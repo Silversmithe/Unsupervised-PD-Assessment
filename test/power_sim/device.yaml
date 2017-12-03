@@ -1,0 +1,53 @@
+#
+# FILE:     device.yaml
+#
+# LOG:
+#           12/2/17: Alexander S. Adranly
+#                    - created device.yaml file
+#
+# NOTE:
+#           All units of current: (mA)
+#           All units of voltage: (V)
+
+# ACTIVE, IDLE
+# STATE: ACTIVE
+
+MCU:
+  # TI Sensortag CC2650
+  # inline comment
+  TI_SENSORTAG_CC2650:
+    VDD_MAX: 3.6
+    I_OP: 0
+
+SENSOR:
+  # accel for the dorsum of hand
+  KIONIX_KXTJ9:
+    VDD_MIN: 1.8
+    VDD_MAX: 3.6
+    I_OP: 0.135
+
+  # gyro for the dorsum of hand
+  IMU_3000:
+    VDD_MIN: 2.1
+    VDD_MAX: 3.6
+    I_OP: 6.1
+
+  # gyro for the
+  MPU_9250:
+    VDD_MIN: 2.4
+    VDD_MAX: 3.6
+    I_OP: 2.5
+
+  # myoware
+  MYO_EMG:
+    VDD_MIN: 2.9
+    VDD_MAX: 5.7
+    I_OP: 9
+
+# information on the battery
+BATTERY:
+  VOLTAGE: 3.7
+
+  # power per time (mAh)
+  PPT: 2500
+
