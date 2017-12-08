@@ -12,9 +12,10 @@ import sys
 import yaml
 
 # list of times to check
-TIMES = []
+SECONDS = []
 
 if __name__ == '__main__':
+
     ##################
     # DEVICE BUILDER #
     ##################
@@ -41,11 +42,28 @@ if __name__ == '__main__':
     
     P = IV
     """
-    # LIFETIME (PWR * sec) = mA * Voltage * Time
     mA_SUM, V_SUM = 0, 0
 
-    # get the sum of all voltages
-    DEVICES[""]
+    # VOLTAGE
+    V_SUM = DEVICES["MCU"]["TI_SENSORTAG_CC2650"]["VDD_MAX"]
+    V_SUM += DEVICES["SENSOR"]["KIONIX_KXTJ9"]["VDD_MAX"]
+    V_SUM += DEVICES["SENSOR"]["IMU_3000"]["VDD_MAX"]
+    V_SUM += DEVICES["SENSOR"]["MPU_9250"]["VDD_MAX"]
+    V_SUM += DEVICES["SENSOR"]["MYO_EMG"]["VDD_MAX"]
+    print("Total Voltage: {}".format(V_SUM))
 
+    # CURRENT
+    mA_SUM = DEVICES["MCU"]["TI_SENSORTAG_CC2650"]["I_OP"]
+    mA_SUM += DEVICES["SENSOR"]["KIONIX_KXTJ9"]["I_OP"]
+    mA_SUM += DEVICES["SENSOR"]["IMU_3000"]["I_OP"]
+    mA_SUM += DEVICES["SENSOR"]["MPU_9250"]["I_OP"]
+    mA_SUM += DEVICES["SENSOR"]["MYO_EMG"]["I_OP"]
+    print("Total Current Draw: {}".format(mA_SUM))
 
+    ############
+    # LIFETIME #
+    ############
+    # LIFETIME (PWR * sec) = mA * Voltage * Time
+    LIFETIME = mA_SUM * V_SUM * 10000
 
+    print(LIFETIME)

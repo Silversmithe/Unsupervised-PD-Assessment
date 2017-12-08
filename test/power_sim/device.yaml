@@ -17,7 +17,8 @@ MCU:
   # inline comment
   TI_SENSORTAG_CC2650:
     VDD_MAX: 3.6
-    I_OP: 0
+    I_OP: 1.45 # 1.45mA + 31 uA/MHz
+    # 0.031 mA * x/1000000 Hz
 
 SENSOR:
   # accel for the dorsum of hand
