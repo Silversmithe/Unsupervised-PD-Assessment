@@ -36,34 +36,17 @@ if __name__ == '__main__':
     ###############
     # CALCULATION #
     ###############
-    """
-    V = IR
-    I = R/V
-    
-    P = IV
-    """
-    mA_SUM, V_SUM = 0, 0
 
-    # VOLTAGE
-    V_SUM = DEVICES["MCU"]["TI_SENSORTAG_CC2650"]["VDD_MAX"]
-    V_SUM += DEVICES["SENSOR"]["KIONIX_KXTJ9"]["VDD_MAX"]
-    V_SUM += DEVICES["SENSOR"]["IMU_3000"]["VDD_MAX"]
-    V_SUM += DEVICES["SENSOR"]["MPU_9250"]["VDD_MAX"]
-    V_SUM += DEVICES["SENSOR"]["MYO_EMG"]["VDD_MAX"]
-    print("Total Voltage: {}".format(V_SUM))
+    # calculating theoretical lifetime of battery
+    battery_rating = DEVICES["BATTERY"]["RATING"]
 
-    # CURRENT
-    mA_SUM = DEVICES["MCU"]["TI_SENSORTAG_CC2650"]["I_OP"]
-    mA_SUM += DEVICES["SENSOR"]["KIONIX_KXTJ9"]["I_OP"]
-    mA_SUM += DEVICES["SENSOR"]["IMU_3000"]["I_OP"]
-    mA_SUM += DEVICES["SENSOR"]["MPU_9250"]["I_OP"]
-    mA_SUM += DEVICES["SENSOR"]["MYO_EMG"]["I_OP"]
-    print("Total Current Draw: {}".format(mA_SUM))
+    device_current_draw = 0
+    device_current_draw += DEVICES["MCU"]["TEENSY"]["I_OP"]
+    device_current_draw += DEVICES["RADIO"]["XBEE"]["I_OP"]
 
-    ############
-    # LIFETIME #
-    ############
-    # LIFETIME (PWR * sec) = mA * Voltage * Time
-    LIFETIME = mA_SUM * V_SUM * 10000
+    device_current_draw += DEVICES["SENSOR"]["MYO_EMG"]["I_OP"]
+    device_current_draw += (DEVICES["SENSOR"]["MPU_9250"]["I_OP"] * 3)
+    device_current_draw += DEVICES["SENSOR"]["MPU_6050"]["I_OP"]
 
-    print(LIFETIME)
+    battery_life = battery_rating / device_current_draw
+    print("Theoretical Worst-Case Battery Life: {} hours".format(battery_life))

@@ -13,42 +13,43 @@
 # STATE: ACTIVE
 
 MCU:
-  # TI Sensortag CC2650
-  # inline comment
-  TI_SENSORTAG_CC2650:
-    VDD_MAX: 3.6
-    I_OP: 1.45 # 1.45mA + 31 uA/MHz
-    # 0.031 mA * x/1000000 Hz
+  # Teensy
+  TEENSY:
+    VDD_MIN: 3
+    VDD_MAX: 6
+    I_OP: 250 # mA
+
+RADIO:
+  XBEE:
+    VDD: 3.3
+    TX_I_OP: 45 # mA
+    RX_I_OP: 50 # mA
+    I_OP: 50 # mA
 
 SENSOR:
-  # accel for the dorsum of hand
-  KIONIX_KXTJ9:
-    VDD_MIN: 1.8
-    VDD_MAX: 3.6
-    I_OP: 0.135
-
-  # gyro for the dorsum of hand
-  IMU_3000:
-    VDD_MIN: 2.1
-    VDD_MAX: 3.6
-    I_OP: 6.1
-
   # gyro for the
   MPU_9250:
     VDD_MIN: 2.4
     VDD_MAX: 3.6
-    I_OP: 2.5
+    I_OP: 3.7 # mA
+
+  # accelerometer
+  MPU_6050:
+    VDD_MIN: 2.4
+    VDD_MAX: 3.6
+    I_OP: 3.8 # mA
 
   # myoware
   MYO_EMG:
     VDD_MIN: 2.9
     VDD_MAX: 5.7
-    I_OP: 9
+    I_OP: 9 # mA
 
 # information on the battery
 BATTERY:
   VOLTAGE: 3.7
+  RATING: 2500 # power per time (mAh)
 
-  # power per time (mAh)
-  PPT: 2500
-
+MISC:
+  # other electrical components that could produce
+  # a large amount of energy
