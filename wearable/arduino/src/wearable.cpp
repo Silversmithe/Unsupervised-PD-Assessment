@@ -14,12 +14,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-// TEST MODES
-#define NO_TEST -1
-#define EMG_TEST 0
-#define MPU9250_TEST 1
-#define MPU6050_TEST 2
-
 // accelerometer
 const int MPU6_addr = 0x68; // default address of MPU6
 int16_t Ax, Ay, Az, Tmp, Gx, Gy, Gz;
@@ -27,13 +21,16 @@ int16_t Ax, Ay, Az, Tmp, Gx, Gy, Gz;
 // PINS
 const int EMG_SIG_PIN = 0;
 
+// function prototypes
+void read_emg();
+void read_mpu6050();
+
 void setup() {
     // put your setup code here, to run once:
-    const int MODE = NO_TEST;
-
     // set up WIRE
     Wire.begin();
     Wire.beginTransmission(MPU6_addr);
+    Wire.write(0x6B);
     Wire.write(0);
     Wire.endTransmission();
 
@@ -44,6 +41,7 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
+    read_mpu6050();
 }
 
 void read_emg(){
