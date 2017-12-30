@@ -11,9 +11,10 @@
 */
 #include "Arduino.h"
 #include "stdint.h"
-#include "i2c/i2c_t3.h"       // Teensy wire library
+// #include "i2c/i2c_t3.h"       // Teensy wire library
 #include "MPU9250/MPU9250.h"
 #include "MyoEMG/MyoEMG.h"
+#include "TimerOne.h"         // timer & interrupt library
 
 /* GLOBAL VARIALBES */
 #define DEBUG           true  // defines debug state
@@ -30,22 +31,22 @@
 #endif
 #if MODE == 0x00
   // IMU Devices
-  MPU9250 POINT(Wire, 0x68);   // pointer finger
-  MPU9250 THUMB(Wire, 0x69);   // thumb finger
-  MPU9250 RING(Wire1, 0x68);   // ring finger
-  MPU9250 DORSAL(Wire1, 0x69); // back of palm
+  MPU9250 POINT(Wire, IMU_ADDR_LO);              // pointer finger
+  MPU9250 THUMB(Wire, IMU_ADDR_HI);              // thumb finger
+  MPU9250 RING(Wire1, IMU_ADDR_LO);              // ring finger
+  MPU9250 DORSAL(Wire1, IMU_ADDR_HI);            // back of palm
   // EMG Sensor
-  EMG FOREARM(12, 13);         // EMG signal
+  EMG FOREARM(EMG_REC_PIN, EMG_RAW_PIN);         // EMG signal
 #endif
 
 /* FUNCTION PROTOTYPES */
-
+bool die();   // graceful death of program
 
 /* MAIN FUNCTIONS */
 void setup() {
     /* ADJUST BASED ON MODE */
     if(MODE != 0x00){
-      unittest_runner(MODE);   // hand off to unit tester
+        // unittest_runner(MODE);   // hand off to unit tester
     } else {
       /* MAIN SETUP */
       /* INITIALIZE SERIAL MONITOR */

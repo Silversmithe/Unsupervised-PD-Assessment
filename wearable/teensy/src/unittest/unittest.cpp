@@ -10,7 +10,7 @@
 */
 #include "Arduino.h"
 #include "stdint.h"
-#include "i2c/i2c_t3.h"       // Teensy wire library
+// #include "i2c/i2c_t3.h"       // Teensy wire library
 #include "MPU9250/MPU9250.h"
 #include "MyoEMG/MyoEMG.h"
 #include "unittest.h"
@@ -31,6 +31,7 @@ bool unittest_runner(uint8_t mode_type){
     case 0x03: return imu_0(); break;
     case 0x04: return imu_1(); break;
   }
+  return false;
 }
 
 /* UNIT TESTS */
@@ -116,7 +117,7 @@ bool imu_0 (){
   /* TIMED LOOP */
   while(current_time < final_time){
     // read the sensor
-    IMU.readSensor();
+    imu.readSensor();
     // display the data
     Serial.print(imu.getAccelX_mss(),6);
     Serial.print("\t");
@@ -139,6 +140,7 @@ bool imu_0 (){
     Serial.println(imu.getTemperature_C(),6);
     delay(100);
   }
+  return true;
 }
 
 bool imu_1 (){
@@ -148,5 +150,5 @@ bool imu_1 (){
   /* SETUP */
 
   /* TIMED LOOP */
-
+  return true;
 }
