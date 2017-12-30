@@ -12,22 +12,15 @@ Alexander S. Adranly (aadranly@scu.edu)
 #include "Arduino.h"
 #include "stdint.h"
 
-typedef struct myEMG {
-  /* PINS */
-  // Rectified, Integrated, Amplified Signal
-  int8_t sig_pin;         // Regular Rectified Signal
+class EMG {
+public:
+  EMG(uint8_t prect, uint8_t praw=0);           // EMG constructor
+  int16_t getRaw();                             // get the raw signal
+  int16_t getRect();                            // get the rectified signal
 
-  // Electrode Extension
-  int8_t mmep_pin;        // Mid Muscle Electrode Pin
-  int8_t emep_pin;        // End Muscle Electrode Pin
-  int8_t rep_pin;         // Reference Electrode Pin
-
-  // Raw data request
-  int8_t raw_pin;         // Raw signal Pin
-
-  /* SIGNAL */
-  int16_t raw_sig;        // Raw Signal
-  int16_t rect_sig;       // Rectified Signal (EMG Envelope)
-} myEMG;
+private:
+  uint8_t raw_pin;                              // define raw pin
+  uint8_t rect_pin;                             // define rectified pin
+};
 
 #endif

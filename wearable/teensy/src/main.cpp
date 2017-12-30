@@ -1,32 +1,63 @@
-/* LED Blink, Teensyduino Tutorial #1
-   http://www.pjrc.com/teensy/tutorial.html
+/*
+  ------------------------------------------------------------------------------
+  main.cpp
 
-   This example code is in the public domain.
+  Alexander S. Adranly
+  December 29th, 2017
+  ------------------------------------------------------------------------------
+  Driver program, change main code to select unittests or running the main
+  program
+  ------------------------------------------------------------------------------
 */
-
-// Teensy 2.0 has the LED on pin 11
-// Teensy++ 2.0 has the LED on pin 6
-// Teensy 3.x / Teensy LC have the LED on pin 13
 #include "Arduino.h"
 #include "stdint.h"
+#include "i2c/i2c_t3.h"       // Teensy wire library
+#include "MPU9250/MPU9250.h"
+#include "MyoEMG/MyoEMG.h"
+
+/* GLOBAL VARIALBES */
+#define DEBUG           true  // defines debug state
+#define BAUD_RATE       9600  // baud rate of the serial connection
+#define IMU_ADDR_LO     0x68  // lower imu address on bus
+#define IMU_ADDR_HI     0x69  // higher imu address on bus
+#define EMG_RAW_PIN     13    // pin on teensy for raw emg (ANALOG)
+#define EMG_REC_PIN     12    // pin on teensy for rectified emg (ANALOG)
+
+/* MODE SELECTION */
+#define MODE 0x00             // defines code to run (codes in unittest.h)
+#if MODE != 0x00
+  #include "unittest/unittest.h"
+#endif
+#if MODE == 0x00
+  // IMU Devices
+  MPU9250 POINT(Wire, 0x68);   // pointer finger
+  MPU9250 THUMB(Wire, 0x69);   // thumb finger
+  MPU9250 RING(Wire1, 0x68);   // ring finger
+  MPU9250 DORSAL(Wire1, 0x69); // back of palm
+  // EMG Sensor
+  EMG FOREARM(12, 13);         // EMG signal
+#endif
+
+/* FUNCTION PROTOTYPES */
 
 
-// the setup() method runs once, when the sketch starts
-
+/* MAIN FUNCTIONS */
 void setup() {
-  // initialize the digital pin as an output.
-  Serial.begin(9600);
-  while(!Serial);
-  delay(1000);
-  Serial.println("Read EMG");
+    /* ADJUST BASED ON MODE */
+    if(MODE != 0x00){
+      unittest_runner(MODE);   // hand off to unit tester
+    } else {
+      /* MAIN SETUP */
+      /* INITIALIZE SERIAL MONITOR */
+      Serial.begin(BAUD_RATE);
+
+      /* INITIALIZE IMU */
+    } // endif
 }
 
-// the loop() methor runs over and over again,
-// as long as the board has power
-
 void loop() {
-  // read the emg value and display it onto the monitor
-  int value = analogRead(13);
-  Serial.println(value);
-  delay(100);
+  if(MODE == 0x00){
+    /* MAIN LOOP */
+
+  } // endif
 }
