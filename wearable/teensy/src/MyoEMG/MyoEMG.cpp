@@ -38,11 +38,11 @@ int16_t EMG::getRaw(){
 }
 
 int16_t EMG::getRect(){
-  /*
-    Function that polls rectified and integrated emg signal for the
-    instantaneous value
+/*
+  Function that polls rectified and integrated emg signal for the
+  instantaneous value
 
-    @return: (int16_t) rectified and integrated emg signal
-  */
+  @return: (int16_t) rectified and integrated emg signal
+*/
   return analogRead(rect_pin);
 }
