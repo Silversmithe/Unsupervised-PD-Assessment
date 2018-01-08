@@ -21,10 +21,10 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "MPU9250.h"
+#include "MPU9250/MPU9250.h"
 
 // an MPU9250 object with the MPU-9250 sensor on I2C bus 0 with address 0x68
-MPU9250 IMU(Wire,0x68);
+MPU9250 IMU(Wire,0x69);
 int status;
 
 void setup() {
@@ -35,11 +35,13 @@ void setup() {
   // start communication with IMU
   status = IMU.begin();
   if (status < 0) {
-    Serial.println("IMU initialization unsuccessful");
-    Serial.println("Check IMU wiring or try cycling power");
-    Serial.print("Status: ");
-    Serial.println(status);
-    while(1) {}
+    while(1) {
+      Serial.println("IMU initialization unsuccessful");
+      Serial.println("Check IMU wiring or try cycling power");
+      Serial.print("Status: ");
+      Serial.println(status);
+      delay(1000);
+    }
   }
 }
 

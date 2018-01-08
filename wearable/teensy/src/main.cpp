@@ -1,274 +1,296 @@
 /*
-  ------------------------------------------------------------------------------
-  main.cpp
+--------------------------------------------------------------------------------
+  main.cpp (Wearable Version 1)
 
-  Alexander S. Adranly
-  December 31st, 2017
-  ------------------------------------------------------------------------------
-  Driver program, change main code to select unittests or running the main
-  program
-  ------------------------------------------------------------------------------
+  Main Application for gathering and reporting information of both sensors in
+  one. This is the prototype for the main application.
+  Wearable device gathers information about the muscles of the arm and its
+  fingers to perform diagnostics of parkinson's disease.
+
+  Alexander Sami Adranly
+--------------------------------------------------------------------------------
+NOTES
+January 4th, 2018
+- Pointer and Thumb IMU will be on the same BUS
+- Hand and Ring IMU will be on the same BUS
+--------------------------------------------------------------------------------
 */
-#include "Arduino.h"
-#include "stdint.h"
-#include "MPU9250/MPU9250.h"     // @Make a better version for the project
-#include "MyoEMG/MyoEMG.h"       // Simple EMG Library
-#include "TimerOne.h"            // timer & interrupt library
-#include "Packet.h"              // packets to transfer information
+#include "main.h"
+#include "Arduino.h"              // Arduino Library
+#include "stdint.h"               // Integer Library
+#include "TimerOne.h"             // Timer Libaray
 
-/* GLOBAL VARIALBES */
-// SYSTEM LOGISTICS
-#define VERSION         1.0   // VERSION number
-#define MODE            0x00  // defines code to run (codes in unittest.h)
-#define DEBUG           true  // defines debug state
-#define BAUD_RATE       9600  // baud rate of the serial connection
-#define ISR_TIMEOUT     200   // timeout rate for ISR (to read sensors)
-#define BUFFER_SIZE     200   // buffer size for the packet io buffer
-// ADDRESSES
-#define IMU_ADDR_LO     0x68  // lower imu address on bus
-#define IMU_ADDR_HI     0x69  // higher imu address on bus
-// PINS
-#define ERROR_LIGHT     13    // error light
-#define EMG_RAW_PIN     13    // pin on teensy for raw emg (ANALOG)
-#define EMG_REC_PIN     12    // pin on teensy for rectified emg (ANALOG)
-// CONTAINERS
-PACKET* TEMP;                 // temporary packet pointer to read from
-PACKET* BUFFER;      // IO buffer to transfer information QUEUE
-int buffer_front = 0;         // keeps track of the buffer
-int buffer_back = 0;          // keeps track of the buffer
+/* VARIABLES */
+IOMedBuffer BUFFER(BUFFER_SIZE);
+uint32_t current_time, instant_time, delta_time;
 
-/* MODE SELECTION */
-#if MODE != 0x00
-  #include "unittest/unittest.h"
-#endif
-#if MODE == 0x00
-  // IMU Devices
-  MPU9250 IMUPointer(Wire, IMU_ADDR_LO);            // pointer finger
-  MPU9250 IMUThumb(Wire, IMU_ADDR_HI);              // thumb finger
-  MPU9250 IMURing(Wire1, IMU_ADDR_LO);              // ring finger
-  MPU9250 IMUHandDorsum(Wire1, IMU_ADDR_HI);        // back of palm
-  // EMG Sensor
-  EMG EMGForearm(EMG_REC_PIN, EMG_RAW_PIN);         // EMG signal
-#endif
+/* DEVICE INITIALIZATION */
+EMG forearm(RECT_PIN, RAW_PIN);   // initialize the forearm
+MPU9250 tfinger_imu(Wire, IMU_ADDR_LO);
+MPU9250 pfinger_imu(Wire, IMU_ADDR_HI);
+MPU9250 dhand_imu(Wire1, IMU_ADDR_LO);
+MPU9250 rfinger_imu(Wire1, IMU_ADDR_HI);
 
-/* FUNCTION PROTOTYPES */
-// sensor
-void total_sensor_scan();  // interrupt routine to gather sensor data
-// error handling
-bool die();                // graceful death of program
-bool reset();              // attempted recovery of the wearable program
-void error_signal();       // display an error light
-
-/* MAIN FUNCTIONS */
+/* SETUP */
 void setup() {
-  /* MAIN SETUP */
-  /* ADJUST BASED ON MODE */
-  #if MODE != 0x00
-    unittest_runner(MODE);        // hand off to unit tester
-  #else
-    /* MAIN SETUP CODE */
-    pinMode(ERROR_LIGHT, OUTPUT);       // initialize error light
+  /* PIN SETUP */
+  pinMode(BUILTIN_LED, OUTPUT);
 
-    // Buffer Setup
-    BUFFER = new PACKET[BUFFER_SIZE](); // buffer packet
-    for(int i=0; i<BUFFER_SIZE; i++){
-      // Container setup
-      BUFFER[i].thumb_gyro = new int16_t[3];
-      BUFFER[i].pointer_gyro = new int16_t[3];
-      BUFFER[i].ring_gyro = new int16_t[3];
-      BUFFER[i].hand_gyro = new int16_t[3];
-      BUFFER[i].hand_accel = new int16_t[3];
-      BUFFER[i].emg_sig = new int16_t[2];
-    } // end loop
+  /* COMMUNICATION SETUP */
+  if (SERIAL_SELECT){
+    Serial.begin(BAUD_RATE);
+    while(!Serial) { com_search_light(); }
+  } // endif
 
-    // Setup Variables
-    int status[4] = {0, 0, 0, 0};       // startup status of the imus
+  /* SENSOR SETUP */
+  imu_setup();
 
-    /* INITIALIZE IMUS */
-    status[0] = IMUThumb.begin();
-    status[1] = IMUPointer.begin();
-    status[2] = IMURing.begin();
-    status[3] = IMUHandDorsum.begin();
+  /* TIMER SETUP */
+  Timer1.initialize(FULL_SAMPLE_RATE);
+  Timer1.attachInterrupt(sensor_isr);
 
-    // check for any invalid startups & show error light on error
-    if(status[0] + status[1] + status[2] + status[3] != 0){ error_signal(); }
-
-    // Timer Variable Arbitrary time at the moment
-    Timer1.initialize(ISR_TIMEOUT);             // set a timer frequency
-    Timer1.attachInterrupt(total_sensor_scan);  // attached sensor scan
-    noInterrupts();                      // prevent timer until start
-
-    Serial.begin(BAUD_RATE);      // INITIALIZE SERIAL MONITOR
-    while(!Serial){}              // wait for serial monitor
-
-    interrupts();          // start the timer
-  #endif
+  current_time = micros();            // initialize timer
 }
 
+/* MAIN LOOP */
 void loop() {
-  /* MAIN LOOP */
-  // display information via serial
-  #if MODE == 0x00
-    if(buffer_front < buffer_back){
-      // increment the front buffer to consume that item in the queue
-      noInterrupts();
-      TEMP = &BUFFER[buffer_front];  // must take pointer for future use
-      interrupts();
-      buffer_front = (buffer_front + 1) % BUFFER_SIZE;
-      // display information
-      Serial.print("EMG: raw:");
-      Serial.print(TEMP->emg_sig[0]);
-      Serial.print(", rect: ");
-      Serial.println(TEMP->emg_sig[1]);
 
-      Serial.print("Thumb Gyro: x: ");
-      Serial.print(TEMP->thumb_gyro[0]);
-      Serial.print(", y:");
-      Serial.print(TEMP->thumb_gyro[1]);
-      Serial.print(", z:");
-      Serial.println(TEMP->thumb_gyro[2]);
-
-      Serial.print("Pointer Gyro: x: ");
-      Serial.print(TEMP->pointer_gyro[0]);
-      Serial.print(", y:");
-      Serial.print(TEMP->pointer_gyro[1]);
-      Serial.print(", z:");
-      Serial.println(TEMP->pointer_gyro[2]);
-
-      Serial.print("Ring Gyro: x: ");
-      Serial.print(TEMP->ring_gyro[0]);
-      Serial.print(", y:");
-      Serial.print(TEMP->ring_gyro[1]);
-      Serial.print(", z:");
-      Serial.println(TEMP->ring_gyro[2]);
-
-      Serial.print("Hand Gyro: x: ");
-      Serial.print(TEMP->hand_gyro[0]);
-      Serial.print(", y:");
-      Serial.print(TEMP->hand_gyro[1]);
-      Serial.print(", z:");
-      Serial.println(TEMP->hand_gyro[2]);
-
-      Serial.print("Hand Accel: x: ");
-      Serial.print(TEMP->hand_accel[0]);
-      Serial.print(", y:");
-      Serial.print(TEMP->hand_accel[1]);
-      Serial.print(", z:");
-      Serial.println(TEMP->hand_accel[2]);
-      Serial.println("---------------------");
-
-    }
-    delay(100);       // should be consuming faster than producing
-  #endif
+  delay(1000);
 }
 
-//------------------------------------------------------------------------------
-//                              SENSOR FUNCTIONS
-//------------------------------------------------------------------------------
-void total_sensor_scan(){
-/*
-  Gather all the sensor information from the EMG and IMUS and store it in a
-  struct for future work. Store the information in the buffer.
-
-*/
-  buffer_back = (buffer_back + 1) % BUFFER_SIZE; // increment back pointer
-  // IMU Trigger Sensor Read
-  IMUThumb.readSensor();
-  IMUPointer.readSensor();
-  IMURing.readSensor();
-  IMUHandDorsum.readSensor();
-  // EMG
-  BUFFER[buffer_back].emg_sig[0] = EMGForearm.getRaw();
-  BUFFER[buffer_back].emg_sig[1] = EMGForearm.getRect();
-  // Store thumb
-  BUFFER[buffer_back].thumb_gyro[0] = IMUThumb.getGyroX_rads();
-  BUFFER[buffer_back].thumb_gyro[1] = IMUThumb.getGyroY_rads();
-  BUFFER[buffer_back].thumb_gyro[2] = IMUThumb.getGyroZ_rads();
-  // store pointer
-  BUFFER[buffer_back].pointer_gyro[0] = IMUPointer.getGyroX_rads();
-  BUFFER[buffer_back].pointer_gyro[1] = IMUPointer.getGyroY_rads();
-  BUFFER[buffer_back].pointer_gyro[2] = IMUPointer.getGyroZ_rads();
-  // store ring
-  BUFFER[buffer_back].ring_gyro[0] = IMURing.getGyroX_rads();
-  BUFFER[buffer_back].ring_gyro[1] = IMURing.getGyroY_rads();
-  BUFFER[buffer_back].ring_gyro[2] = IMURing.getGyroZ_rads();
-  // store hand gyro
-  BUFFER[buffer_back].hand_gyro[0] = IMUHandDorsum.getGyroX_rads();
-  BUFFER[buffer_back].hand_gyro[1] = IMUHandDorsum.getGyroY_rads();
-  BUFFER[buffer_back].hand_gyro[2] = IMUHandDorsum.getGyroZ_rads();
-  // hand accel
-  BUFFER[buffer_back].hand_accel[0] = IMUHandDorsum.getGyroX_rads();
-  BUFFER[buffer_back].hand_accel[1] = IMUHandDorsum.getGyroY_rads();
-  BUFFER[buffer_back].hand_accel[2] = IMUHandDorsum.getGyroZ_rads();
-}
-
-//------------------------------------------------------------------------------
-//                              ERROR RECOVERY FUNCTIONS
-//------------------------------------------------------------------------------
-bool die(){
-/*
-  Upon any critical errors have the wearable device shut down all of its
-  peripheral devices so that the device can be repaired. This code handles the
-  shutdown of any main code failures, not for any of the unittests.
-
-  @return: (bool) success or failure of the device to shut down all peripherals
-                  properly
-*/
-// turn off interrupts
-noInterrupts();
-// shut down all sensors
-// make the imus go to sleep
-
-// shut down serial monitor
-Serial.end();
-
-// deallocate all Variables
-
-// Destroying buffer variable
-for(int i=0; i<BUFFER_SIZE; i++){
-  delete[] BUFFER[i].thumb_gyro;
-  delete[] BUFFER[i].pointer_gyro;
-  delete[] BUFFER[i].ring_gyro;
-  delete[] BUFFER[i].hand_gyro;
-  delete[] BUFFER[i].hand_accel;
-  delete[] BUFFER[i].emg_sig;
-}
-delete[] BUFFER;
-
-return true;
-}
-
-bool reset(){
+/* FUNCTIONS */
+// -----------------------------------------------------------------------------
+void imu_setup(){
   /*
-    Upon any minor errors have the wearable device reset all of its
-    peripheral devices so that the device can attemt to self-recover.
-    This code is meant for handling the main program peripherals, NOT the
-    unit tests
-
-    @return: (bool) success or failure of the device to reset all peripherals
-                    properly
+    Initialize all IMUs accordingly
   */
-  noInterrupts();          // turn off interrupts
+  /* TEMPORARY VARS */
+  int status;                                 // status for imu setup
 
-  // reset sensors
+  if(THUMB_SELECT){
+    status = tfinger_imu.begin();
+    if(status < 0){
+      fprint("thumb imu: unable to be initialized...\n");
+      fprint("\tstatus: %d\n", status);
+    } // end bad status
+  } // init thumb imu
 
-  // reset serial MONITOR
-  Serial.end();
-  delay(1000);             // wait a second for the computer to calm down
-  Serial.begin(BAUD_RATE); // restart the serial monitor at the desired BAUD
-  interrupts();            // turn on inerrupts
-  return true;
+  if(POINT_SELECT){
+    status = pfinger_imu.begin();
+    if(status < 0){
+      fprint("point imu: unable to be initialized...\n");
+      fprint("\tstatus: %d\n", status);
+    } // end bad status
+  } // init pointer imu
+
+  if(RING_SELECT){
+    status = rfinger_imu.begin();
+    if(status < 0){
+      fprint("ring imu: unable to be initialized...\n");
+      fprint("\tstatus: %d\n", status);
+    } // end bad status
+  } // init thumb imu
+
+  if(HAND_SELECT){
+    status = dhand_imu.begin();
+    if(status < 0){
+      fprint("hand imu: unable to be initialized...\n");
+      fprint("\tstatus: %d\n", status);
+    } // end bad status
+  } // init thumb imu
 }
 
-void error_signal(){
+// -----------------------------------------------------------------------------
+
+void sensor_isr(){
   /*
-    Display a blinking light built into the teensy if the device is not running
-    properly
+    Should time to see how long this takes
   */
-  while(1){
-    digitalWrite(ERROR_LIGHT, HIGH);
-    delay(1000);
-    digitalWrite(ERROR_LIGHT, LOW);
-    delay(1000);
-  } // end while
+  uint32_t delta;
+  uint32_t start = micros();
+  MedData packet;   // new information set for buffer
+
+  // update the time
+  instant_time = micros();
+  delta_time = instant_time - current_time;
+  current_time = instant_time;
+  // add the change in time always to the packet
+  packet.dT = delta_time;
+
+  if(EMG_SELECT){
+    packet.emg_raw = forearm.getRaw();
+    packet.emg_rect = forearm.getRect();
+  } else {
+    // fill packet with zeros
+    packet.emg_raw = 0;
+    packet.emg_rect = 0;
+  }
+
+  if(HAND_SELECT){
+    dhand_imu.readSensor();
+    // accel
+    packet.Hand_Ax = dhand_imu.getAccelX_mss();
+    packet.Hand_Ay = dhand_imu.getAccelY_mss();
+    packet.Hand_Az = dhand_imu.getAccelZ_mss();
+    // gyro
+    packet.Hand_Gx = dhand_imu.getGyroX_rads();
+    packet.Hand_Gy = dhand_imu.getGyroY_rads();
+    packet.Hand_Gz = dhand_imu.getGyroZ_rads();
+    // mag
+    packet.Hand_Mx = dhand_imu.getMagX_uT();
+    packet.Hand_My = dhand_imu.getMagY_uT();
+    packet.Hand_Mz = dhand_imu.getMagZ_uT();
+    // temp
+    packet.Hand_T = dhand_imu.getTemperature_C();
+  } else {
+    // accel
+    packet.Hand_Ax = 0.0;
+    packet.Hand_Ay = 0.0;
+    packet.Hand_Az = 0.0;
+    // gyro
+    packet.Hand_Gx = 0.0;
+    packet.Hand_Gy = 0.0;
+    packet.Hand_Gz = 0.0;
+    // mag
+    packet.Hand_Mx = 0.0;
+    packet.Hand_My = 0.0;
+    packet.Hand_Mz = 0.0;
+    // temp
+    packet.Hand_T = 0.0;
+  }
+
+  if(THUMB_SELECT){
+    tfinger_imu.readSensor();
+    // accel
+    packet.Thumb_Ax = tfinger_imu.getAccelX_mss();
+    packet.Thumb_Ay = tfinger_imu.getAccelY_mss();
+    packet.Thumb_Az = tfinger_imu.getAccelZ_mss();
+    // gyro
+    packet.Thumb_Gx = tfinger_imu.getGyroX_rads();
+    packet.Thumb_Gy = tfinger_imu.getGyroY_rads();
+    packet.Thumb_Gz = tfinger_imu.getGyroZ_rads();
+    // mag
+    packet.Thumb_Mx = tfinger_imu.getMagX_uT();
+    packet.Thumb_My = tfinger_imu.getMagY_uT();
+    packet.Thumb_Mz = tfinger_imu.getMagZ_uT();
+    // temp
+    packet.Thumb_T = tfinger_imu.getTemperature_C();
+  } else {
+    // accel
+    packet.Thumb_Ax = 0.0;
+    packet.Thumb_Ay = 0.0;
+    packet.Thumb_Az = 0.0;
+    // gyro
+    packet.Thumb_Gx = 0.0;
+    packet.Thumb_Gy = 0.0;
+    packet.Thumb_Gz = 0.0;
+    // mag
+    packet.Thumb_Mx = 0.0;
+    packet.Thumb_My = 0.0;
+    packet.Thumb_Mz = 0.0;
+    // temp
+    packet.Thumb_T = 0.0;
+  }
+
+  if(POINT_SELECT){
+    pfinger_imu.readSensor();
+    // accel
+    packet.Point_Ax = pfinger_imu.getAccelX_mss();
+    packet.Point_Ay = pfinger_imu.getAccelY_mss();
+    packet.Point_Az = pfinger_imu.getAccelZ_mss();
+    // gyro
+    packet.Point_Gx = pfinger_imu.getGyroX_rads();
+    packet.Point_Gy = pfinger_imu.getGyroY_rads();
+    packet.Point_Gz = pfinger_imu.getGyroZ_rads();
+    // mag
+    packet.Point_Mx = pfinger_imu.getMagX_uT();
+    packet.Point_My = pfinger_imu.getMagY_uT();
+    packet.Point_Mz = pfinger_imu.getMagZ_uT();
+    // temp
+    packet.Point_T = pfinger_imu.getTemperature_C();
+  } else {
+    // accel
+    packet.Point_Ax = 0.0;
+    packet.Point_Ay = 0.0;
+    packet.Point_Az = 0.0;
+    // gyro
+    packet.Point_Gx = 0.0;
+    packet.Point_Gy = 0.0;
+    packet.Point_Gz = 0.0;
+    // mag
+    packet.Point_Mx = 0.0;
+    packet.Point_My = 0.0;
+    packet.Point_Mz = 0.0;
+    // temp
+    packet.Point_T = 0.0;
+  }
+
+  if(RING_SELECT){
+    rfinger_imu.readSensor();
+    // accel
+    packet.Ring_Ax = rfinger_imu.getAccelX_mss();
+    packet.Ring_Ay = rfinger_imu.getAccelY_mss();
+    packet.Ring_Az = rfinger_imu.getAccelZ_mss();
+    // gyro
+    packet.Ring_Gx = rfinger_imu.getGyroX_rads();
+    packet.Ring_Gy = rfinger_imu.getGyroY_rads();
+    packet.Ring_Gz = rfinger_imu.getGyroZ_rads();
+    // mag
+    packet.Ring_Mx = rfinger_imu.getMagX_uT();
+    packet.Ring_My = rfinger_imu.getMagY_uT();
+    packet.Ring_Mz = rfinger_imu.getMagZ_uT();
+    // temp
+    packet.Ring_T = rfinger_imu.getTemperature_C();
+  } else {
+    // accel
+    packet.Ring_Ax = 0.0;
+    packet.Ring_Ay = 0.0;
+    packet.Ring_Az = 0.0;
+    // gyro
+    packet.Ring_Gx = 0.0;
+    packet.Ring_Gy = 0.0;
+    packet.Ring_Gz = 0.0;
+    // mag
+    packet.Ring_Mx = 0.0;
+    packet.Ring_My = 0.0;
+    packet.Ring_Mz = 0.0;
+    // temp
+    packet.Ring_T = 0.0;
+  }
+
+  // store packet in buffer
+  // BUFFER.push_back(&packet);
+  delta = micros() - start;
+  Serial.println(delta);
 }
+
+// -----------------------------------------------------------------------------
+
+void com_search_light(){
+  /*
+    Display if searching
+  */
+  digitalWrite(BUILTIN_LED, HIGH);
+  delay(100);
+  digitalWrite(BUILTIN_LED, LOW);
+  delay(100);
+  digitalWrite(BUILTIN_LED, HIGH);
+  delay(100);
+  digitalWrite(BUILTIN_LED, LOW);
+  delay(1000);
+}
+
+// -----------------------------------------------------------------------------
+
+void fprint(const char* msg, ...){
+  // print on a single line to serial monitor
+  va_list args;
+  va_start(args, msg);
+  // print and return carriage to serial monitor
+  if(SERIAL_SELECT){
+    Serial.printf(msg, args);
+  } // endif
+  va_end(args);
+}
+
+// -----------------------------------------------------------------------------
