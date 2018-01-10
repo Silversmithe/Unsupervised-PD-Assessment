@@ -5,6 +5,13 @@
 
   This struct contains the basic storage of all information necessary to gather
   diagnostics
+
+  NOTES:
+  January 8th, 2018
+  Angular Velocity is important for analysis
+  - include angular velocity in the PAYLOAD packet ( can keep pos still if fits)
+
+
 */
 #include "stdint.h"
 
@@ -56,12 +63,15 @@ struct Payload {
   /* Dorsum of Hand Position and Acceleration */
   uint16_t dHACCEL[3];
   uint16_t dHPOS[3];
-  /* Thumb Finger Position */
+  /* Thumb Finger Position and Angular Velocity */
   uint16_t dTPOS[3];
+  uint16_t dTRADS[3];
   /* Pointer Finger Position */
   uint16_t dPPOS[3];
+  uint16_t dPRADS[3];
   /* Ring Finger Position */
   uint16_t dRPOS[3];
+  uint16_t dRRADS[3];
 };
 
 typedef struct MedData MedData;

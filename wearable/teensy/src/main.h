@@ -56,6 +56,7 @@ necessary. This is particularly useful for unittesting the system.
 
 /* SAMPLING INFORMATION */
 #define FULL_SAMPLE_RATE 10000  // microseconds, 10 Hz
+#define DEMO_RATE        1000000 // microseconds
 
 /* CHECKING CONFIGURATION */
 #if SERIAL_SELECT == true && XBEE_SELECT == true
@@ -73,5 +74,8 @@ void com_search_light();             // if device is searching for communcation
 
 // Serial
 void fprint(const char* msg, ...);   // print on a single line to serial monitor
+
+// Communication
+bool transfer_payload(Payload* payload); // transfer payload over COM connection
 
 #endif

@@ -19,8 +19,6 @@ public:
 
   /* ACCESSORS */
   uint8_t num_elts(){ return count; }           // how many items are stored
-  bool has_more_elts(){ return (count > 0); }   // are there any more items
-  uint8_t buffer_size(){ return SIZE; }  // size of whole buffer
   bool is_full(){ return count == SIZE; }
   bool is_empty(){ return count == 0; }
 

@@ -46,7 +46,7 @@ void setup() {
   imu_setup();
 
   /* TIMER SETUP */
-  Timer1.initialize(FULL_SAMPLE_RATE);
+  Timer1.initialize(DEMO_RATE);
   Timer1.attachInterrupt(sensor_isr);
 
   current_time = micros();            // initialize timer
@@ -54,7 +54,15 @@ void setup() {
 
 /* MAIN LOOP */
 void loop() {
-
+  /* consumer of the IOBuffer */
+  // if(!BUFFER.is_empty()){
+  //   // remove a MedData item from buffer
+  //   MedData data = BUFFER.remove_front();
+  //
+  //   // convert MedData into PAYLOAD
+  //
+  //   // send payload over communication medium
+  // }
   delay(1000);
 }
 
@@ -70,32 +78,44 @@ void imu_setup(){
   if(THUMB_SELECT){
     status = tfinger_imu.begin();
     if(status < 0){
-      fprint("thumb imu: unable to be initialized...\n");
-      fprint("\tstatus: %d\n", status);
+      while(1){
+        fprint("thumb imu: unable to be initialized...\n");
+        fprint("\tstatus: %d\n", status);
+        delay(1000);
+      }
     } // end bad status
   } // init thumb imu
 
   if(POINT_SELECT){
     status = pfinger_imu.begin();
     if(status < 0){
-      fprint("point imu: unable to be initialized...\n");
-      fprint("\tstatus: %d\n", status);
+      while(1){
+        fprint("point imu: unable to be initialized...\n");
+        fprint("\tstatus: %d\n", status);
+        delay(1000);
+      }
     } // end bad status
   } // init pointer imu
 
   if(RING_SELECT){
     status = rfinger_imu.begin();
     if(status < 0){
-      fprint("ring imu: unable to be initialized...\n");
-      fprint("\tstatus: %d\n", status);
+      while(1){
+        fprint("ring imu: unable to be initialized...\n");
+        fprint("\tstatus: %d\n", status);
+        delay(1000);
+      }
     } // end bad status
   } // init thumb imu
 
   if(HAND_SELECT){
     status = dhand_imu.begin();
     if(status < 0){
-      fprint("hand imu: unable to be initialized...\n");
-      fprint("\tstatus: %d\n", status);
+      while(1){
+        fprint("hand imu: unable to be initialized...\n");
+        fprint("\tstatus: %d\n", status);
+        delay(1000);
+      }
     } // end bad status
   } // init thumb imu
 }
@@ -106,8 +126,8 @@ void sensor_isr(){
   /*
     Should time to see how long this takes
   */
-  uint32_t delta;
-  uint32_t start = micros();
+  // uint32_t delta;
+  // uint32_t start = micros();
   MedData packet;   // new information set for buffer
 
   // update the time
@@ -120,6 +140,14 @@ void sensor_isr(){
   if(EMG_SELECT){
     packet.emg_raw = forearm.getRaw();
     packet.emg_rect = forearm.getRect();
+    //
+    if(SERIAL_SELECT){
+      Serial.print("EMG: (RAW: ");
+      Serial.print(packet.emg_raw);
+      Serial.print(", RECT: ");
+      Serial.print(packet.emg_rect);
+      Serial.println(")");
+    }
   } else {
     // fill packet with zeros
     packet.emg_raw = 0;
@@ -142,6 +170,16 @@ void sensor_isr(){
     packet.Hand_Mz = dhand_imu.getMagZ_uT();
     // temp
     packet.Hand_T = dhand_imu.getTemperature_C();
+
+    if(SERIAL_SELECT){
+      Serial.print("HAND: (Ax: ");
+      Serial.print(packet.Hand_Ax);
+      Serial.print(", Ay: ");
+      Serial.print(packet.Hand_Ay);
+      Serial.print(", Az: ");
+      Serial.print(packet.Hand_Az);
+      Serial.println(")");
+    }
   } else {
     // accel
     packet.Hand_Ax = 0.0;
@@ -175,6 +213,16 @@ void sensor_isr(){
     packet.Thumb_Mz = tfinger_imu.getMagZ_uT();
     // temp
     packet.Thumb_T = tfinger_imu.getTemperature_C();
+
+    if(SERIAL_SELECT){
+      Serial.print("Thumb: (Ax: ");
+      Serial.print(packet.Thumb_Ax);
+      Serial.print(", Ay: ");
+      Serial.print(packet.Thumb_Ay);
+      Serial.print(", Az: ");
+      Serial.print(packet.Thumb_Az);
+      Serial.println(")");
+    }
   } else {
     // accel
     packet.Thumb_Ax = 0.0;
@@ -208,6 +256,16 @@ void sensor_isr(){
     packet.Point_Mz = pfinger_imu.getMagZ_uT();
     // temp
     packet.Point_T = pfinger_imu.getTemperature_C();
+
+    if(SERIAL_SELECT){
+      Serial.print("Point: (Ax: ");
+      Serial.print(packet.Point_Ax);
+      Serial.print(", Ay: ");
+      Serial.print(packet.Point_Ay);
+      Serial.print(", Az: ");
+      Serial.print(packet.Point_Az);
+      Serial.println(")");
+    }
   } else {
     // accel
     packet.Point_Ax = 0.0;
@@ -241,6 +299,16 @@ void sensor_isr(){
     packet.Ring_Mz = rfinger_imu.getMagZ_uT();
     // temp
     packet.Ring_T = rfinger_imu.getTemperature_C();
+
+    if(SERIAL_SELECT){
+      Serial.print("Ring: (Ax: ");
+      Serial.print(packet.Ring_Ax);
+      Serial.print(", Ay: ");
+      Serial.print(packet.Ring_Ay);
+      Serial.print(", Az: ");
+      Serial.print(packet.Ring_Az);
+      Serial.println(")");
+    }
   } else {
     // accel
     packet.Ring_Ax = 0.0;
@@ -258,11 +326,17 @@ void sensor_isr(){
     packet.Ring_T = 0.0;
   }
 
+  if(SERIAL_SELECT){ Serial.println(); }
+
   // store packet in buffer
   // BUFFER.push_back(&packet);
-  delta = micros() - start;
-  Serial.println(delta);
+  // delta = micros() - start;
+  // Serial.println(delta);
 }
+
+// -----------------------------------------------------------------------------
+
+
 
 // -----------------------------------------------------------------------------
 
