@@ -33,11 +33,11 @@ necessary. This is particularly useful for unittesting the system.
 #define IS_CONSUMED SERIAL_SELECT || XBEE_SELECT // is the data being consumed
 
 /* DEVICE SELECTORS */
-#define EMG_SELECT    true      // Turn on/off Forearm EMG readings
+#define EMG_SELECT    false      // Turn on/off Forearm EMG readings
 #define HAND_SELECT   true      // Turn on/off dorsum hand IMU readings
 #define THUMB_SELECT  true      // Turn on/off Thumb IMU readings
 #define POINT_SELECT  true      // Turn on/off Pointer IMU readings
-#define RING_SELECT   false     // Turn on/off Ring IMU readings
+#define RING_SELECT   true     // Turn on/off Ring IMU readings
 
 /* COMMUNICATION DEFINITION */
 #define BAUD_RATE 115200        // rate information is transferred serially

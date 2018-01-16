@@ -46,7 +46,7 @@ void setup() {
   imu_setup();
 
   /* TIMER SETUP */
-  Timer1.initialize(DEMO_RATE);
+  Timer1.initialize(FULL_SAMPLE_RATE);
   Timer1.attachInterrupt(sensor_isr);
 
   current_time = micros();            // initialize timer
@@ -136,17 +136,19 @@ void sensor_isr(){
   current_time = instant_time;
   // add the change in time always to the packet
   packet.dT = delta_time;
+  if(SERIAL_SELECT){
+    Serial.print(millis());
+  }
 
   if(EMG_SELECT){
     packet.emg_raw = forearm.getRaw();
     packet.emg_rect = forearm.getRect();
     //
     if(SERIAL_SELECT){
-      Serial.print("EMG: (RAW: ");
+      Serial.print("\t");
       Serial.print(packet.emg_raw);
-      Serial.print(", RECT: ");
+      Serial.print("\t");
       Serial.print(packet.emg_rect);
-      Serial.println(")");
     }
   } else {
     // fill packet with zeros
@@ -172,13 +174,12 @@ void sensor_isr(){
     packet.Hand_T = dhand_imu.getTemperature_C();
 
     if(SERIAL_SELECT){
-      Serial.print("HAND: (Ax: ");
-      Serial.print(packet.Hand_Ax);
-      Serial.print(", Ay: ");
-      Serial.print(packet.Hand_Ay);
-      Serial.print(", Az: ");
-      Serial.print(packet.Hand_Az);
-      Serial.println(")");
+      Serial.print("\t");
+      Serial.print(packet.Hand_Gx);
+      Serial.print("\t");
+      Serial.print(packet.Hand_Gy);
+      Serial.print("\t");
+      Serial.print(packet.Hand_Gz);
     }
   } else {
     // accel
@@ -215,13 +216,12 @@ void sensor_isr(){
     packet.Thumb_T = tfinger_imu.getTemperature_C();
 
     if(SERIAL_SELECT){
-      Serial.print("Thumb: (Ax: ");
-      Serial.print(packet.Thumb_Ax);
-      Serial.print(", Ay: ");
-      Serial.print(packet.Thumb_Ay);
-      Serial.print(", Az: ");
-      Serial.print(packet.Thumb_Az);
-      Serial.println(")");
+      Serial.print("\t");
+      Serial.print(packet.Thumb_Gx);
+      Serial.print("\t");
+      Serial.print(packet.Thumb_Gy);
+      Serial.print("\t");
+      Serial.print(packet.Thumb_Gz);
     }
   } else {
     // accel
@@ -258,13 +258,12 @@ void sensor_isr(){
     packet.Point_T = pfinger_imu.getTemperature_C();
 
     if(SERIAL_SELECT){
-      Serial.print("Point: (Ax: ");
-      Serial.print(packet.Point_Ax);
-      Serial.print(", Ay: ");
-      Serial.print(packet.Point_Ay);
-      Serial.print(", Az: ");
-      Serial.print(packet.Point_Az);
-      Serial.println(")");
+      Serial.print("\t");
+      Serial.print(packet.Point_Gx);
+      Serial.print("\t");
+      Serial.print(packet.Point_Gy);
+      Serial.print("\t");
+      Serial.print(packet.Point_Gz);
     }
   } else {
     // accel
@@ -301,13 +300,12 @@ void sensor_isr(){
     packet.Ring_T = rfinger_imu.getTemperature_C();
 
     if(SERIAL_SELECT){
-      Serial.print("Ring: (Ax: ");
-      Serial.print(packet.Ring_Ax);
-      Serial.print(", Ay: ");
-      Serial.print(packet.Ring_Ay);
-      Serial.print(", Az: ");
-      Serial.print(packet.Ring_Az);
-      Serial.println(")");
+      Serial.print("\t");
+      Serial.print(packet.Ring_Gx);
+      Serial.print("\t");
+      Serial.print(packet.Ring_Gy);
+      Serial.print("\t");
+      Serial.print(packet.Ring_Gz);
     }
   } else {
     // accel
