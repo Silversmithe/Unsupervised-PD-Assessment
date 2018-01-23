@@ -1,19 +1,14 @@
 /*
 --------------------------------------------------------------------------------
-  main.cpp (Wearable Version 1)
+  main.cpp (Wearable Version 1: IRON FIST)
 
   Main Application for gathering and reporting information of both sensors in
   one. This is the prototype for the main application.
   Wearable device gathers information about the muscles of the arm and its
   fingers to perform diagnostics of parkinson's disease.
 
-  Alexander Sami Adranly
---------------------------------------------------------------------------------
-NOTES
-January 4th, 2018
-- Pointer and Thumb IMU will be on the same BUS
-- Hand and Ring IMU will be on the same BUS
---------------------------------------------------------------------------------
+  Alexander S. Adranly
+  --------------------------------------------------------------------------------
 */
 #include "main.h"
 #include "Arduino.h"              // Arduino Library
@@ -28,8 +23,8 @@ uint32_t current_time, instant_time, delta_time;
 EMG forearm(RECT_PIN, RAW_PIN);   // initialize the forearm
 MPU9250 tfinger_imu(Wire, IMU_ADDR_LO);
 MPU9250 pfinger_imu(Wire, IMU_ADDR_HI);
-MPU9250 dhand_imu(Wire1, IMU_ADDR_LO);
-MPU9250 rfinger_imu(Wire1, IMU_ADDR_HI);
+MPU9250 dhand_imu(Wire1, IMU_ADDR_HI);
+MPU9250 rfinger_imu(Wire1, IMU_ADDR_LO);
 
 /* SETUP */
 void setup() {
@@ -46,7 +41,7 @@ void setup() {
   imu_setup();
 
   /* TIMER SETUP */
-  Timer1.initialize(FULL_SAMPLE_RATE);
+  Timer1.initialize(FULL_SAMPLE_RATE); // DEMO_RATE FULL_SAMPLE_RATE DOUBLE_SAMPLE_RATE
   Timer1.attachInterrupt(sensor_isr);
 
   current_time = micros();            // initialize timer
@@ -55,19 +50,29 @@ void setup() {
 /* MAIN LOOP */
 void loop() {
   /* consumer of the IOBuffer */
-  // if(!BUFFER.is_empty()){
-  //   // remove a MedData item from buffer
-  //   MedData data = BUFFER.remove_front();
-  //
-  //   // convert MedData into PAYLOAD
-  //
-  //   // send payload over communication medium
-  // }
-  delay(1000);
+  if(!BUFFER.is_empty()){
+    // remove a MedData item from buffer
+    MedData* data = BUFFER.remove_front();
+    // convert MedData into PAYLOAD
+
+    /* BUFFER TESTING */
+    // if(!BUFFER.is_full()){
+    //   Serial.println(BUFFER.num_elts());
+    // } else {
+    //   Serial.println("buffer is full");
+    // }
+
+    // send payload over communication medium
+    // print data from buffers
+    print_meddata(data);
+  } else {
+    // buffer testing
+    // Serial.println("empty!");
+  }
+  delay(10);
 }
 
 /* FUNCTIONS */
-// -----------------------------------------------------------------------------
 void imu_setup(){
   /*
     Initialize all IMUs accordingly
@@ -79,8 +84,9 @@ void imu_setup(){
     status = tfinger_imu.begin();
     if(status < 0){
       while(1){
-        fprint("thumb imu: unable to be initialized...\n");
-        fprint("\tstatus: %d\n", status);
+        Serial.print("thumb imu: unable to be initialized...\n");
+        Serial.print("\tstatus: ");
+        Serial.println(status);
         delay(1000);
       }
     } // end bad status
@@ -90,8 +96,9 @@ void imu_setup(){
     status = pfinger_imu.begin();
     if(status < 0){
       while(1){
-        fprint("point imu: unable to be initialized...\n");
-        fprint("\tstatus: %d\n", status);
+        Serial.print("point imu: unable to be initialized...\n");
+        Serial.print("\tstatus: ");
+        Serial.println(status);
         delay(1000);
       }
     } // end bad status
@@ -101,8 +108,9 @@ void imu_setup(){
     status = rfinger_imu.begin();
     if(status < 0){
       while(1){
-        fprint("ring imu: unable to be initialized...\n");
-        fprint("\tstatus: %d\n", status);
+        Serial.print("ring imu: unable to be initialized...\n");
+        Serial.print("\tstatus: ");
+        Serial.println(status);
         delay(1000);
       }
     } // end bad status
@@ -112,15 +120,14 @@ void imu_setup(){
     status = dhand_imu.begin();
     if(status < 0){
       while(1){
-        fprint("hand imu: unable to be initialized...\n");
-        fprint("\tstatus: %d\n", status);
+        Serial.print("hand imu: unable to be initialized...\n");
+        Serial.print("\tstatus: ");
+        Serial.println(status);
         delay(1000);
       }
     } // end bad status
   } // init thumb imu
 }
-
-// -----------------------------------------------------------------------------
 
 void sensor_isr(){
   /*
@@ -136,20 +143,10 @@ void sensor_isr(){
   current_time = instant_time;
   // add the change in time always to the packet
   packet.dT = delta_time;
-  if(SERIAL_SELECT){
-    Serial.print(millis());
-  }
 
   if(EMG_SELECT){
     packet.emg_raw = forearm.getRaw();
     packet.emg_rect = forearm.getRect();
-    //
-    if(SERIAL_SELECT){
-      Serial.print("\t");
-      Serial.print(packet.emg_raw);
-      Serial.print("\t");
-      Serial.print(packet.emg_rect);
-    }
   } else {
     // fill packet with zeros
     packet.emg_raw = 0;
@@ -173,14 +170,6 @@ void sensor_isr(){
     // temp
     packet.Hand_T = dhand_imu.getTemperature_C();
 
-    if(SERIAL_SELECT){
-      Serial.print("\t");
-      Serial.print(packet.Hand_Gx);
-      Serial.print("\t");
-      Serial.print(packet.Hand_Gy);
-      Serial.print("\t");
-      Serial.print(packet.Hand_Gz);
-    }
   } else {
     // accel
     packet.Hand_Ax = 0.0;
@@ -215,14 +204,6 @@ void sensor_isr(){
     // temp
     packet.Thumb_T = tfinger_imu.getTemperature_C();
 
-    if(SERIAL_SELECT){
-      Serial.print("\t");
-      Serial.print(packet.Thumb_Gx);
-      Serial.print("\t");
-      Serial.print(packet.Thumb_Gy);
-      Serial.print("\t");
-      Serial.print(packet.Thumb_Gz);
-    }
   } else {
     // accel
     packet.Thumb_Ax = 0.0;
@@ -257,14 +238,6 @@ void sensor_isr(){
     // temp
     packet.Point_T = pfinger_imu.getTemperature_C();
 
-    if(SERIAL_SELECT){
-      Serial.print("\t");
-      Serial.print(packet.Point_Gx);
-      Serial.print("\t");
-      Serial.print(packet.Point_Gy);
-      Serial.print("\t");
-      Serial.print(packet.Point_Gz);
-    }
   } else {
     // accel
     packet.Point_Ax = 0.0;
@@ -299,14 +272,6 @@ void sensor_isr(){
     // temp
     packet.Ring_T = rfinger_imu.getTemperature_C();
 
-    if(SERIAL_SELECT){
-      Serial.print("\t");
-      Serial.print(packet.Ring_Gx);
-      Serial.print("\t");
-      Serial.print(packet.Ring_Gy);
-      Serial.print("\t");
-      Serial.print(packet.Ring_Gz);
-    }
   } else {
     // accel
     packet.Ring_Ax = 0.0;
@@ -324,19 +289,97 @@ void sensor_isr(){
     packet.Ring_T = 0.0;
   }
 
-  if(SERIAL_SELECT){ Serial.println(); }
-
   // store packet in buffer
-  // BUFFER.push_back(&packet);
-  // delta = micros() - start;
-  // Serial.println(delta);
+  BUFFER.push_back(packet);
+  // instant idea
+  // print_meddata(packet);
+  // delete packet;
 }
 
-// -----------------------------------------------------------------------------
+void print_meddata(MedData* src){
+  /*
+    Print MedData over Serial
+  */
+  if(!SERIAL_SELECT){ return; }
+  else{
+    // display information
+    // time
+    Serial.print(src->dT);
+    Serial.print("\t");
 
+    // emg
+    if(EMG_SELECT){
+      Serial.print(src->emg_raw);
+      Serial.print("\t");
+      Serial.print(src->emg_rect);
+      Serial.print("\t");
+    }
 
+    // hand
+    if(HAND_SELECT){
+      Serial.print(src->Hand_Ax);
+      Serial.print("\t");
+      Serial.print(src->Hand_Ay);
+      Serial.print("\t");
+      Serial.print(src->Hand_Az);
+      Serial.print("\t");
+      Serial.print(src->Hand_Gx);
+      Serial.print("\t");
+      Serial.print(src->Hand_Gy);
+      Serial.print("\t");
+      Serial.print(src->Hand_Gz);
+      Serial.print("\t");
+    }
 
-// -----------------------------------------------------------------------------
+    // thumb
+    if(THUMB_SELECT){
+      Serial.print(src->Thumb_Ax);
+      Serial.print("\t");
+      Serial.print(src->Thumb_Ay);
+      Serial.print("\t");
+      Serial.print(src->Thumb_Az);
+      Serial.print("\t");
+      Serial.print(src->Thumb_Gx);
+      Serial.print("\t");
+      Serial.print(src->Thumb_Gy);
+      Serial.print("\t");
+      Serial.print(src->Thumb_Gz);
+      Serial.print("\t");
+    }
+
+    // pointer
+    if(POINT_SELECT){
+      Serial.print(src->Point_Ax);
+      Serial.print("\t");
+      Serial.print(src->Point_Ay);
+      Serial.print("\t");
+      Serial.print(src->Point_Az);
+      Serial.print("\t");
+      Serial.print(src->Point_Gx);
+      Serial.print("\t");
+      Serial.print(src->Point_Gy);
+      Serial.print("\t");
+      Serial.print(src->Point_Gz);
+      Serial.print("\t");
+    }
+
+    // ring
+    if(RING_SELECT){
+      Serial.print(src->Ring_Ax);
+      Serial.print("\t");
+      Serial.print(src->Ring_Ay);
+      Serial.print("\t");
+      Serial.print(src->Ring_Az);
+      Serial.print("\t");
+      Serial.print(src->Ring_Gx);
+      Serial.print("\t");
+      Serial.print(src->Ring_Gy);
+      Serial.print("\t");
+      Serial.print(src->Ring_Gz);
+      Serial.print("\n");
+    }
+  }
+}
 
 void com_search_light(){
   /*
@@ -351,18 +394,3 @@ void com_search_light(){
   digitalWrite(BUILTIN_LED, LOW);
   delay(1000);
 }
-
-// -----------------------------------------------------------------------------
-
-void fprint(const char* msg, ...){
-  // print on a single line to serial monitor
-  va_list args;
-  va_start(args, msg);
-  // print and return carriage to serial monitor
-  if(SERIAL_SELECT){
-    Serial.printf(msg, args);
-  } // endif
-  va_end(args);
-}
-
-// -----------------------------------------------------------------------------

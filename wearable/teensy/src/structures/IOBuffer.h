@@ -23,12 +23,12 @@ public:
   bool is_empty(){ return count == 0; }
 
   /* MUTATORS */
-  MedData remove_front();           // consuming an item from the front
-  bool push_back(MedData* item);    // producing an item and putting it in back
+  MedData* remove_front();           // consuming an item from the front
+  bool push_back(MedData item);    // producing an item and putting it in back
 
 private:
-  MedData* buffer;        // array for storing all the data
-  uint8_t SIZE;    // Buffer's static size
+  MedData** buffer;        // array for storing all the data
+  uint8_t SIZE;           // Buffer's static size
   uint8_t pfront, pback;  // Pointers for the program
   uint8_t count;          // how many items are in the buffer currently
 };

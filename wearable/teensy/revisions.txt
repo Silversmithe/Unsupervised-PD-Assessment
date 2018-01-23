@@ -1,0 +1,15 @@
+--------------------------------------------------------------------------------
+                      NOTES & HISTORY OF WEARABLE DEVELOPMENT
+--------------------------------------------------------------------------------
+
+January 4th, 2018
+- Pointer and Thumb IMU will be on the same BUS
+- Hand and Ring IMU will be on the same BUS
+
+January 21st, 2018
+- created wearable prototype VERSION 1: (IRON FIST)
+
+January 22nd, 2018
+- need to create error message types so that errors can be propagated
+  through the code
+- create circuitry to display information without the serial monitor

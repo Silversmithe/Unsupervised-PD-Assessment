@@ -1,6 +1,6 @@
 /*
 --------------------------------------------------------------------------------
-  main.cpp (Wearable Version 1)
+  main.cpp (Wearable Version 1: IRON FIST)
 
   Main Application for gathering and reporting information of both sensors in
   one. This is the prototype for the main application.
@@ -55,8 +55,9 @@ necessary. This is particularly useful for unittesting the system.
 #define BUILTIN_LED 13          // builtin led for signaling
 
 /* SAMPLING INFORMATION */
-#define FULL_SAMPLE_RATE 10000  // microseconds, 10 Hz
-#define DEMO_RATE        1000000 // microseconds
+#define DOUBLE_SAMPLE_RATE 5000   // microseconds, 200Hz
+#define FULL_SAMPLE_RATE   10000  // microseconds, 100 Hz
+#define DEMO_RATE          1000000 // microseconds
 
 /* CHECKING CONFIGURATION */
 #if SERIAL_SELECT == true && XBEE_SELECT == true
@@ -73,7 +74,7 @@ Payload data_to_payload(MedData* item); // convert sensor data to sendable data
 void com_search_light();             // if device is searching for communcation
 
 // Serial
-void fprint(const char* msg, ...);   // print on a single line to serial monitor
+void print_meddata(MedData* src); // print the meddata to the serial
 
 // Communication
 bool transfer_payload(Payload* payload); // transfer payload over COM connection
