@@ -9,3 +9,12 @@ Our goal is to create a device that will utilize patient’s daily actions inste
 
 ### January 2nd, 2018
 * Latency to read from a MPU9250 is worst case 1ms
+
+### January 21st, 2018
+- wearable device (V1: Iron Fist) built
+
+### January 22nd, 2018
+- wireless communication between XBee and Artik 710 over Zigbee
+- Xbee is configured using XCTU
+- end-to-end system prototype by the end of January (~February 2nd, 2018)
+
