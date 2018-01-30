@@ -19,62 +19,55 @@
 #define MED_DATA_H
 
 /* INFORMATION STORED IN BUFFER */
-struct MedData {
-  /* EMG */
-  uint16_t emg_raw, emg_rect;
+struct Data {
+  /* ------------------ EMG -----------------------*/
+  int16_t emg[2]; // Raw Rect
+  /*
+    ------------------ IMU -----------------------
+    In the array, data is organized as follows:
+    [Axyz Gxyz Mxyz T]
+  */
+  float hand[10];
+  float hand_pos[3];
 
-  /* IMU */
-  // HAND
-  float Hand_Ax, Hand_Ay, Hand_Az; // mss
-  float Hand_Gx, Hand_Gy, Hand_Gz; // rads/s
-  float Hand_Mx, Hand_My, Hand_Mz;
-  float Hand_T;
+  float thumb[10];
+  float thumb_pos[3];
 
-  // Thumb Finger
-  float Thumb_Ax, Thumb_Ay, Thumb_Az; // mss
-  float Thumb_Gx, Thumb_Gy, Thumb_Gz; // rads/s
-  float Thumb_Mx, Thumb_My, Thumb_Mz;
-  float Thumb_T;
+  float point[10];
+  float point_pos[3];
 
-  // Pointer Finger
-  float Point_Ax, Point_Ay, Point_Az; // mss
-  float Point_Gx, Point_Gy, Point_Gz; // rads/s
-  float Point_Mx, Point_My, Point_Mz;
-  float Point_T;
-
-  // Ring Finger
-  float Ring_Ax, Ring_Ay, Ring_Az; // mss
-  float Ring_Gx, Ring_Gy, Ring_Gz; // rads/s
-  float Ring_Mx, Ring_My, Ring_Mz;
-  float Ring_T;
+  float ring[10];
+  float ring_pos[3];
 
   /* TIMING */
-  uint32_t dT;
+  uint32_t dt; // distance between interrupts
 };
 
 /* INFORMATION SENT OVER RADIO */
 struct Payload {
   /*
+    UPDATE: floats are 4 bytes = 4*8 = 32 bits
     272 bits of information
     This would result in 27.2 kbits/s
   */
   /* Electromyography of Forearm */
-  uint16_t dEMG[2];
+  int16_t dEMG[2];
   /* Dorsum of Hand Position and Acceleration */
-  uint16_t dHACCEL[3];
-  uint16_t dHPOS[3];
+  int16_t dHACCEL[3];
+  int16_t dHPOS[3];
   /* Thumb Finger Position and Angular Velocity */
-  uint16_t dTPOS[3];
-  uint16_t dTRADS[3];
+  int16_t dTPOS[3];
+  int16_t dTRADS[3];
   /* Pointer Finger Position */
-  uint16_t dPPOS[3];
-  uint16_t dPRADS[3];
+  int16_t dPPOS[3];
+  int16_t dPRADS[3];
   /* Ring Finger Position */
-  uint16_t dRPOS[3];
-  uint16_t dRRADS[3];
+  int16_t dRPOS[3];
+  int16_t dRRADS[3];
+  /* Message Code TELEMETRY */
 };
 
-typedef struct MedData MedData;
+typedef struct Data Data;
 typedef struct Payload Payload;
 
 #endif

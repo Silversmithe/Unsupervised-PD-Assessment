@@ -17,7 +17,7 @@ necessary. This is particularly useful for unittesting the system.
 
 #include "MyoEMG/MyoEMG.h"             // EMG library
 #include "MPU9250/MPU9250.h"           // IMU library
-#include "MPU9250/quaternionFilters.h" // quad filters
+#include "analysis/quaternionFilters.h" // quad filters
 #include "structures/IOBuffer.h"       // IOBuffer
 #include "structures/Data.h"        // Medical Data Packet
 
@@ -66,15 +66,15 @@ necessary. This is particularly useful for unittesting the system.
 
 /* FUNCTION PROTOTYPES */
 // Sensor
-void imu_setup();                       // initialize all imus accordingly
-void sensor_isr();                      // called whenever the device samples
-Payload data_to_payload(MedData* item); // convert sensor data to sendable data
+void imu_setup();                  // initialize all imus accordingly
+void sensor_isr();                 // called whenever the device samples
+void get_orientation(Data* item);  // convert sensor data to orientation data
 
 // Errors
 void com_search_light();             // if device is searching for communcation
 
 // Serial
-void print_meddata(MedData* src); // print the meddata to the serial
+void serial_print_data(Data* src); // print the meddata to the serial
 
 // Communication
 bool transfer_payload(Payload* payload); // transfer payload over COM connection

@@ -51,24 +51,16 @@ void setup() {
 void loop() {
   /* consumer of the IOBuffer */
   if(!BUFFER.is_empty()){
-    // remove a MedData item from buffer
-    MedData* data = BUFFER.remove_front();
-    // convert MedData into PAYLOAD
+    // remove a Data item from buffer
+    Data* data = BUFFER.remove_front();
+    // convert Data into PAYLOAD
 
     /* BUFFER TESTING */
-    // if(!BUFFER.is_full()){
-    //   Serial.println(BUFFER.num_elts());
-    // } else {
-    //   Serial.println("buffer is full");
-    // }
-
     // send payload over communication medium
     // print data from buffers
-    print_meddata(data);
-  } else {
-    // buffer testing
-    // Serial.println("empty!");
+    serial_print_data(data);
   }
+
   delay(10);
 }
 
@@ -79,7 +71,7 @@ void imu_setup(){
   */
   /* TEMPORARY VARS */
   int status;                                 // status for imu setup
-
+  // needs to have error handling
   if(THUMB_SELECT){
     status = tfinger_imu.begin();
     if(status < 0){
@@ -133,251 +125,245 @@ void sensor_isr(){
   /*
     Should time to see how long this takes
   */
-  // uint32_t delta;
-  // uint32_t start = micros();
-  MedData packet;   // new information set for buffer
-
   // update the time
   instant_time = micros();
   delta_time = instant_time - current_time;
   current_time = instant_time;
-  // add the change in time always to the packet
-  packet.dT = delta_time;
+
+  // new information set for buffer
+  Data packet = {
+    {0,0},                    // EMG DATA
+    {0,0,0,0,0,0,0,0,0,0},    // HAND
+    {0,0,0},                  // HPOSITION
+    {0,0,0,0,0,0,0,0,0,0},    // THUMB
+    {0,0,0},                  // TPOSITION
+    {0,0,0,0,0,0,0,0,0,0},    // POINT
+    {0,0,0},                  // PPOSITION
+    {0,0,0,0,0,0,0,0,0,0},    // RING
+    {0,0,0},                  // RPOSITION
+    delta_time                // dt
+  };
 
   if(EMG_SELECT){
-    packet.emg_raw = forearm.getRaw();
-    packet.emg_rect = forearm.getRect();
-  } else {
-    // fill packet with zeros
-    packet.emg_raw = 0;
-    packet.emg_rect = 0;
+    packet.emg[0] = forearm.getRaw();
+    packet.emg[1] = forearm.getRect();
   }
 
   if(HAND_SELECT){
     dhand_imu.readSensor();
     // accel
-    packet.Hand_Ax = dhand_imu.getAccelX_mss();
-    packet.Hand_Ay = dhand_imu.getAccelY_mss();
-    packet.Hand_Az = dhand_imu.getAccelZ_mss();
+    packet.hand[0] = dhand_imu.getAccelX_mss();
+    packet.hand[1] = dhand_imu.getAccelY_mss();
+    packet.hand[2] = dhand_imu.getAccelZ_mss();
     // gyro
-    packet.Hand_Gx = dhand_imu.getGyroX_rads();
-    packet.Hand_Gy = dhand_imu.getGyroY_rads();
-    packet.Hand_Gz = dhand_imu.getGyroZ_rads();
+    packet.hand[3] = dhand_imu.getGyroX_rads();
+    packet.hand[4] = dhand_imu.getGyroY_rads();
+    packet.hand[5] = dhand_imu.getGyroZ_rads();
     // mag
-    packet.Hand_Mx = dhand_imu.getMagX_uT();
-    packet.Hand_My = dhand_imu.getMagY_uT();
-    packet.Hand_Mz = dhand_imu.getMagZ_uT();
+    packet.hand[6] = dhand_imu.getMagX_uT();
+    packet.hand[7] = dhand_imu.getMagY_uT();
+    packet.hand[8] = dhand_imu.getMagZ_uT();
     // temp
-    packet.Hand_T = dhand_imu.getTemperature_C();
-
-  } else {
-    // accel
-    packet.Hand_Ax = 0.0;
-    packet.Hand_Ay = 0.0;
-    packet.Hand_Az = 0.0;
-    // gyro
-    packet.Hand_Gx = 0.0;
-    packet.Hand_Gy = 0.0;
-    packet.Hand_Gz = 0.0;
-    // mag
-    packet.Hand_Mx = 0.0;
-    packet.Hand_My = 0.0;
-    packet.Hand_Mz = 0.0;
-    // temp
-    packet.Hand_T = 0.0;
+    packet.hand[9] = dhand_imu.getTemperature_C();
   }
 
   if(THUMB_SELECT){
     tfinger_imu.readSensor();
     // accel
-    packet.Thumb_Ax = tfinger_imu.getAccelX_mss();
-    packet.Thumb_Ay = tfinger_imu.getAccelY_mss();
-    packet.Thumb_Az = tfinger_imu.getAccelZ_mss();
+    packet.thumb[0] = tfinger_imu.getAccelX_mss();
+    packet.thumb[1] = tfinger_imu.getAccelY_mss();
+    packet.thumb[2] = tfinger_imu.getAccelZ_mss();
     // gyro
-    packet.Thumb_Gx = tfinger_imu.getGyroX_rads();
-    packet.Thumb_Gy = tfinger_imu.getGyroY_rads();
-    packet.Thumb_Gz = tfinger_imu.getGyroZ_rads();
+    packet.thumb[3] = tfinger_imu.getGyroX_rads();
+    packet.thumb[4] = tfinger_imu.getGyroY_rads();
+    packet.thumb[5] = tfinger_imu.getGyroZ_rads();
     // mag
-    packet.Thumb_Mx = tfinger_imu.getMagX_uT();
-    packet.Thumb_My = tfinger_imu.getMagY_uT();
-    packet.Thumb_Mz = tfinger_imu.getMagZ_uT();
+    packet.thumb[6] = tfinger_imu.getMagX_uT();
+    packet.thumb[7] = tfinger_imu.getMagY_uT();
+    packet.thumb[8] = tfinger_imu.getMagZ_uT();
     // temp
-    packet.Thumb_T = tfinger_imu.getTemperature_C();
-
-  } else {
-    // accel
-    packet.Thumb_Ax = 0.0;
-    packet.Thumb_Ay = 0.0;
-    packet.Thumb_Az = 0.0;
-    // gyro
-    packet.Thumb_Gx = 0.0;
-    packet.Thumb_Gy = 0.0;
-    packet.Thumb_Gz = 0.0;
-    // mag
-    packet.Thumb_Mx = 0.0;
-    packet.Thumb_My = 0.0;
-    packet.Thumb_Mz = 0.0;
-    // temp
-    packet.Thumb_T = 0.0;
+    packet.thumb[9] = tfinger_imu.getTemperature_C();
   }
 
   if(POINT_SELECT){
     pfinger_imu.readSensor();
     // accel
-    packet.Point_Ax = pfinger_imu.getAccelX_mss();
-    packet.Point_Ay = pfinger_imu.getAccelY_mss();
-    packet.Point_Az = pfinger_imu.getAccelZ_mss();
+    packet.point[0] = pfinger_imu.getAccelX_mss();
+    packet.point[1] = pfinger_imu.getAccelY_mss();
+    packet.point[2] = pfinger_imu.getAccelZ_mss();
     // gyro
-    packet.Point_Gx = pfinger_imu.getGyroX_rads();
-    packet.Point_Gy = pfinger_imu.getGyroY_rads();
-    packet.Point_Gz = pfinger_imu.getGyroZ_rads();
+    packet.point[3] = pfinger_imu.getGyroX_rads();
+    packet.point[4] = pfinger_imu.getGyroY_rads();
+    packet.point[5] = pfinger_imu.getGyroZ_rads();
     // mag
-    packet.Point_Mx = pfinger_imu.getMagX_uT();
-    packet.Point_My = pfinger_imu.getMagY_uT();
-    packet.Point_Mz = pfinger_imu.getMagZ_uT();
+    packet.point[6] = pfinger_imu.getMagX_uT();
+    packet.point[7] = pfinger_imu.getMagY_uT();
+    packet.point[8] = pfinger_imu.getMagZ_uT();
     // temp
-    packet.Point_T = pfinger_imu.getTemperature_C();
-
-  } else {
-    // accel
-    packet.Point_Ax = 0.0;
-    packet.Point_Ay = 0.0;
-    packet.Point_Az = 0.0;
-    // gyro
-    packet.Point_Gx = 0.0;
-    packet.Point_Gy = 0.0;
-    packet.Point_Gz = 0.0;
-    // mag
-    packet.Point_Mx = 0.0;
-    packet.Point_My = 0.0;
-    packet.Point_Mz = 0.0;
-    // temp
-    packet.Point_T = 0.0;
+    packet.point[9] = pfinger_imu.getTemperature_C();
   }
 
   if(RING_SELECT){
     rfinger_imu.readSensor();
     // accel
-    packet.Ring_Ax = rfinger_imu.getAccelX_mss();
-    packet.Ring_Ay = rfinger_imu.getAccelY_mss();
-    packet.Ring_Az = rfinger_imu.getAccelZ_mss();
+    packet.ring[0] = rfinger_imu.getAccelX_mss();
+    packet.ring[1] = rfinger_imu.getAccelY_mss();
+    packet.ring[2] = rfinger_imu.getAccelZ_mss();
     // gyro
-    packet.Ring_Gx = rfinger_imu.getGyroX_rads();
-    packet.Ring_Gy = rfinger_imu.getGyroY_rads();
-    packet.Ring_Gz = rfinger_imu.getGyroZ_rads();
+    packet.ring[3] = rfinger_imu.getGyroX_rads();
+    packet.ring[4] = rfinger_imu.getGyroY_rads();
+    packet.ring[5] = rfinger_imu.getGyroZ_rads();
     // mag
-    packet.Ring_Mx = rfinger_imu.getMagX_uT();
-    packet.Ring_My = rfinger_imu.getMagY_uT();
-    packet.Ring_Mz = rfinger_imu.getMagZ_uT();
+    packet.ring[6] = rfinger_imu.getMagX_uT();
+    packet.ring[7] = rfinger_imu.getMagY_uT();
+    packet.ring[8] = rfinger_imu.getMagZ_uT();
     // temp
-    packet.Ring_T = rfinger_imu.getTemperature_C();
-
-  } else {
-    // accel
-    packet.Ring_Ax = 0.0;
-    packet.Ring_Ay = 0.0;
-    packet.Ring_Az = 0.0;
-    // gyro
-    packet.Ring_Gx = 0.0;
-    packet.Ring_Gy = 0.0;
-    packet.Ring_Gz = 0.0;
-    // mag
-    packet.Ring_Mx = 0.0;
-    packet.Ring_My = 0.0;
-    packet.Ring_Mz = 0.0;
-    // temp
-    packet.Ring_T = 0.0;
+    packet.ring[9] = rfinger_imu.getTemperature_C();
   }
 
   // store packet in buffer
   BUFFER.push_back(packet);
-  // instant idea
-  // print_meddata(packet);
-  // delete packet;
 }
 
-void print_meddata(MedData* src){
+void get_orientation(Data* item){
+// Define output variables from updated quaternion---these are Tait-Bryan
+// angles, commonly used in aircraft orientation. In this coordinate system,
+// the positive z-axis is down toward Earth. Yaw is the angle between Sensor
+// x-axis and Earth magnetic North (or true North if corrected for local
+// declination, looking down on the sensor positive yaw is counterclockwise.
+// Pitch is angle between sensor x-axis and Earth ground plane, toward the
+// Earth is positive, up toward the sky is negative. Roll is angle between
+// sensor y-axis and Earth ground plane, y-axis up is positive roll. These
+// arise from the definition of the homogeneous rotation matrix constructed
+// from quaternions. Tait-Bryan angles as well as Euler angles are
+// non-commutative; that is, the get the correct orientation the rotations
+// must be applied in the correct order which for this configuration is yaw,
+// pitch, and then roll.
+// For more see
+// http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+// which has additional links.
+
+// hand
+MahonyQuaternionUpdate(item->hand[0], item->hand[1], item->hand[2], // Axyz
+                       item->hand[3], item->hand[4], item->hand[5], // Gxyz
+                       item->hand[6], item->hand[7], item->hand[8], // Mxyz
+                       item->hand[9]);                              // dT
+
+// pitch
+item->hand_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+                 *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+                 - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+// roll
+item->hand_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+                   *(getQ()+2)));
+
+// yaw
+item->hand_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+                 *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+                 - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+
+
+// thumb
+MahonyQuaternionUpdate(item->thumb[0], item->thumb[1], item->thumb[2], // Axyz
+                      item->thumb[3], item->thumb[4], item->thumb[5], // Gxyz
+                      item->thumb[6], item->thumb[7], item->thumb[8], // Mxyz
+                      item->thumb[9]);                              // dT
+
+// pitch
+item->thumb_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+                  *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+                  - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+// roll
+item->thumb_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+                    *(getQ()+2)));
+
+// yaw
+item->thumb_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+                  *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+                  - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+
+// point
+MahonyQuaternionUpdate(item->point[0], item->point[1], item->point[2], // Axyz
+                       item->point[3], item->point[4], item->point[5], // Gxyz
+                       item->point[6], item->point[7], item->point[8], // Mxyz
+                       item->point[9]);                              // dT
+
+// pitch
+item->point_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+                 *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+                 - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+// roll
+item->point_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+                   *(getQ()+2)));
+
+// yaw
+item->point_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+                 *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+                 - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+
+// ring
+MahonyQuaternionUpdate(item->ring[0], item->ring[1], item->ring[2], // Axyz
+                      item->ring[3], item->ring[4], item->ring[5], // Gxyz
+                      item->ring[6], item->ring[7], item->ring[8], // Mxyz
+                      item->ring[9]);                              // dT
+
+// pitch
+item->ring_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+                  *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+                  - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+// roll
+item->ring_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+                    *(getQ()+2)));
+
+// yaw
+item->ring_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+                  *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+                  - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+
+}
+
+void serial_print_data(Data* src){
   /*
-    Print MedData over Serial
+    Print Data over Serial
   */
   if(!SERIAL_SELECT){ return; }
   else{
     // display information
     // time
-    Serial.print(src->dT);
+    Serial.print(src->dt);
     Serial.print("\t");
 
-    // emg
     if(EMG_SELECT){
-      Serial.print(src->emg_raw);
-      Serial.print("\t");
-      Serial.print(src->emg_rect);
-      Serial.print("\t");
-    }
-
-    // hand
+      for(int i=0; i<2; i++){
+        Serial.print(src->emg[i]);
+        Serial.print("\t");
+      }
+    } // end EMG
     if(HAND_SELECT){
-      Serial.print(src->Hand_Ax);
-      Serial.print("\t");
-      Serial.print(src->Hand_Ay);
-      Serial.print("\t");
-      Serial.print(src->Hand_Az);
-      Serial.print("\t");
-      Serial.print(src->Hand_Gx);
-      Serial.print("\t");
-      Serial.print(src->Hand_Gy);
-      Serial.print("\t");
-      Serial.print(src->Hand_Gz);
-      Serial.print("\t");
-    }
-
-    // thumb
+      for(int i=0; i<6; i++){
+        Serial.print(src->hand[i]);
+        Serial.print("\t");
+      }
+    } // end hand
     if(THUMB_SELECT){
-      Serial.print(src->Thumb_Ax);
-      Serial.print("\t");
-      Serial.print(src->Thumb_Ay);
-      Serial.print("\t");
-      Serial.print(src->Thumb_Az);
-      Serial.print("\t");
-      Serial.print(src->Thumb_Gx);
-      Serial.print("\t");
-      Serial.print(src->Thumb_Gy);
-      Serial.print("\t");
-      Serial.print(src->Thumb_Gz);
-      Serial.print("\t");
-    }
-
-    // pointer
+      for(int i=0; i<6; i++){
+        Serial.print(src->thumb[i]);
+        Serial.print("\t");
+      }
+    } // end thumb
     if(POINT_SELECT){
-      Serial.print(src->Point_Ax);
-      Serial.print("\t");
-      Serial.print(src->Point_Ay);
-      Serial.print("\t");
-      Serial.print(src->Point_Az);
-      Serial.print("\t");
-      Serial.print(src->Point_Gx);
-      Serial.print("\t");
-      Serial.print(src->Point_Gy);
-      Serial.print("\t");
-      Serial.print(src->Point_Gz);
-      Serial.print("\t");
-    }
-
-    // ring
+      for(int i=0; i<6; i++){
+        Serial.print(src->point[i]);
+        Serial.print("\t");
+      }
+    }// end point
     if(RING_SELECT){
-      Serial.print(src->Ring_Ax);
-      Serial.print("\t");
-      Serial.print(src->Ring_Ay);
-      Serial.print("\t");
-      Serial.print(src->Ring_Az);
-      Serial.print("\t");
-      Serial.print(src->Ring_Gx);
-      Serial.print("\t");
-      Serial.print(src->Ring_Gy);
-      Serial.print("\t");
-      Serial.print(src->Ring_Gz);
-      Serial.print("\n");
-    }
+      for(int i=0; i<6; i++){
+        Serial.print(src->ring[i]);
+        Serial.print("\t");
+      }
+    } // end ring
+    Serial.println("");
   }
 }
 
