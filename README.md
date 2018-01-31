@@ -3,6 +3,8 @@ Our goal is to create a device that will utilize patient’s daily actions inste
 
 ## Library Resources
 * https://github.com/bolderflight/MPU9250
+* https://github.com/andrewrapp/xbee-arduino
+* http://pyopengl.sourceforge.net/documentation/
 * https://pypi.python.org/pypi/XBee
 
 ## Project Notes
