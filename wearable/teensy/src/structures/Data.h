@@ -1,5 +1,5 @@
 /*
-  MedData.h
+  Data.h
 
   Alexander S. Adranly
 
@@ -10,8 +10,6 @@
   January 8th, 2018
   Angular Velocity is important for analysis
   - include angular velocity in the PAYLOAD packet ( can keep pos still if fits)
-
-
 */
 #include "stdint.h"
 

@@ -1,5 +1,5 @@
 /*
---------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
   main.cpp (Wearable Version 1: IRON FIST)
 
   Main Application for gathering and reporting information of both sensors in
@@ -8,12 +8,13 @@
   fingers to perform diagnostics of parkinson's disease.
 
   Alexander S. Adranly
-  --------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
 */
 #include "main.h"
 #include "Arduino.h"              // Arduino Library
 #include "stdint.h"               // Integer Library
 #include "TimerOne.h"             // Timer Libaray
+#include "Xbee/Xbee.h"            // Radio (Zigbee) Library
 
 /* VARIABLES */
 IOMedBuffer BUFFER(BUFFER_SIZE);
@@ -53,18 +54,22 @@ void loop() {
   if(!BUFFER.is_empty()){
     // remove a Data item from buffer
     Data* data = BUFFER.remove_front();
-    // convert Data into PAYLOAD
+    /* DATA PROCESSING */
+    // Load Position data into Data structures using Mahony Filter
+    get_orientation(data);
 
-    /* BUFFER TESTING */
-    // send payload over communication medium
-    // print data from buffers
-    serial_print_data(data);
-  }
+    /* DATA TRANSFER */
+    if(SERIAL_SELECT){
+      serial_print_data(data);    // display onto the serial monitor
+    } else if(XBEE_SELECT){
+
+    } // fin communication
+  } // fin buffer
 
   delay(10);
 }
 
-/* FUNCTIONS */
+/* INITIALIZATION */
 void imu_setup(){
   /*
     Initialize all IMUs accordingly
@@ -120,7 +125,7 @@ void imu_setup(){
     } // end bad status
   } // init thumb imu
 }
-
+/* SENSOR FUNCTIONS */
 void sensor_isr(){
   /*
     Should time to see how long this takes
@@ -225,103 +230,112 @@ void sensor_isr(){
   BUFFER.push_back(packet);
 }
 
+/* ANALYSIS */
 void get_orientation(Data* item){
-// Define output variables from updated quaternion---these are Tait-Bryan
-// angles, commonly used in aircraft orientation. In this coordinate system,
-// the positive z-axis is down toward Earth. Yaw is the angle between Sensor
-// x-axis and Earth magnetic North (or true North if corrected for local
-// declination, looking down on the sensor positive yaw is counterclockwise.
-// Pitch is angle between sensor x-axis and Earth ground plane, toward the
-// Earth is positive, up toward the sky is negative. Roll is angle between
-// sensor y-axis and Earth ground plane, y-axis up is positive roll. These
-// arise from the definition of the homogeneous rotation matrix constructed
-// from quaternions. Tait-Bryan angles as well as Euler angles are
-// non-commutative; that is, the get the correct orientation the rotations
-// must be applied in the correct order which for this configuration is yaw,
-// pitch, and then roll.
-// For more see
-// http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-// which has additional links.
+  // Define output variables from updated quaternion---these are Tait-Bryan
+  // angles, commonly used in aircraft orientation. In this coordinate system,
+  // the positive z-axis is down toward Earth. Yaw is the angle between Sensor
+  // x-axis and Earth magnetic North (or true North if corrected for local
+  // declination, looking down on the sensor positive yaw is counterclockwise.
+  // Pitch is angle between sensor x-axis and Earth ground plane, toward the
+  // Earth is positive, up toward the sky is negative. Roll is angle between
+  // sensor y-axis and Earth ground plane, y-axis up is positive roll. These
+  // arise from the definition of the homogeneous rotation matrix constructed
+  // from quaternions. Tait-Bryan angles as well as Euler angles are
+  // non-commutative; that is, the get the correct orientation the rotations
+  // must be applied in the correct order which for this configuration is yaw,
+  // pitch, and then roll.
+  // For more see
+  // http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+  // which has additional links.
 
-// hand
-MahonyQuaternionUpdate(item->hand[0], item->hand[1], item->hand[2], // Axyz
-                       item->hand[3], item->hand[4], item->hand[5], // Gxyz
-                       item->hand[6], item->hand[7], item->hand[8], // Mxyz
-                       item->hand[9]);                              // dT
+  // hand
+  if(HAND_SELECT){
+    MahonyQuaternionUpdate(item->hand[0], item->hand[1], item->hand[2], // Axyz
+                           item->hand[3], item->hand[4], item->hand[5], // Gxyz
+                           item->hand[6], item->hand[7], item->hand[8], // Mxyz
+                           item->hand[9]);                              // dT
 
-// pitch
-item->hand_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                 *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                 - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-// roll
-item->hand_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                   *(getQ()+2)));
+    // pitch
+    item->hand_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+                     *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+                     - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+    // roll
+    item->hand_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+                       *(getQ()+2)));
 
-// yaw
-item->hand_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                 *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                 - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+    // yaw
+    item->hand_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+                     *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+                     - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
 
+  }
 
-// thumb
-MahonyQuaternionUpdate(item->thumb[0], item->thumb[1], item->thumb[2], // Axyz
-                      item->thumb[3], item->thumb[4], item->thumb[5], // Gxyz
-                      item->thumb[6], item->thumb[7], item->thumb[8], // Mxyz
-                      item->thumb[9]);                              // dT
+  if(THUMB_SELECT){
+    // thumb
+    MahonyQuaternionUpdate(item->thumb[0], item->thumb[1], item->thumb[2],// Axyz
+                          item->thumb[3], item->thumb[4], item->thumb[5], // Gxyz
+                          item->thumb[6], item->thumb[7], item->thumb[8], // Mxyz
+                          item->thumb[9]);                                // dT
 
-// pitch
-item->thumb_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                  *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                  - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-// roll
-item->thumb_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                    *(getQ()+2)));
+    // pitch
+    item->thumb_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+                      *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+                      - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+    // roll
+    item->thumb_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+                        *(getQ()+2)));
 
-// yaw
-item->thumb_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                  *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                  - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+    // yaw
+    item->thumb_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+                      *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+                      - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+  }
 
-// point
-MahonyQuaternionUpdate(item->point[0], item->point[1], item->point[2], // Axyz
-                       item->point[3], item->point[4], item->point[5], // Gxyz
-                       item->point[6], item->point[7], item->point[8], // Mxyz
-                       item->point[9]);                              // dT
+  if(POINT_SELECT){
+    // point
+    MahonyQuaternionUpdate(item->point[0], item->point[1], item->point[2], // Axyz
+                           item->point[3], item->point[4], item->point[5], // Gxyz
+                           item->point[6], item->point[7], item->point[8], // Mxyz
+                           item->point[9]);                              // dT
 
-// pitch
-item->point_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                 *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                 - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-// roll
-item->point_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                   *(getQ()+2)));
+    // pitch
+    item->point_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+                     *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+                     - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+    // roll
+    item->point_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+                       *(getQ()+2)));
 
-// yaw
-item->point_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                 *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                 - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+    // yaw
+    item->point_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+                     *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+                     - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+  }
 
-// ring
-MahonyQuaternionUpdate(item->ring[0], item->ring[1], item->ring[2], // Axyz
-                      item->ring[3], item->ring[4], item->ring[5], // Gxyz
-                      item->ring[6], item->ring[7], item->ring[8], // Mxyz
-                      item->ring[9]);                              // dT
+  if(RING_SELECT){
+    // ring
+    MahonyQuaternionUpdate(item->ring[0], item->ring[1], item->ring[2], // Axyz
+                          item->ring[3], item->ring[4], item->ring[5], // Gxyz
+                          item->ring[6], item->ring[7], item->ring[8], // Mxyz
+                          item->ring[9]);                              // dT
 
-// pitch
-item->ring_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                  *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                  - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-// roll
-item->ring_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                    *(getQ()+2)));
+    // pitch
+    item->ring_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
+                      *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
+                      - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
+    // roll
+    item->ring_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
+                        *(getQ()+2)));
 
-// yaw
-item->ring_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                  *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                  - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
-
+    // yaw
+    item->ring_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
+                      *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
+                      - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
+  }
 }
 
+/* COMMUNICATION FUNCTIONS */
 void serial_print_data(Data* src){
   /*
     Print Data over Serial
@@ -367,6 +381,12 @@ void serial_print_data(Data* src){
   }
 }
 
+void radio_transfer_data(Data* src){
+  /* work on this later
+
+}
+
+/* ERROR HANDLING */
 void com_search_light(){
   /*
     Display if searching
