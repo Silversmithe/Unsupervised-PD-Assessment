@@ -1,25 +1,24 @@
-/*
---------------------------------------------------------------------------------
-  main.cpp (Wearable Version 1: IRON FIST)
+/*------------------------------------------------------------------------------
+  file:         main.cpp (Wearable Version 1: IRON FIST)
 
-  Main Application for gathering and reporting information of both sensors in
-  one. This is the prototype for the main application.
+  author:       Alexander Sami Adranly
+  ------------------------------------------------------------------------------
+  description:  Main Application for gathering and reporting information of both
+  sensors in one. This is the prototype for the main application.
   Wearable device gathers information about the muscles of the arm and its
   fingers to perform diagnostics of parkinson's disease.
 
-  Alexander Sami Adranly
---------------------------------------------------------------------------------
-In the H file, useful definitions will be made. The device can also be
-configured here to run or not run different sensors depending on what is
-necessary. This is particularly useful for unittesting the system.
---------------------------------------------------------------------------------
-*/
+  In the H file, useful definitions will be made. The device can also be
+  configured here to run or not run different sensors depending on what is
+  necessary. This is particularly useful for unittesting the system.
+  ----------------------------------------------------------------------------*/
 
-#include "MyoEMG/MyoEMG.h"             // EMG library
-#include "MPU9250/MPU9250.h"           // IMU library
-#include "analysis/quaternionFilters.h" // quad filters
-#include "structures/IOBuffer.h"       // IOBuffer
-#include "structures/Data.h"        // Medical Data Packet
+#include "myoEMG/MyoEMG.h"                // EMG library
+#include "mpu9250/MPU9250.h"              // IMU library
+#include "analysis/analysis.h"            // analysis functions
+#include "structures/IOBuffer.h"          // IOBuffer
+#include "structures/Data.h"              // Data Struct
+#include "com/com.h"                      // Communications Functions
 
 #ifndef MAIN_H
 #define MAIN_H
@@ -30,14 +29,14 @@ necessary. This is particularly useful for unittesting the system.
 /* COMMUNICATION SELECTORS */
 #define SERIAL_SELECT        true      // Turn on/off Serial communication
 #define XBEE_SELECT          false     // Turn on/off Xbee (Radio) communication
-#define IS_CONSUMED SERIAL_SELECT || XBEE_SELECT // is the data being consumed
+#define TIMEOUT              5000      // timeout for any communication until err
 
 /* DEVICE SELECTORS */
 #define EMG_SELECT    false      // Turn on/off Forearm EMG readings
-#define HAND_SELECT   false      // Turn on/off dorsum hand IMU readings
-#define THUMB_SELECT  false      // Turn on/off Thumb IMU readings
-#define POINT_SELECT  false      // Turn on/off Pointer IMU readings
-#define RING_SELECT   false     // Turn on/off Ring IMU readings
+#define HAND_SELECT   true      // Turn on/off dorsum hand IMU readings
+#define THUMB_SELECT  true      // Turn on/off Thumb IMU readings
+#define POINT_SELECT  true      // Turn on/off Pointer IMU readings
+#define RING_SELECT   true     // Turn on/off Ring IMU readings
 
 /* COMMUNICATION DEFINITION */
 #define BAUD_RATE 115200        // rate information is transferred serially
@@ -68,14 +67,5 @@ necessary. This is particularly useful for unittesting the system.
 // Sensor
 void imu_setup();                  // initialize all imus accordingly
 void sensor_isr();                 // called whenever the device samples
-void get_orientation(Data* item);  // convert sensor data to orientation data
-
-// Errors
-void com_search_light();           // if device is searching for communcation
-
-// Serial
-void serial_print_data(Data* src); // print the data to the serial
-// Xbee
-void radio_transfer_data(Data* src);    // transfer the data over xbee radio
 
 #endif

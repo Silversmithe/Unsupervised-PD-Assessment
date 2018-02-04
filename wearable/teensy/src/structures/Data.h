@@ -1,16 +1,11 @@
-/*
-  Data.h
+/*------------------------------------------------------------------------------
+  file:         Data.h
 
-  Alexander S. Adranly
-
-  This struct contains the basic storage of all information necessary to gather
-  diagnostics
-
-  NOTES:
-  January 8th, 2018
-  Angular Velocity is important for analysis
-  - include angular velocity in the PAYLOAD packet ( can keep pos still if fits)
-*/
+  author:       Alexander S. Adranly
+  ------------------------------------------------------------------------------
+  description:  This struct contains the all the information gathered and
+                produced by the wearable device and other processing algorithms
+  ----------------------------------------------------------------------------*/
 #include "stdint.h"
 
 #ifndef MED_DATA_H
@@ -18,6 +13,17 @@
 
 /* INFORMATION STORED IN BUFFER */
 struct Data {
+  /* worst case data
+    32 + 13*4*32 + 32 = 1,728 bits
+
+    100 Hz --> 172,800 bits per second
+
+    200 Hz --> 345,600 bits per second (unsustainable with Zigbee!)
+
+    if Mxyz and Temp are removed per sensor:
+    200Hz -> 243,200 bits per second
+  */
+
   /* ------------------ EMG -----------------------*/
   int16_t emg[2]; // Raw Rect
   /*
@@ -41,31 +47,6 @@ struct Data {
   uint32_t dt; // distance between interrupts
 };
 
-/* INFORMATION SENT OVER RADIO */
-struct Payload {
-  /*
-    UPDATE: floats are 4 bytes = 4*8 = 32 bits
-    272 bits of information
-    This would result in 27.2 kbits/s
-  */
-  /* Electromyography of Forearm */
-  int16_t dEMG[2];
-  /* Dorsum of Hand Position and Acceleration */
-  int16_t dHACCEL[3];
-  int16_t dHPOS[3];
-  /* Thumb Finger Position and Angular Velocity */
-  int16_t dTPOS[3];
-  int16_t dTRADS[3];
-  /* Pointer Finger Position */
-  int16_t dPPOS[3];
-  int16_t dPRADS[3];
-  /* Ring Finger Position */
-  int16_t dRPOS[3];
-  int16_t dRRADS[3];
-  /* Message Code TELEMETRY */
-};
-
 typedef struct Data Data;
-typedef struct Payload Payload;
 
 #endif

@@ -1,10 +1,14 @@
-/*
---------------------------------------------------------------------------------
-MyoEMG programming:
+/*------------------------------------------------------------------------------
+  file:         MyoEMG.cpp
 
-Alexander S. Adranly (aadranly@scu.edu)
---------------------------------------------------------------------------------
-*/
+  author:       Alexander S. Adranly
+  ------------------------------------------------------------------------------
+  description:  A wrapper data structure to represent the EMG sensor attached
+                to the wearable device. responsible for keeping track of which
+                pins the device is attached to, which pin allows the device
+                to read raw data, and which pin allows the device to read
+                rectified data.
+  ----------------------------------------------------------------------------*/
 
 #include "Arduino.h"
 #include "stdint.h"

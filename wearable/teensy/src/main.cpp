@@ -1,27 +1,24 @@
-/*
-  ------------------------------------------------------------------------------
-  main.cpp (Wearable Version 1: IRON FIST)
+/*------------------------------------------------------------------------------
+  file:         main.cpp (Wearable Version 1: IRON FIST)
 
-  Main Application for gathering and reporting information of both sensors in
-  one. This is the prototype for the main application.
+  author:       Alexander Sami Adranly
+  ------------------------------------------------------------------------------
+  description:  Main Application for gathering and reporting information of both
+  sensors in one. This is the prototype for the main application.
   Wearable device gathers information about the muscles of the arm and its
   fingers to perform diagnostics of parkinson's disease.
-
-  Alexander S. Adranly
-  ------------------------------------------------------------------------------
-*/
+  ----------------------------------------------------------------------------*/
 #include "main.h"
 #include "Arduino.h"              // Arduino Library
 #include "stdint.h"               // Integer Library
 #include "TimerOne.h"             // Timer Libaray
-#include "Xbee/Xbee.h"            // Radio (Zigbee) Library
 
 /* VARIABLES */
 IOMedBuffer BUFFER(BUFFER_SIZE);
 uint32_t current_time, instant_time, delta_time;
 
 /* DEVICE INITIALIZATION */
-EMG forearm(RECT_PIN, RAW_PIN);   // initialize the forearm
+EMG forearm(RECT_PIN, RAW_PIN);
 MPU9250 tfinger_imu(Wire, IMU_ADDR_LO);
 MPU9250 pfinger_imu(Wire, IMU_ADDR_HI);
 MPU9250 dhand_imu(Wire1, IMU_ADDR_HI);
@@ -35,7 +32,7 @@ void setup() {
   /* COMMUNICATION SETUP */
   if (SERIAL_SELECT){
     Serial.begin(BAUD_RATE);
-    while(!Serial) { com_search_light(); }
+    while(!Serial) { com_search_light(BUILTIN_LED); }
   } // endif
 
   /* SENSOR SETUP */
@@ -55,12 +52,38 @@ void loop() {
     // remove a Data item from buffer
     Data* data = BUFFER.remove_front();
     /* DATA PROCESSING */
+
     // Load Position data into Data structures using Mahony Filter
-    get_orientation(data);
+    orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
 
     /* DATA TRANSFER */
     if(SERIAL_SELECT){
-      serial_print_data(data);    // display onto the serial monitor
+      // HAND
+      for(int i=0; i<3; i++){
+        Serial.print(data->hand_pos[i]);
+        Serial.print("\t");
+      }
+
+      // thumb
+      for(int i=0; i<3; i++){
+        Serial.print(data->thumb_pos[i]);
+        Serial.print("\t");
+      }
+
+      // point
+      for(int i=0; i<3; i++){
+        Serial.print(data->point_pos[i]);
+        Serial.print("\t");
+      }
+
+      // ring
+      for(int i=0; i<3; i++){
+        Serial.print(data->ring_pos[i]);
+        Serial.print("\t");
+      }
+      Serial.println();
+
+
     } else if(XBEE_SELECT){
 
     } // fin communication
@@ -125,6 +148,7 @@ void imu_setup(){
     } // end bad status
   } // init thumb imu
 }
+
 /* SENSOR FUNCTIONS */
 void sensor_isr(){
   /*
@@ -228,175 +252,4 @@ void sensor_isr(){
 
   // store packet in buffer
   BUFFER.push_back(packet);
-}
-
-/* ANALYSIS */
-void get_orientation(Data* item){
-  // Define output variables from updated quaternion---these are Tait-Bryan
-  // angles, commonly used in aircraft orientation. In this coordinate system,
-  // the positive z-axis is down toward Earth. Yaw is the angle between Sensor
-  // x-axis and Earth magnetic North (or true North if corrected for local
-  // declination, looking down on the sensor positive yaw is counterclockwise.
-  // Pitch is angle between sensor x-axis and Earth ground plane, toward the
-  // Earth is positive, up toward the sky is negative. Roll is angle between
-  // sensor y-axis and Earth ground plane, y-axis up is positive roll. These
-  // arise from the definition of the homogeneous rotation matrix constructed
-  // from quaternions. Tait-Bryan angles as well as Euler angles are
-  // non-commutative; that is, the get the correct orientation the rotations
-  // must be applied in the correct order which for this configuration is yaw,
-  // pitch, and then roll.
-  // For more see
-  // http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-  // which has additional links.
-
-  // hand
-  if(HAND_SELECT){
-    MahonyQuaternionUpdate(item->hand[0], item->hand[1], item->hand[2], // Axyz
-                           item->hand[3], item->hand[4], item->hand[5], // Gxyz
-                           item->hand[6], item->hand[7], item->hand[8], // Mxyz
-                           item->hand[9]);                              // dT
-
-    // pitch
-    item->hand_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                     *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                     - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-    // roll
-    item->hand_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                       *(getQ()+2)));
-
-    // yaw
-    item->hand_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                     *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                     - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
-
-  }
-
-  if(THUMB_SELECT){
-    // thumb
-    MahonyQuaternionUpdate(item->thumb[0], item->thumb[1], item->thumb[2],// Axyz
-                          item->thumb[3], item->thumb[4], item->thumb[5], // Gxyz
-                          item->thumb[6], item->thumb[7], item->thumb[8], // Mxyz
-                          item->thumb[9]);                                // dT
-
-    // pitch
-    item->thumb_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                      *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                      - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-    // roll
-    item->thumb_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                        *(getQ()+2)));
-
-    // yaw
-    item->thumb_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                      *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                      - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
-  }
-
-  if(POINT_SELECT){
-    // point
-    MahonyQuaternionUpdate(item->point[0], item->point[1], item->point[2], // Axyz
-                           item->point[3], item->point[4], item->point[5], // Gxyz
-                           item->point[6], item->point[7], item->point[8], // Mxyz
-                           item->point[9]);                              // dT
-
-    // pitch
-    item->point_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                     *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                     - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-    // roll
-    item->point_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                       *(getQ()+2)));
-
-    // yaw
-    item->point_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                     *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                     - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
-  }
-
-  if(RING_SELECT){
-    // ring
-    MahonyQuaternionUpdate(item->ring[0], item->ring[1], item->ring[2], // Axyz
-                          item->ring[3], item->ring[4], item->ring[5], // Gxyz
-                          item->ring[6], item->ring[7], item->ring[8], // Mxyz
-                          item->ring[9]);                              // dT
-
-    // pitch
-    item->ring_pos[0] = atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
-                      *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
-                      - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
-    // roll
-    item->ring_pos[1] = -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() *
-                        *(getQ()+2)));
-
-    // yaw
-    item->ring_pos[2] = atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
-                      *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
-                      - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));
-  }
-}
-
-/* COMMUNICATION FUNCTIONS */
-void serial_print_data(Data* src){
-  /*
-    Print Data over Serial
-  */
-  if(!SERIAL_SELECT){ return; }
-  else{
-    // display information
-    // time
-    Serial.print(src->dt);
-    Serial.print("\t");
-
-    if(EMG_SELECT){
-      for(int i=0; i<2; i++){
-        Serial.print(src->emg[i]);
-        Serial.print("\t");
-      }
-    } // end EMG
-    if(HAND_SELECT){
-      for(int i=0; i<6; i++){
-        Serial.print(src->hand[i]);
-        Serial.print("\t");
-      }
-    } // end hand
-    if(THUMB_SELECT){
-      for(int i=0; i<6; i++){
-        Serial.print(src->thumb[i]);
-        Serial.print("\t");
-      }
-    } // end thumb
-    if(POINT_SELECT){
-      for(int i=0; i<6; i++){
-        Serial.print(src->point[i]);
-        Serial.print("\t");
-      }
-    }// end point
-    if(RING_SELECT){
-      for(int i=0; i<6; i++){
-        Serial.print(src->ring[i]);
-        Serial.print("\t");
-      }
-    } // end ring
-    Serial.println("");
-  }
-}
-
-void radio_transfer_data(Data* src){
-  /* work on this later
-
-}
-
-/* ERROR HANDLING */
-void com_search_light(){
-  /*
-    Display if searching
-  */
-  digitalWrite(BUILTIN_LED, HIGH);
-  delay(100);
-  digitalWrite(BUILTIN_LED, LOW);
-  delay(100);
-  digitalWrite(BUILTIN_LED, HIGH);
-  delay(100);
-  digitalWrite(BUILTIN_LED, LOW);
-  delay(1000);
 }

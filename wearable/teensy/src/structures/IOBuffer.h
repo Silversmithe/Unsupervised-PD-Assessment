@@ -1,11 +1,11 @@
-/*
-  IOBuffer.cpp
+/*------------------------------------------------------------------------------
+  file:         IOBuffer.h
 
-  Alexander S. Adranly
-
-  A buffer that contains Data structs. The buffer can handle only one
-  producer and one consumer
-*/
+  author:       Alexander S. Adranly
+  ------------------------------------------------------------------------------
+  description:  An ADT that works as a circular data buffer for one consumer
+                and one producer.
+  ----------------------------------------------------------------------------*/
 #include "stdint.h"
 #include "Data.h"
 
