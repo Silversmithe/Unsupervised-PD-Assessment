@@ -15,10 +15,26 @@
                            create a circular data buffer of a specified
                            size and initialize all of its different components
 */
-IOMedBuffer::IOMedBuffer(uint8_t bsize){
+IOBuffer::IOBuffer(uint8_t bsize){
   SIZE = bsize;
   pfront = pback = count = 0;
-  buffer = new Data*[SIZE];
+  buffer = new Data[SIZE];
+
+  // initialize all structs here
+  for(int i=0; i<SIZE; i++){
+    buffer[i] = {
+      {0,0},                  // emg
+      {0,0,0,0,0,0,0,0,0,0},  // hand
+      {0,0,0},                // hand pos
+      {0,0,0,0,0,0,0,0,0,0},  // thumb
+      {0,0,0},                // thumb pos
+      {0,0,0,0,0,0,0,0,0,0},  // point
+      {0,0,0},                // point pos
+      {0,0,0,0,0,0,0,0,0,0},  // ring
+      {0,0,0},                // ring pos
+      0
+    };
+  } // finloop
 }
 
 /*
@@ -26,7 +42,7 @@ IOMedBuffer::IOMedBuffer(uint8_t bsize){
                           deallocate all of the allocated memory from the
                           constructur
 */
-IOMedBuffer::~IOMedBuffer(){
+IOBuffer::~IOBuffer(){
   delete[] buffer;
 }
 
@@ -38,8 +54,8 @@ IOMedBuffer::~IOMedBuffer(){
                           frontmost datapoint can be overwritten as well as
                           returned to the calling program for use.
 */
-Data* IOMedBuffer::remove_front(){
-  Data* temp = buffer[pfront];
+Data IOBuffer::remove_front(){
+  Data temp = buffer[pfront];
   pfront = (pfront + 1) % SIZE;
   count--;
   return temp;
@@ -52,12 +68,20 @@ Data* IOMedBuffer::remove_front(){
   @description:           attempts to place a new data point into the circular
                           buffer.
 */
-bool IOMedBuffer::push_back(Data item){
+bool IOBuffer::push_back(Data item){
   if(count == SIZE){ return false; } // if full do not add
   // store address of data in buffer
-  buffer[pback] = &item;
+  buffer[pback] = item;
 
   pback = (pback + 1) % SIZE;
   count++;
   return true;
+}
+
+Data* IOBuffer::top(){
+  return &buffer[pback];
+}
+
+bool IOBuffer::push_top(){
+
 }

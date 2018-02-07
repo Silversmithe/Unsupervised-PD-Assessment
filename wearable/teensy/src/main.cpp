@@ -9,13 +9,14 @@
   fingers to perform diagnostics of parkinson's disease.
   ----------------------------------------------------------------------------*/
 #include "main.h"
-#include "Arduino.h"              // Arduino Library
+#include <Arduino.h>              // Arduino Library
 #include "stdint.h"               // Integer Library
 #include "TimerOne.h"             // Timer Libaray
 
 /* VARIABLES */
-IOMedBuffer BUFFER(BUFFER_SIZE);
-uint32_t current_time, instant_time, delta_time;
+static IOBuffer BUFFER(BUFFER_SIZE);
+static Data temp_data;
+static uint32_t current_time, instant_time, delta_time;
 
 /* DEVICE INITIALIZATION */
 EMG forearm(RECT_PIN, RAW_PIN);
@@ -32,7 +33,7 @@ void setup() {
   /* COMMUNICATION SETUP */
   if (SERIAL_SELECT){
     Serial.begin(BAUD_RATE);
-    while(!Serial) { com_search_light(BUILTIN_LED); }
+    while(!Serial) { }//com_search_light(BUILTIN_LED); }
   } // endif
 
   /* SENSOR SETUP */
@@ -50,35 +51,35 @@ void loop() {
   /* consumer of the IOBuffer */
   if(!BUFFER.is_empty()){
     // remove a Data item from buffer
-    Data* data = BUFFER.remove_front();
+    temp_data = BUFFER.remove_front();
     /* DATA PROCESSING */
 
     // Load Position data into Data structures using Mahony Filter
-    orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
+    // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
 
     /* DATA TRANSFER */
     if(SERIAL_SELECT){
       // HAND
       for(int i=0; i<3; i++){
-        Serial.print(data->hand_pos[i]);
+        Serial.print(temp_data.hand[i]);
         Serial.print("\t");
       }
 
       // thumb
       for(int i=0; i<3; i++){
-        Serial.print(data->thumb_pos[i]);
+        Serial.print(temp_data.thumb[i]);
         Serial.print("\t");
       }
 
       // point
       for(int i=0; i<3; i++){
-        Serial.print(data->point_pos[i]);
+        Serial.print(temp_data.point[i]);
         Serial.print("\t");
       }
 
       // ring
       for(int i=0; i<3; i++){
-        Serial.print(data->ring_pos[i]);
+        Serial.print(temp_data.ring[i]);
         Serial.print("\t");
       }
       Serial.println();

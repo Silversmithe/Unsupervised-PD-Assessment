@@ -8,33 +8,95 @@ by Alexander Adranly, 2018
 real credit goes to Paul Malmsten
 for providing the example
 
-This example continuously reads the serial 
-port and processes IO data recieved from a 
+This example continuously reads the serial
+port and processes IO data recieved from a
 remote Xbee.
 """
 
+#!/bin/bash
 # import and initialize xbee
-from xbee import Xbee, Zigbee
+from xbee import *
 import serial
 
+"""
+MODE variables
+"""
+RENDER = 0
+ANALYZE = 1
+RENDER_AND_ANALYZE = 2
+
+"""
+GLOBAL VARIABLES
+"""
+# Parameters
+VERSION = 1
 PORT = '/dev/ttyUSB0'
-BAUD_RATE = 9600        # change later
+BAUD_RATE = 9600                # change later to higher most likely
+# Status variables
+SERV_RADIO_ON = False
+MODE = RENDER
 
-# open the serial port
-ser = serial.Serial(PORT, BAUD_RATE);
+"""
+    Function Definitions
+"""
+def error(msg):
+    print("error: {}".format(msg))
 
-# create API object
-xbee = Xbee(ser)
+def die():
+    pass
 
-# continuously read and print packets
-while True:
+
+if __name__ == '__main__':
+    """
+        Print Banner for Program
+    """
+    print("*** UPDA Server v{} ***".format(VERSION))
+
+    """
+        Establishing Serial Connection
+        with the Xbee
+    """
+    # open the serial port
     try:
-        response = xbee.wait_read_frame()
-        print response
+        serial_port = serial.Serial(PORT, BAUD_RATE);
+        SERV_RADIO_ON = True
+    except serial.SerialException:
+        error("unable to find server radio")
 
-    except KeyboardInterrupt:
-        break
+    # start the loop if and only if the server radio
+    # has established a connection with the servial port
+    if SERV_RADIO_ON:
+        # create API object
+        xbee = Zigbee(serial_port)
 
-# close the serial port
-# send a signal to
-ser.close();
+        # continuously read and print packets
+        while True:
+            try:
+                # prossess and send the information
+                response = xbee.wait_read_frame()
+                print(response)
+                if MODE == RENDER:
+                    # RENDER MODE
+                    pass
+                elif MODE == ANALYZE:
+                    # ANALYZE MODE
+                    pass
+                elif MODE == RENDER_AND_ANALYZE:
+                    # RENDER_AND_ANALYZE MODE
+                    pass
+                else:
+                    error("{} is an invalid server mode".format(MODE))
+                    break
+
+            except KeyboardInterrupt:
+                break
+
+        # close the serial port
+        # send a signal to
+        ser.close();
+
+    # closing the program
+    print("*** server closing ***")
+    # die function
+    die()
+    print("*** goodbye ***")
