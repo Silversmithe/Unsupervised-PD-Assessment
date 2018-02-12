@@ -12,10 +12,11 @@
 #include <Arduino.h>              // Arduino Library
 #include "stdint.h"               // Integer Library
 #include "TimerOne.h"             // Timer Libaray
+#define nss Serial
 
 /* VARIABLES */
 static IOBuffer BUFFER(BUFFER_SIZE);
-static Data temp_data;
+static Data* temp_data;
 static uint32_t current_time, instant_time, delta_time;
 
 /* DEVICE INITIALIZATION */
@@ -25,72 +26,96 @@ MPU9250 pfinger_imu(Wire, IMU_ADDR_HI);
 MPU9250 dhand_imu(Wire1, IMU_ADDR_HI);
 MPU9250 rfinger_imu(Wire1, IMU_ADDR_LO);
 
+// testing software serial
+
+int counter;
+
 /* SETUP */
 void setup() {
   /* PIN SETUP */
   pinMode(BUILTIN_LED, OUTPUT);
 
+  Serial1.begin(9600);
+  Serial.begin(9600);
+  counter = 0;
+
   /* COMMUNICATION SETUP */
   if (SERIAL_SELECT){
-    Serial.begin(BAUD_RATE);
-    while(!Serial) { }//com_search_light(BUILTIN_LED); }
+    // Serial.begin(BAUD_RATE);
+    while(!Serial) { com_search_light(BUILTIN_LED); }
   } // endif
 
   /* SENSOR SETUP */
-  imu_setup();
+  // imu_setup();
 
-  /* TIMER SETUP */
-  Timer1.initialize(FULL_SAMPLE_RATE); // DEMO_RATE FULL_SAMPLE_RATE DOUBLE_SAMPLE_RATE
-  Timer1.attachInterrupt(sensor_isr);
+  // /* TIMER SETUP */
+  // Timer1.initialize(FULL_SAMPLE_RATE); // DEMO_RATE FULL_SAMPLE_RATE DOUBLE_SAMPLE_RATE
+  // Timer1.attachInterrupt(sensor_isr);
 
-  current_time = micros();            // initialize timer
+  // current_time = micros();            // initialize timer
 }
 
 /* MAIN LOOP */
 void loop() {
+  // testing out the XBEE
+  if(1){
+
+    Serial.println(counter);
+    counter = counter + 1;
+  } else {
+    Serial.println("unable to find xbee...");
+  }
+
   /* consumer of the IOBuffer */
-  if(!BUFFER.is_empty()){
-    // remove a Data item from buffer
-    temp_data = BUFFER.remove_front();
-    /* DATA PROCESSING */
+  // if(!BUFFER.is_empty()){
+  //   // remove a Data item from buffer
+  //   temp_data = BUFFER.remove_front();
+  //   /* DATA PROCESSING */
+  //
+  //   // Load Position data into Data structures using Mahony Filter
+  //   // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
+  //
+  //   /* DATA TRANSFER */
+  //   if(SERIAL_SELECT){
+  //     // emg
+  //     for(int i=0; i<2; i++){
+  //       Serial.print(temp_data->emg[i]);
+  //       Serial.print("\t");
+  //     }
+  //
+  //     // accel
+  //     // hand
+  //     for(int i=0; i<6; i++){
+  //       Serial.print(temp_data->hand[i]);
+  //       Serial.print("\t");
+  //     }
+  //
+  //     // thumb
+  //     for(int i=0; i<6; i++){
+  //       Serial.print(temp_data->thumb[i]);
+  //       Serial.print("\t");
+  //     }
+  //
+  //     // point
+  //     for(int i=0; i<6; i++){
+  //       Serial.print(temp_data->point[i]);
+  //       Serial.print("\t");
+  //     }
+  //
+  //     // ring
+  //     for(int i=0; i<6; i++){
+  //       Serial.print(temp_data->ring[i]);
+  //       Serial.print("\t");
+  //     }
+  //
+  //     Serial.println();
+  //
+  //   } else if(XBEE_SELECT){
+  //
+  //   } // fin communication
+  // } // fin buffer
 
-    // Load Position data into Data structures using Mahony Filter
-    // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
-
-    /* DATA TRANSFER */
-    if(SERIAL_SELECT){
-      // HAND
-      for(int i=0; i<3; i++){
-        Serial.print(temp_data.hand[i]);
-        Serial.print("\t");
-      }
-
-      // thumb
-      for(int i=0; i<3; i++){
-        Serial.print(temp_data.thumb[i]);
-        Serial.print("\t");
-      }
-
-      // point
-      for(int i=0; i<3; i++){
-        Serial.print(temp_data.point[i]);
-        Serial.print("\t");
-      }
-
-      // ring
-      for(int i=0; i<3; i++){
-        Serial.print(temp_data.ring[i]);
-        Serial.print("\t");
-      }
-      Serial.println();
-
-
-    } else if(XBEE_SELECT){
-
-    } // fin communication
-  } // fin buffer
-
-  delay(10);
+  delay(2000);
 }
 
 /* INITIALIZATION */

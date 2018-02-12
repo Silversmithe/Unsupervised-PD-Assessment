@@ -1782,4 +1782,3 @@ uint8_t XBeeWithCallbacks::waitForStatus(uint8_t frameId, uint16_t timeout) {
 	} while (millis() - start < timeout);
 	return XBEE_WAIT_TIMEOUT ;
 }
-

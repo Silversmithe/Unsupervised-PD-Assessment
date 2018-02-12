@@ -18,23 +18,12 @@
 IOBuffer::IOBuffer(uint8_t bsize){
   SIZE = bsize;
   pfront = pback = count = 0;
-  buffer = new Data[SIZE];
+  buffer = new Data*[SIZE];
 
   // initialize all structs here
   for(int i=0; i<SIZE; i++){
-    buffer[i] = {
-      {0,0},                  // emg
-      {0,0,0,0,0,0,0,0,0,0},  // hand
-      {0,0,0},                // hand pos
-      {0,0,0,0,0,0,0,0,0,0},  // thumb
-      {0,0,0},                // thumb pos
-      {0,0,0,0,0,0,0,0,0,0},  // point
-      {0,0,0},                // point pos
-      {0,0,0,0,0,0,0,0,0,0},  // ring
-      {0,0,0},                // ring pos
-      0
-    };
-  } // finloop
+    buffer[i] = new Data;
+  }
 }
 
 /*
@@ -43,6 +32,9 @@ IOBuffer::IOBuffer(uint8_t bsize){
                           constructur
 */
 IOBuffer::~IOBuffer(){
+  for(int i=0; i<SIZE; i++)
+    delete buffer[i];
+
   delete[] buffer;
 }
 
@@ -54,8 +46,8 @@ IOBuffer::~IOBuffer(){
                           frontmost datapoint can be overwritten as well as
                           returned to the calling program for use.
 */
-Data IOBuffer::remove_front(){
-  Data temp = buffer[pfront];
+Data* IOBuffer::remove_front(){
+  Data* temp = buffer[pfront];
   pfront = (pfront + 1) % SIZE;
   count--;
   return temp;
@@ -71,17 +63,30 @@ Data IOBuffer::remove_front(){
 bool IOBuffer::push_back(Data item){
   if(count == SIZE){ return false; } // if full do not add
   // store address of data in buffer
-  buffer[pback] = item;
+  buffer[pback]->dt = item.dt;
+
+  /* deep copy */
+  // emg
+  for(int i=0; i<2; i++)
+    buffer[pback]->emg[i] = item.emg[i];
+
+  for(int i=0; i<10; i++){
+    if(i<3){
+      buffer[pback]->hand_pos[i] = item.hand_pos[i];
+      buffer[pback]->thumb_pos[i] = item.thumb_pos[i];
+      buffer[pback]->point_pos[i] = item.point_pos[i];
+      buffer[pback]->ring_pos[i] = item.ring_pos[i];
+    }
+    // add rest
+    buffer[pback]->hand[i] = item.hand[i];
+    buffer[pback]->thumb[i] = item.thumb[i];
+    buffer[pback]->point[i] = item.point[i];
+    buffer[pback]->ring[i] = item.ring[i];
+  }
+
+  buffer[pback]->dt = item.dt;
 
   pback = (pback + 1) % SIZE;
   count++;
   return true;
-}
-
-Data* IOBuffer::top(){
-  return &buffer[pback];
-}
-
-bool IOBuffer::push_top(){
-
 }

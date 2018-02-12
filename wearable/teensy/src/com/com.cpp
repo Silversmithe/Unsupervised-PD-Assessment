@@ -74,9 +74,6 @@ void send_to_radio(Data* src, bool* ehtpr){
                      communication medium to connect and use
 */
 void com_search_light(int led){
-  /*
-    Display if searching
-  */
   digitalWrite(led, HIGH);
   delay(100);
   digitalWrite(led, LOW);

@@ -23,12 +23,11 @@ public:
   bool is_empty(){ return count == 0; }
 
   /* MUTATORS */
-  Data remove_front();           // consuming an item from the front
+  Data* remove_front();           // consuming an item from the front
   bool push_back(Data item);    // producing an item and putting it in back
-  Data* top();                  // allow editing of the next item
 
 private:
-  Data* buffer;        // array for storing all the data
+  Data** buffer;        // array for storing all the data
   uint8_t SIZE;           // Buffer's static size
   uint8_t pfront, pback;  // Pointers for the program
   uint8_t count;          // how many items are in the buffer currently
