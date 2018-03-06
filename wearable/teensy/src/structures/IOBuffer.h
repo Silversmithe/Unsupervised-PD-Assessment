@@ -23,8 +23,8 @@ public:
   bool is_empty(){ return count == 0; }
 
   /* MUTATORS */
-  Data* remove_front();           // consuming an item from the front
-  bool push_back(Data item);    // producing an item and putting it in back
+  Data* remove_front(); // consuming an item from the front
+  bool push_back(Data item);     // producing an item and putting it in back
 
 private:
   Data** buffer;        // array for storing all the data

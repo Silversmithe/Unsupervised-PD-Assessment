@@ -8,22 +8,12 @@
   ----------------------------------------------------------------------------*/
 #include "stdint.h"
 
-#ifndef MED_DATA_H
-#define MED_DATA_H
+#ifndef DATA_H
+#define DATA_H
 
 /* INFORMATION STORED IN BUFFER */
 struct Data {
-  /* worst case data
-    32 + 13*4*32 + 32 = 1,728 bits
-
-    100 Hz --> 172,800 bits per second
-
-    200 Hz --> 345,600 bits per second (unsustainable with Zigbee!)
-
-    if Mxyz and Temp are removed per sensor:
-    200Hz -> 243,200 bits per second
-  */
-
+  /* 4B + 4 *(2*6) = 52B*/
   /* ------------------ EMG -----------------------*/
   int16_t emg[2]; // Raw Rect
   /*

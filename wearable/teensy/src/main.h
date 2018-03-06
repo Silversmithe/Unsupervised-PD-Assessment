@@ -26,21 +26,16 @@
 /* PROGRAM INFO */
 #define VERSION 1
 
-/* COMMUNICATION SELECTORS */
-#define SERIAL_SELECT        true      // Turn on/off Serial communication
-#define XBEE_SELECT          false     // Turn on/off Xbee (Radio) communication
-#define TIMEOUT              5000      // timeout for any communication until err
-
 /* DEVICE SELECTORS */
-#define EMG_SELECT    true      // Turn on/off Forearm EMG readings
+#define EMG_SELECT    false      // Turn on/off Forearm EMG readings
 #define HAND_SELECT   true      // Turn on/off dorsum hand IMU readings
 #define THUMB_SELECT  true      // Turn on/off Thumb IMU readings
 #define POINT_SELECT  true      // Turn on/off Pointer IMU readings
-#define RING_SELECT   true     // Turn on/off Ring IMU readings
+#define RING_SELECT   true      // Turn on/off Ring IMU readings
 
 /* COMMUNICATION DEFINITION */
-#define BAUD_RATE 115200        // rate information is transferred serially
-#define BUFFER_SIZE 100         // amount of packets that can be
+#define BUFFER_SIZE    200      // amount of packets that can be
+#define CONSUMER_RATE  10       // miliseconds
 
 /* EMG DEFINITION */
 #define RAW_PIN   12            // Teensy pin to read RAW signal
@@ -50,21 +45,24 @@
 #define IMU_ADDR_LO 0x68        // Low address for IMU
 #define IMU_ADDR_HI 0x69        // High address for IMU
 
-/* PINS */
-#define BUILTIN_LED 13          // builtin led for signaling
-
 /* SAMPLING INFORMATION */
-#define DOUBLE_SAMPLE_RATE 5000   // microseconds, 200Hz
-#define FULL_SAMPLE_RATE   10000  // microseconds, 100 Hz
-#define DEMO_RATE          1000000 // microseconds
+#define DOUBLE_SAMPLE_RATE 5000     // microseconds, 200Hz
+#define FULL_SAMPLE_RATE   10000    // microseconds, 100 Hz
+#define DEMO_RATE          1000000  // microseconds
 
-/* CHECKING CONFIGURATION */
-#if SERIAL_SELECT == true && XBEE_SELECT == true
-#error "Serial and Xbee communication should not both be turned on!"
-#endif
+/* COMMUNICATION SELECTORS */
+const int SRC_XBEE_ADDRESS = 0x0001;   // MY address (for reference)
+const int DEST_XBEE_ADDRESS = 0x0002;  // Destination address (for use)
+const bool SERIAL_SELECT = false;       // Serial communication toggle
+const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
+const unsigned TIMEOUT = 5000;              // error timeout
+
+/* PINS */
+const unsigned BUILTIN_LED = 13;     // builtin led for signaling
+const unsigned EMG_RAW_PIN = 12;     // analog pin for emg sampling
+const unsigned EMG_RECT_PIN = 13;    // analog pin for emg rectified sampling
 
 /* FUNCTION PROTOTYPES */
-// Sensor
 void imu_setup();                  // initialize all imus accordingly
 void sensor_isr();                 // called whenever the device samples
 

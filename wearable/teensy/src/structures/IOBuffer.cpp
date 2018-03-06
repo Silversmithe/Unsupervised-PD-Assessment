@@ -45,6 +45,7 @@ IOBuffer::~IOBuffer(){
                           circular buffer. changes the indicies so that the
                           frontmost datapoint can be overwritten as well as
                           returned to the calling program for use.
+                          ASSUMING CHECKS ARE DONE FIRST
 */
 Data* IOBuffer::remove_front(){
   Data* temp = buffer[pfront];

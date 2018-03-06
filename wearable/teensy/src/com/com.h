@@ -14,21 +14,41 @@
                 - ehtpr: refers to a boolean buffer containing sensor selection
                          control and the order they come in...
                          e(mg)h(and)t(humb)p(ointer)r(ing)
+
   ----------------------------------------------------------------------------*/
 #include "Arduino.h"
-#include "Xbee.h"
 #include "../structures/Data.h"
+#include <XBee.h>
+#include <math.h>
 
 #ifndef COM_H
 #define COM_H
 
-/* Initialize Communication Device */
-void init_com(int sselect, int sxbee); 
-/* Serial */
-void send_to_console(Data* src, bool* ehtpr);
-/* Xbee */
-void send_to_radio(Data* src, bool* ehtpr);
-/* LED Indicators */
-void com_search_light(int led);         // if device is searching for com device
+/* serial information */
+#define HWSERIAL    Serial3
+#define USB_BAUD    115200
+#define RADIO_BAUD  9600
+
+/* addressing */
+extern const int SRC_XBEE_ADDRESS;
+extern const int DEST_XBEE_ADDRESS;
+
+/* pins */
+extern const bool SERIAL_SELECT;
+extern const bool XBEE_SELECT;
+extern const unsigned BUILTIN_LED;   /* builtin led on pin 13 */
+
+/* communication functions */
+void init_com();                      /* Initialize Communication Device */
+void write_console(Data* src);
+void write_radio(Data* src);
+
+/* helper functions */
+uint16_t pack_float(float src);       /* pack float into 16 bit */
+uint8_t pack_upper_float(float src);  /* pack upper half in 1B */
+uint8_t pack_lower_float(float src);  /* pack lower half in 1B */
+
+/* VISUAL HARDWARE COMMUNICATION */
+void com_search_light();         /* LED Indicators */
 
 #endif
