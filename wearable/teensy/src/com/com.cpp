@@ -16,6 +16,7 @@
 XBee xbee = XBee();
 uint8_t payload[52];
 Tx16Request tx = Tx16Request(DEST_XBEE_ADDRESS, payload, sizeof(payload));
+TxStatusResponse txStatus = TxStatusResponse();
 
 /*
   @description:          the function attempts to connect the wearable device
@@ -182,17 +183,27 @@ void write_radio(Data* src){
     packet_index = packet_index + 1;
   }
 
-  // float tosend = -34.53;
-  // uint16_t send = pack_float(tosend);
-  // payload[0] = (send >> 8) & 0x00FF;
-  // payload[1] = send & 0x00FF;
+  xbee.send(tx); // send packet over to xbee
 
-  // send packet over to xbee
+  if(xbee.readPacket(5000)){
+    // got a response
+    // should be a znet tx status
+    if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
+      xbee.getResponse().getTxStatusResponse(txStatus);
+      // get the delivery status, the fifth byte
+      if (txStatus.getStatus() == SUCCESS) {
+        // success.  time to celebrate
+      } else {
+        // the remote XBee did not receive our packet. is it powered on?
+      }
+    }
 
-  xbee.send(tx);
-
-  // wait for a response, if not, resend
-  // once we are done
+  } else if (xbee.getResponse().isError()){
+    // error reading packet or code
+  } else {
+    // local xbee did not provide a timely response, check radio
+    // configuration
+  }
 }
 
 uint16_t pack_float(float src){
@@ -207,6 +218,7 @@ uint16_t pack_float(float src){
     return result;
   }
 }
+
 /*
   @param: (int) led: the digital io pin to control an LED
 
