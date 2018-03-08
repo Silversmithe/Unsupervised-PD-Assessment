@@ -19,13 +19,6 @@ from xbee import *
 import serial
 
 """
-MODE variables
-"""
-RENDER = 0
-ANALYZE = 1
-RENDER_AND_ANALYZE = 2
-
-"""
 GLOBAL VARIABLES
 """
 # Parameters
@@ -43,12 +36,6 @@ def error(msg):
     print("error: {}".format(msg))
 
 def die():
-    pass
-
-def analysis():
-    pass
-
-def render():
     pass
 
 
@@ -81,6 +68,7 @@ if __name__ == '__main__':
                 # prossess and send the information
                 response = xbee.wait_read_frame()
                 print(response)
+                # process data and store somewhere
 
             except KeyboardInterrupt:
                 break
