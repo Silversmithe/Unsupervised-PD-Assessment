@@ -19,13 +19,6 @@ from xbee import *
 import serial
 
 """
-MODE variables
-"""
-RENDER = 0
-ANALYZE = 1
-RENDER_AND_ANALYZE = 2
-
-"""
 GLOBAL VARIABLES
 """
 # Parameters
@@ -75,18 +68,7 @@ if __name__ == '__main__':
                 # prossess and send the information
                 response = xbee.wait_read_frame()
                 print(response)
-                if MODE == RENDER:
-                    # RENDER MODE
-                    pass
-                elif MODE == ANALYZE:
-                    # ANALYZE MODE
-                    pass
-                elif MODE == RENDER_AND_ANALYZE:
-                    # RENDER_AND_ANALYZE MODE
-                    pass
-                else:
-                    error("{} is an invalid server mode".format(MODE))
-                    break
+                # process data and store somewhere
 
             except KeyboardInterrupt:
                 break
