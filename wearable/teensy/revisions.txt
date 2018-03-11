@@ -20,3 +20,6 @@ February 16th, 2018
 February 28th, 2018
 - implementing basic communication software for
   phase 1.
+  
+March 10th, 2018
+- pushed final version of PHASE 1 - naiive software -- to github
