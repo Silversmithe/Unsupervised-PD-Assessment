@@ -146,7 +146,6 @@ void write_radio(Data* src){
     payload[packet_index] = src->emg[i] & 0x00FF;
     packet_index = packet_index + 1;
   }
-
   /* hand */
   for(int i=0; i<6; i++){
     packet_info = pack_float(src->hand[i]);
@@ -155,7 +154,6 @@ void write_radio(Data* src){
     payload[packet_index] = packet_info & 0x00FF;
     packet_index = packet_index + 1;
   }
-
   /* thumb */
   for(int i=0; i<6; i++){
     packet_info = pack_float(src->thumb[i]);
@@ -164,7 +162,6 @@ void write_radio(Data* src){
     payload[packet_index] = packet_info & 0x00FF;
     packet_index = packet_index + 1;
   }
-
   /* point */
   for(int i=0; i<6; i++){
     packet_info = pack_float(src->point[i]);
@@ -173,7 +170,6 @@ void write_radio(Data* src){
     payload[packet_index] = packet_info & 0x00FF;
     packet_index = packet_index + 1;
   }
-
   /* ring */
   for(int i=0; i<6; i++){
     packet_info = pack_float(src->ring[i]);
@@ -183,27 +179,7 @@ void write_radio(Data* src){
     packet_index = packet_index + 1;
   }
 
-  xbee.send(tx); // send packet over to xbee
-
-  if(xbee.readPacket(5000)){
-    // got a response
-    // should be a znet tx status
-    if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
-      xbee.getResponse().getTxStatusResponse(txStatus);
-      // get the delivery status, the fifth byte
-      if (txStatus.getStatus() == SUCCESS) {
-        // success.  time to celebrate
-      } else {
-        // the remote XBee did not receive our packet. is it powered on?
-      }
-    }
-
-  } else if (xbee.getResponse().isError()){
-    // error reading packet or code
-  } else {
-    // local xbee did not provide a timely response, check radio
-    // configuration
-  }
+  xbee.send(tx);
 }
 
 uint16_t pack_float(float src){
