@@ -1,82 +1,91 @@
-/*
-  IOBuffer.cpp
+/*------------------------------------------------------------------------------
+  file:         IOBuffer.cpp
 
-  Alexander S. Adranly
-*/
+  author:       Alexander S. Adranly
+  ------------------------------------------------------------------------------
+  description:  An ADT that works as a circular data buffer for one consumer
+                and one producer.
+  ----------------------------------------------------------------------------*/
 #include "IOBuffer.h"
 
-IOMedBuffer::IOMedBuffer(uint8_t bsize){
+/*
+  @param: (uint8_t) bsize: size of the buffer to be created
+
+  @description:            * constructor *
+                           create a circular data buffer of a specified
+                           size and initialize all of its different components
+*/
+IOBuffer::IOBuffer(uint8_t bsize){
   SIZE = bsize;
   pfront = pback = count = 0;
-  buffer = new MedData*[SIZE];
+  buffer = new Data*[SIZE];
+
+  // initialize all structs here
   for(int i=0; i<SIZE; i++){
-    buffer[i] = new MedData;
+    buffer[i] = new Data;
   }
 }
 
-IOMedBuffer::~IOMedBuffer(){
-  for(int i=0; i<SIZE; i++) {
+/*
+  @description:           * destructor *
+                          deallocate all of the allocated memory from the
+                          constructur
+*/
+IOBuffer::~IOBuffer(){
+  for(int i=0; i<SIZE; i++)
     delete buffer[i];
-  }
+
   delete[] buffer;
 }
 
-MedData* IOMedBuffer::remove_front(){
-  MedData* temp = buffer[pfront];
+/*
+  @return: (Data*):       a pointer to the frontmost data point in the circular
+                          buffer
+  @description:           enables the consumer to remove data points from the
+                          circular buffer. changes the indicies so that the
+                          frontmost datapoint can be overwritten as well as
+                          returned to the calling program for use.
+                          ASSUMING CHECKS ARE DONE FIRST
+*/
+Data* IOBuffer::remove_front(){
+  Data* temp = buffer[pfront];
   pfront = (pfront + 1) % SIZE;
   count--;
   return temp;
 }
 
-bool IOMedBuffer::push_back(MedData item){
+/*
+  @return: (bool):        a boolean referring to the success or failure of the
+                          calling program to insert a data point into the
+                          circular buffer
+  @description:           attempts to place a new data point into the circular
+                          buffer.
+*/
+bool IOBuffer::push_back(Data item){
   if(count == SIZE){ return false; } // if full do not add
-  // store all information
-  // time
-  buffer[pback]->dT = item.dT;
+  // store address of data in buffer
+  buffer[pback]->dt = item.dt;
 
+  /* deep copy */
   // emg
-  buffer[pback]->emg_raw = item.emg_raw;
-  buffer[pback]->emg_rect = item.emg_rect;
+  for(int i=0; i<2; i++)
+    buffer[pback]->emg[i] = item.emg[i];
 
-  // hand
-  // acceleration
-  buffer[pback]->Hand_Ax = item.Hand_Ax;
-  buffer[pback]->Hand_Ay = item.Hand_Ay;
-  buffer[pback]->Hand_Az = item.Hand_Az;
-  // gyroscope
-  buffer[pback]->Hand_Gx = item.Hand_Gx;
-  buffer[pback]->Hand_Gy = item.Hand_Gy;
-  buffer[pback]->Hand_Gz = item.Hand_Gz;
+  for(int i=0; i<10; i++){
+    if(i<3){
+      buffer[pback]->hand_pos[i] = item.hand_pos[i];
+      buffer[pback]->thumb_pos[i] = item.thumb_pos[i];
+      buffer[pback]->point_pos[i] = item.point_pos[i];
+      buffer[pback]->ring_pos[i] = item.ring_pos[i];
+    }
+    // add rest
+    buffer[pback]->hand[i] = item.hand[i];
+    buffer[pback]->thumb[i] = item.thumb[i];
+    buffer[pback]->point[i] = item.point[i];
+    buffer[pback]->ring[i] = item.ring[i];
+  }
 
-  // thumb
-  // acceleration
-  buffer[pback]->Thumb_Ax = item.Thumb_Ax;
-  buffer[pback]->Thumb_Ay = item.Thumb_Ay;
-  buffer[pback]->Thumb_Az = item.Thumb_Az;
-  // gyroscope
-  buffer[pback]->Thumb_Gx = item.Thumb_Gx;
-  buffer[pback]->Thumb_Gy = item.Thumb_Gy;
-  buffer[pback]->Thumb_Gz = item.Thumb_Gz;
-
-  // pointer
-  // acceleration
-  buffer[pback]->Point_Ax = item.Point_Ax;
-  buffer[pback]->Point_Ay = item.Point_Ay;
-  buffer[pback]->Point_Az = item.Point_Az;
-  // gyroscope
-  buffer[pback]->Point_Gx = item.Point_Gx;
-  buffer[pback]->Point_Gy = item.Point_Gy;
-  buffer[pback]->Point_Gz = item.Point_Gz;
-
-  // ring
-  // acceleration
-  buffer[pback]->Ring_Ax = item.Ring_Ax;
-  buffer[pback]->Ring_Ay = item.Ring_Ay;
-  buffer[pback]->Ring_Az = item.Ring_Az;
-  // gyroscope
-  buffer[pback]->Ring_Gx = item.Ring_Gx;
-  buffer[pback]->Ring_Gy = item.Ring_Gy;
-  buffer[pback]->Ring_Gz = item.Ring_Gz;
+  buffer[pback]->dt = item.dt;
 
   pback = (pback + 1) % SIZE;
   count++;

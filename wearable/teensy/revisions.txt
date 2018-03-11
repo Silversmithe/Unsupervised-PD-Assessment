@@ -13,3 +13,10 @@ January 22nd, 2018
 - need to create error message types so that errors can be propagated
   through the code
 - create circuitry to display information without the serial monitor
+
+February 16th, 2018
+- adding communication interface with Xbee
+
+February 28th, 2018
+- implementing basic communication software for
+  phase 1.

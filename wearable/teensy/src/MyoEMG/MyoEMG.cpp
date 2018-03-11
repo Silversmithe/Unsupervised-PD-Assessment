@@ -1,10 +1,14 @@
-/*
---------------------------------------------------------------------------------
-MyoEMG programming:
+/*------------------------------------------------------------------------------
+  file:         MyoEMG.cpp
 
-Alexander S. Adranly (aadranly@scu.edu)
---------------------------------------------------------------------------------
-*/
+  author:       Alexander S. Adranly
+  ------------------------------------------------------------------------------
+  description:  A wrapper data structure to represent the EMG sensor attached
+                to the wearable device. responsible for keeping track of which
+                pins the device is attached to, which pin allows the device
+                to read raw data, and which pin allows the device to read
+                rectified data.
+  ----------------------------------------------------------------------------*/
 
 #include "Arduino.h"
 #include "stdint.h"
@@ -28,21 +32,21 @@ EMG::EMG(uint8_t prect, uint8_t praw){
   rect_pin = prect;
 }
 
-int16_t EMG::getRaw(){
 /*
   Function that polls the raw emg signal for the instantaneous value
 
   @return: (int16_t) raw emg signal
 */
+int16_t EMG::getRaw(){
   return analogRead(raw_pin);
 }
 
-int16_t EMG::getRect(){
 /*
   Function that polls rectified and integrated emg signal for the
   instantaneous value
 
   @return: (int16_t) rectified and integrated emg signal
 */
+int16_t EMG::getRect(){
   return analogRead(rect_pin);
 }

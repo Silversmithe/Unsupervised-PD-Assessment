@@ -1,21 +1,21 @@
-/*
-  IOBuffer.cpp
+/*------------------------------------------------------------------------------
+  file:         IOBuffer.h
 
-  Alexander S. Adranly
-
-  A buffer that contains MedData structs. The buffer can handle only one
-  producer and one consumer
-*/
+  author:       Alexander S. Adranly
+  ------------------------------------------------------------------------------
+  description:  An ADT that works as a circular data buffer for one consumer
+                and one producer.
+  ----------------------------------------------------------------------------*/
 #include "stdint.h"
 #include "Data.h"
 
 #ifndef IOBUFFER_H
 #define IOBUFFER_H
 
-class IOMedBuffer {
+class IOBuffer {
 public:
-  IOMedBuffer(uint8_t bsize);
-  ~IOMedBuffer();
+  IOBuffer(uint8_t bsize);
+  ~IOBuffer();
 
   /* ACCESSORS */
   uint8_t num_elts(){ return count; }           // how many items are stored
@@ -23,11 +23,11 @@ public:
   bool is_empty(){ return count == 0; }
 
   /* MUTATORS */
-  MedData* remove_front();           // consuming an item from the front
-  bool push_back(MedData item);    // producing an item and putting it in back
+  Data* remove_front(); // consuming an item from the front
+  bool push_back(Data item);     // producing an item and putting it in back
 
 private:
-  MedData** buffer;        // array for storing all the data
+  Data** buffer;        // array for storing all the data
   uint8_t SIZE;           // Buffer's static size
   uint8_t pfront, pback;  // Pointers for the program
   uint8_t count;          // how many items are in the buffer currently

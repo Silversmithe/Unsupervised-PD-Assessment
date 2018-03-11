@@ -5,19 +5,19 @@ brian.taylor@bolderflight.com
 
 Copyright (c) 2017 Bolder Flight Systems
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-and associated documentation files (the "Software"), to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge, publish, distribute,
-sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the "Software"), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is 
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or
+The above copyright notice and this permission notice shall be included in all copies or 
 substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
@@ -42,7 +42,7 @@ class MPU9250{
       ACCEL_RANGE_2G,
       ACCEL_RANGE_4G,
       ACCEL_RANGE_8G,
-      ACCEL_RANGE_16G
+      ACCEL_RANGE_16G    
     };
     enum DlpfBandwidth
     {
@@ -78,7 +78,6 @@ class MPU9250{
     int enableDataReadyInterrupt();
     int disableDataReadyInterrupt();
     int enableWakeOnMotion(float womThresh_mg,LpAccelOdr odr);
-    int enableFifo(bool accel,bool gyro,bool mag,bool temp);
     int readSensor();
     float getAccelX_mss();
     float getAccelY_mss();
@@ -90,17 +89,7 @@ class MPU9250{
     float getMagY_uT();
     float getMagZ_uT();
     float getTemperature_C();
-    int readFifo();
-    void getFifoAccelX_mss(size_t *size,float* data);
-    void getFifoAccelY_mss(size_t *size,float* data);
-    void getFifoAccelZ_mss(size_t *size,float* data);
-    void getFifoGyroX_rads(size_t *size,float* data);
-    void getFifoGyroY_rads(size_t *size,float* data);
-    void getFifoGyroZ_rads(size_t *size,float* data);
-    void getFifoMagX_uT(size_t *size,float* data);
-    void getFifoMagY_uT(size_t *size,float* data);
-    void getFifoMagZ_uT(size_t *size,float* data);
-    void getFifoTemperature_C(size_t *size,float* data);
+    
     int calibrateGyro();
     float getGyroBiasX_rads();
     float getGyroBiasY_rads();
@@ -128,7 +117,7 @@ class MPU9250{
     void setMagCalX(float bias,float scaleFactor);
     void setMagCalY(float bias,float scaleFactor);
     void setMagCalZ(float bias,float scaleFactor);
-  private:
+  protected:
     // i2c
     uint8_t _address;
     TwoWire *_i2c;
@@ -145,7 +134,7 @@ class MPU9250{
     // track success of interacting with sensor
     int _status;
     // buffer for reading from sensor
-    uint8_t _buffer[512];
+    uint8_t _buffer[21];
     // data counts
     int16_t _axcounts,_aycounts,_azcounts;
     int16_t _gxcounts,_gycounts,_gzcounts;
@@ -156,17 +145,6 @@ class MPU9250{
     float _gx, _gy, _gz;
     float _hx, _hy, _hz;
     float _t;
-    // fifo
-    bool _enFifoAccel,_enFifoGyro,_enFifoMag,_enFifoTemp;
-    size_t _fifoSize,_fifoFrameSize;
-    float _axFifo[85], _ayFifo[85], _azFifo[85];
-    size_t _aSize;
-    float _gxFifo[85], _gyFifo[85], _gzFifo[85];
-    size_t _gSize;
-    float _hxFifo[73], _hyFifo[73], _hzFifo[73];
-    size_t _hSize;
-    float _tFifo[256];
-    size_t _tSize;
     // wake on motion
     uint8_t _womThreshold;
     // scale factors
@@ -208,7 +186,7 @@ class MPU9250{
     float _avgs;
     // transformation matrix
     /* transform the accel and gyro axes to match the magnetometer axes */
-    const int16_t tX[3] = {0,  1,  0};
+    const int16_t tX[3] = {0,  1,  0}; 
     const int16_t tY[3] = {1,  0,  0};
     const int16_t tZ[3] = {0,  0, -1};
     // constants
@@ -282,7 +260,7 @@ class MPU9250{
     const uint8_t FIFO_READ = 0x74;
     // AK8963 registers
     const uint8_t AK8963_I2C_ADDR = 0x0C;
-    const uint8_t AK8963_HXL = 0x03;
+    const uint8_t AK8963_HXL = 0x03; 
     const uint8_t AK8963_CNTL1 = 0x0A;
     const uint8_t AK8963_PWR_DOWN = 0x00;
     const uint8_t AK8963_CNT_MEAS1 = 0x12;
@@ -299,6 +277,35 @@ class MPU9250{
     int readAK8963Registers(uint8_t subAddress, uint8_t count, uint8_t* dest);
     int whoAmI();
     int whoAmIAK8963();
+};
+
+class MPU9250FIFO: public MPU9250 {
+  public:
+    using MPU9250::MPU9250;
+    int enableFifo(bool accel,bool gyro,bool mag,bool temp);
+    int readFifo();
+    void getFifoAccelX_mss(size_t *size,float* data);
+    void getFifoAccelY_mss(size_t *size,float* data);
+    void getFifoAccelZ_mss(size_t *size,float* data);
+    void getFifoGyroX_rads(size_t *size,float* data);
+    void getFifoGyroY_rads(size_t *size,float* data);
+    void getFifoGyroZ_rads(size_t *size,float* data);
+    void getFifoMagX_uT(size_t *size,float* data);
+    void getFifoMagY_uT(size_t *size,float* data);
+    void getFifoMagZ_uT(size_t *size,float* data);
+    void getFifoTemperature_C(size_t *size,float* data);
+  protected:
+    // fifo
+    bool _enFifoAccel,_enFifoGyro,_enFifoMag,_enFifoTemp;
+    size_t _fifoSize,_fifoFrameSize;
+    float _axFifo[85], _ayFifo[85], _azFifo[85];
+    size_t _aSize;
+    float _gxFifo[85], _gyFifo[85], _gzFifo[85];
+    size_t _gSize;
+    float _hxFifo[73], _hyFifo[73], _hzFifo[73];
+    size_t _hSize;
+    float _tFifo[256];
+    size_t _tSize;
 };
 
 #endif
