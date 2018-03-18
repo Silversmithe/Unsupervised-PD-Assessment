@@ -55,15 +55,24 @@ const int SRC_XBEE_ADDRESS = 0x0001;   // MY address (for reference)
 const int DEST_XBEE_ADDRESS = 0x0002;  // Destination address (for use)
 const bool SERIAL_SELECT = false;       // Serial communication toggle
 const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
-const unsigned TIMEOUT = 5000;              // error timeout
 
 /* PINS */
 const unsigned BUILTIN_LED = 13;     // builtin led for signaling
 const unsigned EMG_RAW_PIN = 12;     // analog pin for emg sampling
 const unsigned EMG_RECT_PIN = 13;    // analog pin for emg rectified sampling
 
+/* FSM STATES */
+enum State {
+  INIT,
+  ONLINE,
+  OFFLINE,
+  RECOVER,
+  KILL
+};
+
 /* FUNCTION PROTOTYPES */
-void imu_setup();                  // initialize all imus accordingly
-void sensor_isr();                 // called whenever the device samples
+bool imu_setup(bool trace);                // initialize all imus accordingly
+void sensor_isr();                         // called whenever the device samples
+void kill();                               // load the bootloader state
 
 #endif

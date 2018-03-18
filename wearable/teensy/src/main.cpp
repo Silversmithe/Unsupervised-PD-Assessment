@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------
-  file:         main.cpp (Wearable Version 1: IRON FIST)
+  file:         main.cpp (Wearable Version 2: SECOND SKIN)
 
   author:       Alexander Sami Adranly
   ------------------------------------------------------------------------------
@@ -18,29 +18,64 @@ static IOBuffer BUFFER(BUFFER_SIZE);
 static Data* temp_data;
 static uint32_t current_time, instant_time, delta_time;
 
+/* STATE */
+State __current_state;
+
 /* DEVICE INITIALIZATION */
+bool __enabled[4] = {
+  THUMB_SELECT,
+  POINT_SELECT,
+  HAND_SELECT,
+  RING_SELECT
+};
+
 EMG forearm(RECT_PIN, RAW_PIN);
-MPU9250 tfinger_imu(Wire, IMU_ADDR_LO);
-MPU9250 pfinger_imu(Wire, IMU_ADDR_HI);
-MPU9250 dhand_imu(Wire1, IMU_ADDR_HI);
-MPU9250 rfinger_imu(Wire1, IMU_ADDR_LO);
+MPU9250 __imus[4] = {
+  MPU9250(Wire1, IMU_ADDR_HI),   // hand
+  MPU9250(Wire, IMU_ADDR_LO),   // thumb finger
+  MPU9250(Wire, IMU_ADDR_HI),   // pointer finger
+  MPU9250(Wire1, IMU_ADDR_LO)   // ring finger
+};
 
 /* SETUP */
 void setup() {
-  /* PIN SETUP */
-  pinMode(BUILTIN_LED, OUTPUT);
-  /* COMMUNICATION SETUP */
-  init_com();
-  /* SENSOR SETUP */
-  imu_setup();
-  /* TIMER SETUP */
+  bool hardware_success = false;
+  bool network_success = false;
+  __current_state = INIT;   // Initialization state
+
+  /* HARDWARE INITIALIZATION PROCEDURE */
+  // 1. can you initialize all hardware?
+  // STATE <- YES: INIT, NO: KILL
+  pinMode(BUILTIN_LED, OUTPUT);   // BUILTIN_LED -> 13 D
+  hardware_success |= init_com();            // setup HWSERIAL & XBEE
+  hardware_success |= imu_setup(false);      // setup IMU
+  if(!hardware_success){
+    __current_state = KILL;
+    kill();
+  }
+
+  /* NETWORK INITIALIZATION PROCEDURE */
+  // 1. Can you contact the server?
+  //    STATE <- YES: ONLINE, NO: OFFLINE
+  // 2. How strong is the connection?
+  //    STATE <- > 50%: ONLINE, < 50%: OFFLINE
+  if(XBEE_SELECT){ network_success = isAnyoneThere(); }
+
+  __current_state = (network_success)? ONLINE : OFFLINE;
+
+  /* START TRAP TIMER */
   Timer1.initialize(FULL_SAMPLE_RATE); // DEMO_RATE FULL_SAMPLE_RATE DOUBLE_SAMPLE_RATE
   Timer1.attachInterrupt(sensor_isr);
-
   // current_time = micros();            // initialize timer
 }
 
-/* MAIN LOOP */
+/*
+ *  function:     loop
+ *
+ *  description:  main consumer thread, responsible for picking packets out
+ *                of the buffer and sending it over the radio or the serial
+ *                monitor.
+ */
 void loop() {
   /* consumer of the IOBuffer */
   if(!BUFFER.is_empty()){
@@ -51,73 +86,66 @@ void loop() {
       // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
       /* DATA TRANSFER */
       if(SERIAL_SELECT){write_console(temp_data);}
-      if(XBEE_SELECT){write_radio(temp_data);}
+
+      if(__current_state == ONLINE){
+        if(XBEE_SELECT){write_radio(temp_data);}
+      } else if(__current_state == OFFLINE){
+        // store into SD card
+      }
+
   }
   delay(CONSUMER_RATE);
 }
 
-/* INITIALIZATION */
-void imu_setup(){
-  /*
-    Initialize all IMUs accordingly
-  */
-  /* TEMPORARY VARS */
-  int status;                                 // status for imu setup
-  // needs to have error handling
-  if(THUMB_SELECT){
-    status = tfinger_imu.begin();
-    if(status < 0){
-      while(1){
-        Serial.print("thumb imu: unable to be initialized...\n");
-        Serial.print("\tstatus: ");
-        Serial.println(status);
-        delay(1000);
-      }
-    } // end bad status
-  } // init thumb imu
-
-  if(POINT_SELECT){
-    status = pfinger_imu.begin();
-    if(status < 0){
-      while(1){
-        Serial.print("point imu: unable to be initialized...\n");
-        Serial.print("\tstatus: ");
-        Serial.println(status);
-        delay(1000);
-      }
-    } // end bad status
-  } // init pointer imu
-
-  if(RING_SELECT){
-    status = rfinger_imu.begin();
-    if(status < 0){
-      while(1){
-        Serial.print("ring imu: unable to be initialized...\n");
-        Serial.print("\tstatus: ");
-        Serial.println(status);
-        delay(1000);
-      }
-    } // end bad status
-  } // init thumb imu
-
-  if(HAND_SELECT){
-    status = dhand_imu.begin();
-    if(status < 0){
-      while(1){
-        Serial.print("hand imu: unable to be initialized...\n");
-        Serial.print("\tstatus: ");
-        Serial.println(status);
-        delay(1000);
-      }
-    } // end bad status
-  } // init thumb imu
+/*
+ *  function:     kill
+ *
+ *  description:  put the device in an infinite state of waiting and notify
+ *                the user that the device should be rebooted or debugged
+ */
+void kill(){
+  kill_light();
+  while(1){ delay(10000); }
 }
 
-/* SENSOR FUNCTIONS */
+/*
+ *  function:     imu_setup
+ *
+ *  param:        (bool) trace: turn on debugger tracer
+ *
+ *  description:  hardware initialization of the inertial measurement
+ *                units. should return some status of the operations.
+ *                Returns true if the initialization was 100% successful.
+ */
+bool imu_setup(bool trace){
+  int status[4];
+  bool out = false;
+  if(trace && !SERIAL_SELECT) { return false; }
+
+  for(int i=0; i<4; i++){
+    if(__enabled[i]){
+      status[i] = __imus[i].begin();
+      out = out | !(status[i] < 0);
+      if(trace && status[i] < 0){
+        Serial.print("(");
+        Serial.print(i);
+        Serial.print("): hardware error, CODE: ");
+        Serial.println(status[i]);
+      }
+    }
+  }
+  return out;
+}
+
+/*
+ *  function:     sensor_isr
+ *
+ *  description:  method that runs after each interrupt from the main thread.
+ *                this function is responsible for gathering all the information
+ *                from the sensors and store it in a packet, which gets pushed
+ *                onto the buffer.
+ */
 void sensor_isr(){
-  /*
-    Should time to see how long this takes
-  */
   // update the time
   instant_time = micros();
   delta_time = instant_time - current_time;
@@ -137,81 +165,29 @@ void sensor_isr(){
     delta_time                // dt
   };
 
+  float* __data_pointer = packet.hand;  // use this to jump around
+
+  /* READ/STORE SENSOR INFORMATION */
   if(EMG_SELECT){
     packet.emg[0] = forearm.getRaw();
     packet.emg[1] = forearm.getRect();
   }
-
-  if(HAND_SELECT){
-    dhand_imu.readSensor();
-    // accel
-    packet.hand[0] = dhand_imu.getAccelX_mss();
-    packet.hand[1] = dhand_imu.getAccelY_mss();
-    packet.hand[2] = dhand_imu.getAccelZ_mss();
-    // gyro
-    packet.hand[3] = dhand_imu.getGyroX_rads();
-    packet.hand[4] = dhand_imu.getGyroY_rads();
-    packet.hand[5] = dhand_imu.getGyroZ_rads();
-    // mag
-    packet.hand[6] = dhand_imu.getMagX_uT();
-    packet.hand[7] = dhand_imu.getMagY_uT();
-    packet.hand[8] = dhand_imu.getMagZ_uT();
-    // temp
-    packet.hand[9] = dhand_imu.getTemperature_C();
-  }
-
-  if(THUMB_SELECT){
-    tfinger_imu.readSensor();
-    // accel
-    packet.thumb[0] = tfinger_imu.getAccelX_mss();
-    packet.thumb[1] = tfinger_imu.getAccelY_mss();
-    packet.thumb[2] = tfinger_imu.getAccelZ_mss();
-    // gyro
-    packet.thumb[3] = tfinger_imu.getGyroX_rads();
-    packet.thumb[4] = tfinger_imu.getGyroY_rads();
-    packet.thumb[5] = tfinger_imu.getGyroZ_rads();
-    // mag
-    packet.thumb[6] = tfinger_imu.getMagX_uT();
-    packet.thumb[7] = tfinger_imu.getMagY_uT();
-    packet.thumb[8] = tfinger_imu.getMagZ_uT();
-    // temp
-    packet.thumb[9] = tfinger_imu.getTemperature_C();
-  }
-
-  if(POINT_SELECT){
-    pfinger_imu.readSensor();
-    // accel
-    packet.point[0] = pfinger_imu.getAccelX_mss();
-    packet.point[1] = pfinger_imu.getAccelY_mss();
-    packet.point[2] = pfinger_imu.getAccelZ_mss();
-    // gyro
-    packet.point[3] = pfinger_imu.getGyroX_rads();
-    packet.point[4] = pfinger_imu.getGyroY_rads();
-    packet.point[5] = pfinger_imu.getGyroZ_rads();
-    // mag
-    packet.point[6] = pfinger_imu.getMagX_uT();
-    packet.point[7] = pfinger_imu.getMagY_uT();
-    packet.point[8] = pfinger_imu.getMagZ_uT();
-    // temp
-    packet.point[9] = pfinger_imu.getTemperature_C();
-  }
-
-  if(RING_SELECT){
-    rfinger_imu.readSensor();
-    // accel
-    packet.ring[0] = rfinger_imu.getAccelX_mss();
-    packet.ring[1] = rfinger_imu.getAccelY_mss();
-    packet.ring[2] = rfinger_imu.getAccelZ_mss();
-    // gyro
-    packet.ring[3] = rfinger_imu.getGyroX_rads();
-    packet.ring[4] = rfinger_imu.getGyroY_rads();
-    packet.ring[5] = rfinger_imu.getGyroZ_rads();
-    // mag
-    packet.ring[6] = rfinger_imu.getMagX_uT();
-    packet.ring[7] = rfinger_imu.getMagY_uT();
-    packet.ring[8] = rfinger_imu.getMagZ_uT();
-    // temp
-    packet.ring[9] = rfinger_imu.getTemperature_C();
+  for(int i=0; i<4; i++){ // IMUS
+    if(__enabled[i]){
+      __data_pointer[0] = __imus[i].getAccelX_mss();
+      __data_pointer[1] = __imus[i].getAccelY_mss();
+      __data_pointer[2] = __imus[i].getAccelZ_mss();
+      __data_pointer[3] = __imus[i].getGyroX_rads();
+      __data_pointer[4] = __imus[i].getGyroY_rads();
+      __data_pointer[5] = __imus[i].getGyroZ_rads();
+      __data_pointer[6] = __imus[i].getMagX_uT();
+      __data_pointer[7] = __imus[i].getMagY_uT();
+      __data_pointer[8] = __imus[i].getMagZ_uT();
+      __data_pointer[9] = __imus[i].getTemperature_C();
+      __data_pointer = __data_pointer + 13; // start at position array
+    } else {
+      __data_pointer = __data_pointer + 13; // skip this part in the pointer
+    }
   }
 
   // store packet in buffer

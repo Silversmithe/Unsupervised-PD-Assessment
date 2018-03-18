@@ -19,10 +19,17 @@
 #include "Arduino.h"
 #include "../structures/Data.h"
 #include <XBee.h>
+#include <../sd/SD.h>
+#include <SPI.h>
 #include <math.h>
 
 #ifndef COM_H
 #define COM_H
+
+/* hardware variables */
+#define HW_TIMEOUT        10000          /* 10000ms : 10 seconds */
+#define XBEE_INIT_TIMEOUT 5000
+#define XBEE_COM_TIMEOUT  10
 
 /* serial information */
 #define HWSERIAL    Serial3
@@ -39,16 +46,16 @@ extern const bool XBEE_SELECT;
 extern const unsigned BUILTIN_LED;   /* builtin led on pin 13 */
 
 /* communication functions */
-void init_com();                      /* Initialize Communication Device */
+bool init_com();                      /* Initialize Communication Device */
 void write_console(Data* src);
 void write_radio(Data* src);
+bool isAnyoneThere();
 
 /* helper functions */
 uint16_t pack_float(float src);       /* pack float into 16 bit */
-uint8_t pack_upper_float(float src);  /* pack upper half in 1B */
-uint8_t pack_lower_float(float src);  /* pack lower half in 1B */
 
 /* VISUAL HARDWARE COMMUNICATION */
-void com_search_light();         /* LED Indicators */
+void search_light();
+void kill_light();
 
 #endif

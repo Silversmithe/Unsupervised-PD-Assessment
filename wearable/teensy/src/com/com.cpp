@@ -15,33 +15,75 @@
 /* Global Functions for Use */
 XBee xbee = XBee();
 uint8_t payload[52];
-Tx16Request tx = Tx16Request(DEST_XBEE_ADDRESS, payload, sizeof(payload));
+uint8_t broadcast[1] = { 0xFF };
+Tx16Request tx_pl = Tx16Request(DEST_XBEE_ADDRESS, payload, sizeof(payload));
+Tx16Request tx_bc = Tx16Request(DEST_XBEE_ADDRESS, broadcast, sizeof(broadcast));
 TxStatusResponse txStatus = TxStatusResponse();
 
 /*
-  @description:          the function attempts to connect the wearable device
+  function:             initialize all hardware connections for all mediums
+                        of communication
+
+  description:          the function attempts to connect the wearable device
                          with the chosen method of communication and will react
                          accordingly if unable to do so
 */
-void init_com(){
+bool init_com(){
+  unsigned long start_time, current_time;
+  bool hardware_success = true;
+  /* SERIAL */
   if(SERIAL_SELECT){
-    // connect with the Serial USB connection
+    start_time = millis();
     Serial.begin(USB_BAUD);
-    while(!Serial.available()) { com_search_light(); }
-  } // fin
-
+    while(!Serial.available()) {
+      search_light();
+      current_time =   millis();
+      if((current_time-start_time) < HW_TIMEOUT){
+        hardware_success = false;
+        break;
+      }
+    }
+  }
+  /* XBEE */
   if (XBEE_SELECT){
     // connect with the Xbee
+    start_time = millis();
     HWSERIAL.begin(RADIO_BAUD);
-    while(!(HWSERIAL.availableForWrite() > 0)) { com_search_light(); }
+    while(!(HWSERIAL.availableForWrite() > 0)){
+      search_light();
+      current_time =   millis();
+      if((current_time-start_time) < HW_TIMEOUT){
+        hardware_success = false;
+        break;
+      }
+    }
     xbee.setSerial(HWSERIAL);
-  } // fin
+  }
 
-  if(!SERIAL_SELECT && !XBEE_SELECT){
-    // throw an error
-    // no communication medium selected
-    // panic
-  } // fin
+  if(!SERIAL_SELECT && !XBEE_SELECT){ hardware_success = false; }
+
+  return hardware_success;
+}
+
+/*
+  function:     isAnyoneThere
+
+  description:  have the radio try and contact the local server and wait for
+                a response. Return true or false depending on if you get a
+                response or not. (true) a server is there, (false) a server
+                is NOT there.
+ */
+bool isAnyoneThere(){
+  xbee.send(tx_bc);
+  if(xbee.readPacket(XBEE_INIT_TIMEOUT)){ // wait for timeout
+    if(xbee.getResponse().getApiId() == RX_16_RESPONSE)
+      return true;
+    return false;
+  } else if (xbee.getResponse().isError()){
+    return false;
+  } else {
+    return false; // could not contact local xbee
+  }
 }
 
 /*
@@ -179,7 +221,7 @@ void write_radio(Data* src){
     packet_index = packet_index + 1;
   }
 
-  xbee.send(tx);
+  xbee.send(tx_pl);
 }
 
 uint16_t pack_float(float src){
@@ -202,7 +244,7 @@ uint16_t pack_float(float src){
                      to signal to the user that the device is searching for a
                      communication medium to connect and use
 */
-void com_search_light(){
+void search_light(){
   digitalWrite(BUILTIN_LED, HIGH);
   delay(100);
   digitalWrite(BUILTIN_LED, LOW);
@@ -211,4 +253,15 @@ void com_search_light(){
   delay(100);
   digitalWrite(BUILTIN_LED, LOW);
   delay(1000);
+}
+
+/*
+  function:     kill_light
+
+  description:  a command to tell the builtin LED to light up and never turn
+                off to get the user's attention that the device needs to be
+                rebooted.
+ */
+void kill_light(){
+  digitalWrite(BUILTIN_LED, HIGH);
 }
