@@ -19,9 +19,9 @@
 #define ANALYSIS_H
 
 // functions to convert orientation data
-float to_pitch();   // quaternion -> pitch
-float to_yaw();     // quaternion -> yaw
-float to_roll();    // quaternion -> roll
+float to_pitch(void);   // quaternion -> pitch
+float to_yaw(void);     // quaternion -> yaw
+float to_roll(void);    // quaternion -> roll
 
 // convert sensor data to orientation data
 void orient(Data* item, bool hand, bool thumb, bool point, bool ring);

@@ -22,7 +22,7 @@
                   Calculation brought to you by:
                   http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 */
-inline float to_pitch(){
+inline float to_pitch(void){
   return atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
          *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
          - *(getQ()+2) * *(getQ()+2) - *(getQ()+3) * *(getQ()+3));
@@ -36,7 +36,7 @@ inline float to_pitch(){
                   Calculation brought to you by:
                   http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 */
-inline float to_yaw(){
+inline float to_yaw(void){
   return -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() * *(getQ()+2)));
 }
 
@@ -48,7 +48,7 @@ inline float to_yaw(){
                   Calculation brought to you by:
                   http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 */
-inline float to_roll(){
+inline float to_roll(void){
   return atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
          *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
          - *(getQ()+2) * *(getQ()+2) + *(getQ()+3) * *(getQ()+3));

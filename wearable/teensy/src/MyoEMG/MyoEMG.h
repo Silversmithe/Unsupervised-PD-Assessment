@@ -18,9 +18,9 @@
 
 class EMG {
 public:
-  EMG(uint8_t prect, uint8_t praw);          // EMG constructor
-  int16_t getRaw();                             // get the raw signal
-  int16_t getRect();                            // get the rectified signal
+  EMG(uint8_t prect, uint8_t praw);                 // EMG constructor
+  int16_t getRaw(void);                             // get the raw signal
+  int16_t getRect(void);                            // get the rectified signal
 
 private:
   uint8_t raw_pin;                              // define raw pin

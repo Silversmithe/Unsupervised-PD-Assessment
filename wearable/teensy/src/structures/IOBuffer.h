@@ -15,15 +15,15 @@
 class IOBuffer {
 public:
   IOBuffer(uint8_t bsize);
-  ~IOBuffer();
+  ~IOBuffer(void);
 
   /* ACCESSORS */
-  uint8_t num_elts(){ return count; }           // how many items are stored
-  bool is_full(){ return count == SIZE; }
-  bool is_empty(){ return count == 0; }
+  uint8_t num_elts(void){ return count; }           // how many items are stored
+  bool is_full(void){ return count == SIZE; }
+  bool is_empty(void){ return count == 0; }
 
   /* MUTATORS */
-  Data* remove_front(); // consuming an item from the front
+  Data* remove_front(void); // consuming an item from the front
   bool push_back(Data item);     // producing an item and putting it in back
 
 private:

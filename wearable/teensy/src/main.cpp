@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------
   file:         main.cpp (Wearable Version 2: SECOND SKIN)
 
-  author:       Alexander Sami Adranly
+  author:       Alexander S. Adranly
   ------------------------------------------------------------------------------
   description:  Main Application for gathering and reporting information of both
   sensors in one. This is the prototype for the main application.
@@ -38,7 +38,7 @@ MPU9250 __imus[4] = {
 };
 
 /* SETUP */
-void setup() {
+void setup(void) {
   bool hardware_success = false;
   bool network_success = false;
   __current_state = INIT;   // Initialization state
@@ -62,7 +62,13 @@ void setup() {
   if(XBEE_SELECT){ network_success = isAnyoneThere(); }
 
   __current_state = (network_success)? ONLINE : OFFLINE;
+  if(__current_state == ONLINE)
+    log("current state: ONLINE");
+  else
+    log("current state: OFFLINE");
 
+  /* delay before running */
+  delay(5000);
   /* START TRAP TIMER */
   Timer1.initialize(FULL_SAMPLE_RATE); // DEMO_RATE FULL_SAMPLE_RATE DOUBLE_SAMPLE_RATE
   Timer1.attachInterrupt(sensor_isr);
@@ -76,10 +82,12 @@ void setup() {
  *                of the buffer and sending it over the radio or the serial
  *                monitor.
  */
-void loop() {
-  /* consumer of the IOBuffer */
+void loop(void) {
+
+  // eventually do BURST logging
+  // wait to log after a set of points have been collected
   if(!BUFFER.is_empty()){
-    // remove a Data item from buffer
+      // remove a Data item from buffer
       temp_data = BUFFER.remove_front();
       /* DATA PROCESSING */
       // Load Position data into Data structures using Mahony Filter
@@ -87,12 +95,11 @@ void loop() {
       /* DATA TRANSFER */
       if(SERIAL_SELECT){write_console(temp_data);}
 
-      if(__current_state == ONLINE){
-        if(XBEE_SELECT){write_radio(temp_data);}
-      } else if(__current_state == OFFLINE){
-        // store into SD card
+      if(__current_state == ONLINE){ /* ONLINE */
+        write_radio(temp_data);
+      } else { /* OFFLINE */
+        log_payload(temp_data);
       }
-
   }
   delay(CONSUMER_RATE);
 }
@@ -103,7 +110,8 @@ void loop() {
  *  description:  put the device in an infinite state of waiting and notify
  *                the user that the device should be rebooted or debugged
  */
-void kill(){
+void kill(void){
+  close_log();
   kill_light();
   while(1){ delay(10000); }
 }
@@ -145,7 +153,7 @@ bool imu_setup(bool trace){
  *                from the sensors and store it in a packet, which gets pushed
  *                onto the buffer.
  */
-void sensor_isr(){
+void sensor_isr(void){
   // update the time
   instant_time = micros();
   delta_time = instant_time - current_time;

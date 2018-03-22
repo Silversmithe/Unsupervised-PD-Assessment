@@ -31,7 +31,7 @@ IOBuffer::IOBuffer(uint8_t bsize){
                           deallocate all of the allocated memory from the
                           constructur
 */
-IOBuffer::~IOBuffer(){
+IOBuffer::~IOBuffer(void){
   for(int i=0; i<SIZE; i++)
     delete buffer[i];
 
@@ -47,7 +47,7 @@ IOBuffer::~IOBuffer(){
                           returned to the calling program for use.
                           ASSUMING CHECKS ARE DONE FIRST
 */
-Data* IOBuffer::remove_front(){
+Data* IOBuffer::remove_front(void){
   Data* temp = buffer[pfront];
   pfront = (pfront + 1) % SIZE;
   count--;

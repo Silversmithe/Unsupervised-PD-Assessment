@@ -72,7 +72,7 @@ enum State {
 
 /* FUNCTION PROTOTYPES */
 bool imu_setup(bool trace);                // initialize all imus accordingly
-void sensor_isr();                         // called whenever the device samples
-void kill();                               // load the bootloader state
+void sensor_isr(void);                     // called whenever the device samples
+void kill(void);                           // load the bootloader state
 
 #endif

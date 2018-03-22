@@ -12,7 +12,7 @@
   ----------------------------------------------------------------------------*/
 #include "com.h"
 
-/* Global Functions for Use */
+/* xbee communication */
 XBee xbee = XBee();
 uint8_t payload[52];
 uint8_t broadcast[1] = { 0xFF };
@@ -20,15 +20,21 @@ Tx16Request tx_pl = Tx16Request(DEST_XBEE_ADDRESS, payload, sizeof(payload));
 Tx16Request tx_bc = Tx16Request(DEST_XBEE_ADDRESS, broadcast, sizeof(broadcast));
 TxStatusResponse txStatus = TxStatusResponse();
 
-/*
-  function:             initialize all hardware connections for all mediums
-                        of communication
+/* logger and SD card */
+File __logfile;
+bool __log_open;
 
-  description:          the function attempts to connect the wearable device
-                         with the chosen method of communication and will react
-                         accordingly if unable to do so
-*/
-bool init_com(){
+/*
+ * function:             initialize all hardware connections for all mediums
+ *                       of communication
+ *
+ *  description:         the function attempts to connect the wearable device
+ *                       with the chosen method of communication and will react
+ *                       accordingly if unable to do so. It will also always
+ *                       open a connection with the SD card port as a place to
+ *                       do logging
+ */
+bool init_com(void){
   unsigned long start_time, current_time;
   bool hardware_success = true;
   /* SERIAL */
@@ -37,7 +43,7 @@ bool init_com(){
     Serial.begin(USB_BAUD);
     while(!Serial.available()) {
       search_light();
-      current_time =   millis();
+      current_time = millis();
       if((current_time-start_time) < HW_TIMEOUT){
         hardware_success = false;
         break;
@@ -46,12 +52,11 @@ bool init_com(){
   }
   /* XBEE */
   if (XBEE_SELECT){
-    // connect with the Xbee
     start_time = millis();
     HWSERIAL.begin(RADIO_BAUD);
     while(!(HWSERIAL.availableForWrite() > 0)){
       search_light();
-      current_time =   millis();
+      current_time = millis();
       if((current_time-start_time) < HW_TIMEOUT){
         hardware_success = false;
         break;
@@ -59,21 +64,34 @@ bool init_com(){
     }
     xbee.setSerial(HWSERIAL);
   }
-
-  if(!SERIAL_SELECT && !XBEE_SELECT){ hardware_success = false; }
+  /* SD */
+  if (!SD.begin(chip_select)){ hardware_success = false; }
+  else {
+    /* initialize logger */
+    __logfile = SD.open("log.txt", FILE_WRITE);
+    if(__logfile){
+      /* file created successfully */
+      __logfile.println("----- logfile -----");
+      __logfile.close();
+    } else {
+      /* error creating file */
+      hardware_success = false;
+    }
+  }
+  __log_open = false;
 
   return hardware_success;
 }
 
 /*
-  function:     isAnyoneThere
-
-  description:  have the radio try and contact the local server and wait for
-                a response. Return true or false depending on if you get a
-                response or not. (true) a server is there, (false) a server
-                is NOT there.
+ * function:     isAnyoneThere
+ *
+ *  description:  have the radio try and contact the local server and wait for
+ *                a response. Return true or false depending on if you get a
+ *                response or not. (true) a server is there, (false) a server
+ *                is NOT there.
  */
-bool isAnyoneThere(){
+bool isAnyoneThere(void){
   xbee.send(tx_bc);
   if(xbee.readPacket(XBEE_INIT_TIMEOUT)){ // wait for timeout
     if(xbee.getResponse().getApiId() == RX_16_RESPONSE)
@@ -84,6 +102,73 @@ bool isAnyoneThere(){
   } else {
     return false; // could not contact local xbee
   }
+}
+
+void open_log(void){
+  if(!__log_open){__logfile = SD.open("log.txt", FILE_WRITE); }
+  __log_open = true;
+}
+
+/*
+*/
+void close_log(void){
+  if(__log_open){ __logfile.close(); }
+  __log_open = false;
+}
+
+/*
+*/
+void log(char * message){
+  if(!__log_open){ __logfile = SD.open("log.txt", FILE_WRITE); }
+  __logfile.println(message);
+  __logfile.close();
+}
+
+/*
+*/
+void log_payload(Data* src, bool burst){
+  if(!burst){open_log();}
+  float * point = src->hand;
+
+  /* print emg*/
+  __logfile.print(src->emg[0]);
+  __logfile.print(" ");
+  __logfile.print(src->emg[1]);
+  __logfile.print(" ");
+
+  /* print emg and position */
+  for(int i=0; i<4; i++){ // IMUS
+    __logfile.print(point[0]);
+    __logfile.print(" ");
+    __logfile.print(point[1]);
+    __logfile.print(" ");
+    __logfile.print(point[2]);
+    __logfile.print(" ");
+    __logfile.print(point[3]);
+    __logfile.print(" ");
+    __logfile.print(point[4]);
+    __logfile.print(" ");
+    __logfile.print(point[5]);
+    __logfile.print(" ");
+    __logfile.print(point[6]);
+    __logfile.print(" ");
+    __logfile.print(point[7]);
+    __logfile.print(" ");
+    __logfile.print(point[8]);
+    __logfile.print(" ");
+    __logfile.print(point[9]);
+    __logfile.print(" ");
+    __logfile.print(point[10]);
+    __logfile.print(" ");
+    __logfile.print(point[11]);
+    __logfile.print(" ");
+    __logfile.print(point[12]);
+    __logfile.print(" ");
+    point = point + 13; // go to the next set
+  }
+  
+  __logfile.println();
+  if(!burst){close_log();}
 }
 
 /*
@@ -224,6 +309,8 @@ void write_radio(Data* src){
   xbee.send(tx_pl);
 }
 
+/*
+*/
 uint16_t pack_float(float src){
   /* to get decimals mult by 100 */
   if(src >= 0){
@@ -237,6 +324,9 @@ uint16_t pack_float(float src){
   }
 }
 
+
+
+
 /*
   @param: (int) led: the digital io pin to control an LED
 
@@ -244,7 +334,7 @@ uint16_t pack_float(float src){
                      to signal to the user that the device is searching for a
                      communication medium to connect and use
 */
-void search_light(){
+void search_light(void){
   digitalWrite(BUILTIN_LED, HIGH);
   delay(100);
   digitalWrite(BUILTIN_LED, LOW);
@@ -262,6 +352,6 @@ void search_light(){
                 off to get the user's attention that the device needs to be
                 rebooted.
  */
-void kill_light(){
+void kill_light(void){
   digitalWrite(BUILTIN_LED, HIGH);
 }

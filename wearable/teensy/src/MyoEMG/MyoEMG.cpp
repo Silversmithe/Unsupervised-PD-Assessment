@@ -37,7 +37,7 @@ EMG::EMG(uint8_t prect, uint8_t praw){
 
   @return: (int16_t) raw emg signal
 */
-int16_t EMG::getRaw(){
+int16_t EMG::getRaw(void){
   return analogRead(raw_pin);
 }
 
@@ -47,6 +47,6 @@ int16_t EMG::getRaw(){
 
   @return: (int16_t) rectified and integrated emg signal
 */
-int16_t EMG::getRect(){
+int16_t EMG::getRect(void){
   return analogRead(rect_pin);
 }

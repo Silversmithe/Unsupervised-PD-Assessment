@@ -45,17 +45,26 @@ extern const bool SERIAL_SELECT;
 extern const bool XBEE_SELECT;
 extern const unsigned BUILTIN_LED;   /* builtin led on pin 13 */
 
+/* sd card communication */
+const int chip_select = BUILTIN_SDCARD;
+
 /* communication functions */
-bool init_com();                      /* Initialize Communication Device */
+bool init_com(void);                      /* Initialize Communication Device */
 void write_console(Data* src);
 void write_radio(Data* src);
-bool isAnyoneThere();
+bool isAnyoneThere(void);
 
 /* helper functions */
 uint16_t pack_float(float src);       /* pack float into 16 bit */
 
+/* sd card functions */
+void open_log(void);
+void close_log(void);
+void log(char * message);
+void log_payload(Data* src, bool burst=false);
+
 /* VISUAL HARDWARE COMMUNICATION */
-void search_light();
-void kill_light();
+void search_light(void);
+void kill_light(void);
 
 #endif
