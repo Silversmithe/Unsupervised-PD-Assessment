@@ -56,7 +56,7 @@ void setup(void) {
   // STATE <- YES: INIT, NO: KILL
   pinMode(BUILTIN_LED, OUTPUT);   // BUILTIN_LED -> 13 D
   hardware_success |= init_com();            // setup HWSERIAL & XBEE
-  hardware_success |= imu_setup(true);      // setup IMU
+  hardware_success |= imu_setup(false);      // setup IMU
   if(!hardware_success){
     __current_state = KILL;
     kill();

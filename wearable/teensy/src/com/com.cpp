@@ -129,69 +129,69 @@ void log(const char* message){
  * @description:  record the given message in a new line in the log
  */
 void log_payload(Data* src, bool burst){
-  __logfile = SD.open("log.txt", FILE_WRITE);
+  __datafile = SD.open("data.txt", FILE_WRITE);
 
-  if(__logfile){
+  if(__datafile){
     // write time elapsed since last sample
-    __logfile.print(src->dt);
+    __datafile.print(src->dt);
 
     // emg
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<2; iter++){
-      __logfile.print(src->emg[iter]);
-      if(iter < 1) { __logfile.print("    "); }
+      __datafile.print(src->emg[iter]);
+      if(iter < 1) { __datafile.print("    "); }
     }
 
     // hand
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<10; iter++){
-      __logfile.print(src->hand[iter]);
-      if(iter < 9) { __logfile.print("    "); }
+      __datafile.print(src->hand[iter]);
+      if(iter < 9) { __datafile.print("    "); }
     }
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<3; iter++){
-      __logfile.print(src->hand_pos[iter]);
-      if(iter < 2) { __logfile.print("    "); }
+      __datafile.print(src->hand_pos[iter]);
+      if(iter < 2) { __datafile.print("    "); }
     }
 
     // thumb
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<10; iter++){
-      __logfile.print(src->thumb[iter]);
-      if(iter < 9) { __logfile.print("    "); }
+      __datafile.print(src->thumb[iter]);
+      if(iter < 9) { __datafile.print("    "); }
     }
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<3; iter++){
-      __logfile.print(src->thumb_pos[iter]);
-      if(iter < 2) { __logfile.print("    "); }
+      __datafile.print(src->thumb_pos[iter]);
+      if(iter < 2) { __datafile.print("    "); }
     }
 
     // point
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<10; iter++){
-      __logfile.print(src->point[iter]);
-      if(iter < 9) { __logfile.print("    "); }
+      __datafile.print(src->point[iter]);
+      if(iter < 9) { __datafile.print("    "); }
     }
 
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<3; iter++){
-      __logfile.print(src->point_pos[iter]);
-      if(iter < 2) { __logfile.print("    "); }
+      __datafile.print(src->point_pos[iter]);
+      if(iter < 2) { __datafile.print("    "); }
     }
 
     // ring
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<10; iter++){
-      __logfile.print(src->ring[iter]);
-      if(iter < 9) { __logfile.print("    "); }
+      __datafile.print(src->ring[iter]);
+      if(iter < 9) { __datafile.print("    "); }
     }
-    __logfile.print("    ");
+    __datafile.print("    ");
     for(int iter=0; iter<3; iter++){
-      __logfile.print(src->ring_pos[iter]);
-      if(iter < 2) { __logfile.print("    "); }
+      __datafile.print(src->ring_pos[iter]);
+      if(iter < 2) { __datafile.print("    "); }
     }
-    __logfile.println("");
-    __logfile.close();
+    __datafile.println("");
+    __datafile.close();
   }
 }
 
