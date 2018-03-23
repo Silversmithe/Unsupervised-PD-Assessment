@@ -20,12 +20,13 @@ static uint32_t current_time, instant_time, delta_time;
 
 /* STATE */
 State __current_state;
+ERROR __error;
 
 /* DEVICE INITIALIZATION */
 bool __enabled[4] = {
+  HAND_SELECT,
   THUMB_SELECT,
   POINT_SELECT,
-  HAND_SELECT,
   RING_SELECT
 };
 
@@ -37,10 +38,17 @@ MPU9250 __imus[4] = {
   MPU9250(Wire1, IMU_ADDR_LO)   // ring finger
 };
 
-/* SETUP */
+/*
+ * @function:     setup
+ *
+ * @description:  main initialization function, responsible creating all of the
+ *                variables and doing the initial checks for hardware, networking,
+ *                logging, and initializing the automata and error states.
+ */
 void setup(void) {
   bool hardware_success = false;
   bool network_success = false;
+  __error = NONE;           // initialize error
   __current_state = INIT;   // Initialization state
 
   /* HARDWARE INITIALIZATION PROCEDURE */
@@ -48,7 +56,7 @@ void setup(void) {
   // STATE <- YES: INIT, NO: KILL
   pinMode(BUILTIN_LED, OUTPUT);   // BUILTIN_LED -> 13 D
   hardware_success |= init_com();            // setup HWSERIAL & XBEE
-  hardware_success |= imu_setup(false);      // setup IMU
+  hardware_success |= imu_setup(true);      // setup IMU
   if(!hardware_success){
     __current_state = KILL;
     kill();
@@ -67,25 +75,41 @@ void setup(void) {
   else
     log("current state: OFFLINE");
 
-  /* delay before running */
-  delay(5000);
-  /* START TRAP TIMER */
+  /* delay and signal before running */
+  for(int i=0; i<5; i++){
+    if(__current_state == ONLINE) { online_light(); }
+    else { offline_light(); }
+  }
+  log("starting device...");
+
+  // kill();
+  /* START SENSOR INTERRUPT */
   Timer1.initialize(FULL_SAMPLE_RATE); // DEMO_RATE FULL_SAMPLE_RATE DOUBLE_SAMPLE_RATE
   Timer1.attachInterrupt(sensor_isr);
-  // current_time = micros();            // initialize timer
+  current_time = micros();            // initialize timer
 }
 
 /*
- *  function:     loop
+ * @function:     loop
  *
- *  description:  main consumer thread, responsible for picking packets out
+ * @description:  main consumer thread, responsible for picking packets out
  *                of the buffer and sending it over the radio or the serial
  *                monitor.
  */
 void loop(void) {
+  /* check errors */
+  if(__error != NONE){
+    // could eventually do error recovery here
+    /* output into the log */
+    log("error: an error has occurred...");
+    log(__error);
+    __current_state = KILL;
+    kill();
+  }
 
   // eventually do BURST logging
   // wait to log after a set of points have been collected
+
   if(!BUFFER.is_empty()){
       // remove a Data item from buffer
       temp_data = BUFFER.remove_front();
@@ -93,7 +117,7 @@ void loop(void) {
       // Load Position data into Data structures using Mahony Filter
       // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
       /* DATA TRANSFER */
-      if(SERIAL_SELECT){write_console(temp_data);}
+      if(SERIAL_SELECT){ write_console(temp_data); }
 
       if(__current_state == ONLINE){ /* ONLINE */
         write_radio(temp_data);
@@ -105,23 +129,22 @@ void loop(void) {
 }
 
 /*
- *  function:     kill
+ * @function:     kill
  *
- *  description:  put the device in an infinite state of waiting and notify
+ * @description:  put the device in an infinite state of waiting and notify
  *                the user that the device should be rebooted or debugged
  */
 void kill(void){
-  close_log();
   kill_light();
   while(1){ delay(10000); }
 }
 
 /*
- *  function:     imu_setup
+ * @function:     imu_setup
  *
- *  param:        (bool) trace: turn on debugger tracer
+ * @param:        (bool) trace: turn on debugger tracer
  *
- *  description:  hardware initialization of the inertial measurement
+ * @description:  hardware initialization of the inertial measurement
  *                units. should return some status of the operations.
  *                Returns true if the initialization was 100% successful.
  */
@@ -139,6 +162,7 @@ bool imu_setup(bool trace){
         Serial.print(i);
         Serial.print("): hardware error, CODE: ");
         Serial.println(status[i]);
+        delay(1000);
       }
     }
   }
@@ -146,15 +170,14 @@ bool imu_setup(bool trace){
 }
 
 /*
- *  function:     sensor_isr
+ * @function:     sensor_isr
  *
- *  description:  method that runs after each interrupt from the main thread.
+ * @description:  method that runs after each interrupt from the main thread.
  *                this function is responsible for gathering all the information
  *                from the sensors and store it in a packet, which gets pushed
  *                onto the buffer.
  */
 void sensor_isr(void){
-  // update the time
   instant_time = micros();
   delta_time = instant_time - current_time;
   current_time = instant_time;
@@ -173,29 +196,81 @@ void sensor_isr(void){
     delta_time                // dt
   };
 
-  float* __data_pointer = packet.hand;  // use this to jump around
-
-  /* READ/STORE SENSOR INFORMATION */
   if(EMG_SELECT){
     packet.emg[0] = forearm.getRaw();
     packet.emg[1] = forearm.getRect();
   }
-  for(int i=0; i<4; i++){ // IMUS
-    if(__enabled[i]){
-      __data_pointer[0] = __imus[i].getAccelX_mss();
-      __data_pointer[1] = __imus[i].getAccelY_mss();
-      __data_pointer[2] = __imus[i].getAccelZ_mss();
-      __data_pointer[3] = __imus[i].getGyroX_rads();
-      __data_pointer[4] = __imus[i].getGyroY_rads();
-      __data_pointer[5] = __imus[i].getGyroZ_rads();
-      __data_pointer[6] = __imus[i].getMagX_uT();
-      __data_pointer[7] = __imus[i].getMagY_uT();
-      __data_pointer[8] = __imus[i].getMagZ_uT();
-      __data_pointer[9] = __imus[i].getTemperature_C();
-      __data_pointer = __data_pointer + 13; // start at position array
-    } else {
-      __data_pointer = __data_pointer + 13; // skip this part in the pointer
-    }
+
+  if(HAND_SELECT){
+    __imus[0].readSensor();
+    // accel
+    packet.hand[0] = __imus[0].getAccelX_mss();
+    packet.hand[1] = __imus[0].getAccelY_mss();
+    packet.hand[2] = __imus[0].getAccelZ_mss();
+    // gyro
+    packet.hand[3] = __imus[0].getGyroX_rads();
+    packet.hand[4] = __imus[0].getGyroY_rads();
+    packet.hand[5] = __imus[0].getGyroZ_rads();
+    // mag
+    packet.hand[6] = __imus[0].getMagX_uT();
+    packet.hand[7] = __imus[0].getMagY_uT();
+    packet.hand[8] = __imus[0].getMagZ_uT();
+    // temp
+    packet.hand[9] = __imus[0].getTemperature_C();
+  }
+
+  if(THUMB_SELECT){
+    __imus[1].readSensor();
+    // accel
+    packet.thumb[0] = __imus[1].getAccelX_mss();
+    packet.thumb[1] = __imus[1].getAccelY_mss();
+    packet.thumb[2] = __imus[1].getAccelZ_mss();
+    // gyro
+    packet.thumb[3] = __imus[1].getGyroX_rads();
+    packet.thumb[4] = __imus[1].getGyroY_rads();
+    packet.thumb[5] = __imus[1].getGyroZ_rads();
+    // mag
+    packet.thumb[6] = __imus[1].getMagX_uT();
+    packet.thumb[7] = __imus[1].getMagY_uT();
+    packet.thumb[8] = __imus[1].getMagZ_uT();
+    // temp
+    packet.thumb[9] = __imus[1].getTemperature_C();
+  }
+
+  if(POINT_SELECT){
+    __imus[2].readSensor();
+    // accel
+    packet.point[0] = __imus[2].getAccelX_mss();
+    packet.point[1] = __imus[2].getAccelY_mss();
+    packet.point[2] = __imus[2].getAccelZ_mss();
+    // gyro
+    packet.point[3] = __imus[2].getGyroX_rads();
+    packet.point[4] = __imus[2].getGyroY_rads();
+    packet.point[5] = __imus[2].getGyroZ_rads();
+    // mag
+    packet.point[6] = __imus[2].getMagX_uT();
+    packet.point[7] = __imus[2].getMagY_uT();
+    packet.point[8] = __imus[2].getMagZ_uT();
+    // temp
+    packet.point[9] = __imus[2].getTemperature_C();
+  }
+
+  if(RING_SELECT){
+    __imus[3].readSensor();
+    // accel
+    packet.ring[0] = __imus[3].getAccelX_mss();
+    packet.ring[1] = __imus[3].getAccelY_mss();
+    packet.ring[2] = __imus[3].getAccelZ_mss();
+    // gyro
+    packet.ring[3] = __imus[3].getGyroX_rads();
+    packet.ring[4] = __imus[3].getGyroY_rads();
+    packet.ring[5] = __imus[3].getGyroZ_rads();
+    // mag
+    packet.ring[6] = __imus[3].getMagX_uT();
+    packet.ring[7] = __imus[3].getMagY_uT();
+    packet.ring[8] = __imus[3].getMagZ_uT();
+    // temp
+    packet.ring[9] = __imus[3].getTemperature_C();
   }
 
   // store packet in buffer

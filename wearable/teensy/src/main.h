@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------
-  file:         main.cpp (Wearable Version 1: IRON FIST)
+  file:         main.cpp (Wearable Version 2: SECOND SKIN)
 
   author:       Alexander Sami Adranly
   ------------------------------------------------------------------------------
@@ -12,13 +12,13 @@
   configured here to run or not run different sensors depending on what is
   necessary. This is particularly useful for unittesting the system.
   ----------------------------------------------------------------------------*/
-
 #include "myoEMG/MyoEMG.h"                // EMG library
 #include "mpu9250/MPU9250.h"              // IMU library
 #include "analysis/analysis.h"            // analysis functions
 #include "structures/IOBuffer.h"          // IOBuffer
 #include "structures/Data.h"              // Data Struct
 #include "com/com.h"                      // Communications Functions
+#include "errors.h"                        // error values
 
 #ifndef MAIN_H
 #define MAIN_H
@@ -54,7 +54,7 @@
 const int SRC_XBEE_ADDRESS = 0x0001;   // MY address (for reference)
 const int DEST_XBEE_ADDRESS = 0x0002;  // Destination address (for use)
 const bool SERIAL_SELECT = false;       // Serial communication toggle
-const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
+const bool XBEE_SELECT = false;         // Xbee (Radio) communication toggle
 
 /* PINS */
 const unsigned BUILTIN_LED = 13;     // builtin led for signaling

@@ -9,7 +9,7 @@
                 down accordingly
                 This file will also be in control of error handling if such a
                 thing is possible.
-
+                
   errors:
                 IMU_ERROR                 Any issue reguarding the control of
                                           the IMU including communication,
@@ -44,6 +44,7 @@
 #define ERRORS_H
 
 enum ERROR {
+  NONE,
   /* SENSOR ERRORS */
   IMU_ERROR,
   EMG_ERROR,

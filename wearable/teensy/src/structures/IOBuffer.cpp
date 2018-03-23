@@ -9,12 +9,14 @@
 #include "IOBuffer.h"
 
 /*
-  @param: (uint8_t) bsize: size of the buffer to be created
-
-  @description:            * constructor *
-                           create a circular data buffer of a specified
-                           size and initialize all of its different components
-*/
+ * @function:       IOBuffer::IOBuffer
+ *
+ * @param:          (uint8_t) bsize: size of the buffer to be created
+ *
+ * @description:    * constructor *
+ *                  create a circular data buffer of a specified
+ *                  size and initialize all of its different components
+ */
 IOBuffer::IOBuffer(uint8_t bsize){
   SIZE = bsize;
   pfront = pback = count = 0;
@@ -27,10 +29,12 @@ IOBuffer::IOBuffer(uint8_t bsize){
 }
 
 /*
-  @description:           * destructor *
-                          deallocate all of the allocated memory from the
-                          constructur
-*/
+ * @function:          IOBuffer::~IOBuffer
+ *
+ * @description:       * destructor *
+ *                     deallocate all of the allocated memory from the
+ *                     constructur
+ */
 IOBuffer::~IOBuffer(void){
   for(int i=0; i<SIZE; i++)
     delete buffer[i];
@@ -39,14 +43,17 @@ IOBuffer::~IOBuffer(void){
 }
 
 /*
-  @return: (Data*):       a pointer to the frontmost data point in the circular
-                          buffer
-  @description:           enables the consumer to remove data points from the
-                          circular buffer. changes the indicies so that the
-                          frontmost datapoint can be overwritten as well as
-                          returned to the calling program for use.
-                          ASSUMING CHECKS ARE DONE FIRST
-*/
+ * @function:             IOBuffer::remove_front
+ *
+ * @description:          enables the consumer to remove data points from the
+ *                        circular buffer. changes the indicies so that the
+ *                        frontmost datapoint can be overwritten as well as
+ *                        returned to the calling program for use.
+ *                        ASSUMING CHECKS ARE DONE FIRST
+ *
+ *  @return: (Data*):     a pointer to the frontmost data point in the circular
+ *                        buffer
+ */
 Data* IOBuffer::remove_front(void){
   Data* temp = buffer[pfront];
   pfront = (pfront + 1) % SIZE;
@@ -55,12 +62,17 @@ Data* IOBuffer::remove_front(void){
 }
 
 /*
-  @return: (bool):        a boolean referring to the success or failure of the
-                          calling program to insert a data point into the
-                          circular buffer
-  @description:           attempts to place a new data point into the circular
-                          buffer.
-*/
+ * @function:              IOBuffer::push_back
+ *
+ * @param:                 (Data) item: payload to push onto the buffer
+ *
+ * @description:           attempts to place a new data point into the circular
+ *                         buffer.
+ *
+ * @return: (bool):        a boolean referring to the success or failure of the
+ *                         calling program to insert a data point into the
+ *                         circular buffer
+ */
 bool IOBuffer::push_back(Data item){
   if(count == SIZE){ return false; } // if full do not add
   // store address of data in buffer

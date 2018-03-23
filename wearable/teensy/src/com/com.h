@@ -9,12 +9,6 @@
                 the server for future processing. Furthermore, the wearable
                 device may want to react to an error by displaying an error
                 message or flashing a light indicator.
-
-  note:
-                - ehtpr: refers to a boolean buffer containing sensor selection
-                         control and the order they come in...
-                         e(mg)h(and)t(humb)p(ointer)r(ing)
-
   ----------------------------------------------------------------------------*/
 #include "Arduino.h"
 #include "../structures/Data.h"
@@ -43,7 +37,7 @@ extern const int DEST_XBEE_ADDRESS;
 /* pins */
 extern const bool SERIAL_SELECT;
 extern const bool XBEE_SELECT;
-extern const unsigned BUILTIN_LED;   /* builtin led on pin 13 */
+extern const unsigned BUILTIN_LED;        /* builtin led on pin 13 */
 
 /* sd card communication */
 const int chip_select = BUILTIN_SDCARD;
@@ -55,15 +49,19 @@ void write_radio(Data* src);
 bool isAnyoneThere(void);
 
 /* helper functions */
-uint16_t pack_float(float src);       /* pack float into 16 bit */
+uint16_t pack_float(float src);           /* pack float into 16 bit */
 
 /* sd card functions */
+void log(const char* msg);
 void open_log(void);
 void close_log(void);
-void log(char * message);
+void open_sd_data(void);
+void close_sd_data(void);
 void log_payload(Data* src, bool burst=false);
 
 /* VISUAL HARDWARE COMMUNICATION */
+void online_light(void);
+void offline_light(void);
 void search_light(void);
 void kill_light(void);
 

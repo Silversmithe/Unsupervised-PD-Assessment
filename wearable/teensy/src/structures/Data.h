@@ -5,21 +5,19 @@
   ------------------------------------------------------------------------------
   description:  This struct contains the all the information gathered and
                 produced by the wearable device and other processing algorithms
+                4B + 4 *(2*6) = 52B
   ----------------------------------------------------------------------------*/
 #include "stdint.h"
 
 #ifndef DATA_H
 #define DATA_H
 
-/* INFORMATION STORED IN BUFFER */
 struct Data {
-  /* 4B + 4 *(2*6) = 52B*/
   /* ------------------ EMG -----------------------*/
-  int16_t emg[2]; // Raw Rect
-  /*
-    ------------------ IMU -----------------------
-    In the array, data is organized as follows:
-    [Axyz Gxyz Mxyz T]
+  int16_t emg[2]; // [Raw Rect]
+  /* ------------------ IMU -----------------------
+    (float[10])[Axyz Gxyz Mxyz T]
+    (float[3]) [xyz]
   */
   float hand[10];
   float hand_pos[3];

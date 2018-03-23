@@ -15,13 +15,15 @@
 #include "analysis.h"
 
 /*
-  @description:   takes the stored variable Q, which has been updated with the
-                  most recently calculated quaternion coordinates and uses the
-                  coordinates to calculate the pitch of the measured IMU.
-
-                  Calculation brought to you by:
-                  http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-*/
+ * @function:      to_pitch
+ *
+ * @description:   takes the stored variable Q, which has been updated with the
+ *                  most recently calculated quaternion coordinates and uses the
+ *                  coordinates to calculate the pitch of the measured IMU.
+ *
+ *                  Calculation brought to you by:
+ *                  http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+ */
 inline float to_pitch(void){
   return atan2(2.0f * (*(getQ()+1) * *(getQ()+2) + *getQ() *
          *(getQ()+3)), *getQ() * *getQ() + *(getQ()+1) * *(getQ()+1)
@@ -29,25 +31,29 @@ inline float to_pitch(void){
 }
 
 /*
-  @description:   takes the stored variable Q, which has been updated with the
-                  most recently calculated quaternion coordinates and uses the
-                  coordinates to calculate the yaw of the measured IMU.
-
-                  Calculation brought to you by:
-                  http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-*/
+ * @function:      to_yaw
+ *
+ *  @description:   takes the stored variable Q, which has been updated with the
+ *                  most recently calculated quaternion coordinates and uses the
+ *                  coordinates to calculate the yaw of the measured IMU.
+ *
+ *                  Calculation brought to you by:
+ *                  http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+ */
 inline float to_yaw(void){
   return -asin(2.0f * (*(getQ()+1) * *(getQ()+3) - *getQ() * *(getQ()+2)));
 }
 
 /*
-  @description:   takes the stored variable Q, which has been updated with the
-                  most recently calculated quaternion coordinates and uses the
-                  coordinates to calculate the roll of the measured IMU.
-
-                  Calculation brought to you by:
-                  http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-*/
+ *  @function:      to_roll
+ *
+ *  @description:   takes the stored variable Q, which has been updated with the
+ *                  most recently calculated quaternion coordinates and uses the
+ *                  coordinates to calculate the roll of the measured IMU.
+ *
+ *                  Calculation brought to you by:
+ *                  http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+ */
 inline float to_roll(void){
   return atan2(2.0f * (*getQ() * *(getQ()+1) + *(getQ()+2) *
          *(getQ()+3)), *getQ() * *getQ() - *(getQ()+1) * *(getQ()+1)
@@ -55,19 +61,21 @@ inline float to_roll(void){
 }
 
 /*
-  @param: (Data *) item: a pointer to a data structure to calculate orientation
-                         data for
-  @param: (bool) hand: determine if the hand IMU pos should be calculated
-  @param: (bool) thumb: determine if the thumb IMU pos should be calculated
-  @param: (bool) point: determine if the point IMU pos should be calculated
-  @param: (bool) ring: determine if the ring IMU pos should be calculated
-
-  @description: given a data point, pass the selected imu sensors through a
-                mahony filter to produce quick, but accurate estimations of
-                orientation in the quaternion coordinate system. then, take
-                those quaternion coordinates and convert them to roll, pitch,
-                and yaw for processing.
-*/
+ *  @function:    orient
+ *
+ *  @param: (Data *) item: a pointer to a data structure to calculate orientation
+ *                         data for
+ *  @param: (bool) hand: determine if the hand IMU pos should be calculated
+ *  @param: (bool) thumb: determine if the thumb IMU pos should be calculated
+ *  @param: (bool) point: determine if the point IMU pos should be calculated
+ *  @param: (bool) ring: determine if the ring IMU pos should be calculated
+ *
+ *  @description: given a data point, pass the selected imu sensors through a
+ *                mahony filter to produce quick, but accurate estimations of
+ *                orientation in the quaternion coordinate system. then, take
+ *                those quaternion coordinates and convert them to roll, pitch,
+ *                and yaw for processing.
+ */
 void orient(Data* item, bool hand, bool thumb, bool point, bool ring){
   // Define output variables from updated quaternion---these are Tait-Bryan
   // angles, commonly used in aircraft orientation. In this coordinate system,

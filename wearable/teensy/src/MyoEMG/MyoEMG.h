@@ -9,7 +9,6 @@
                 to read raw data, and which pin allows the device to read
                 rectified data.
   ----------------------------------------------------------------------------*/
-
 #ifndef MYOEMG_H
 #define MYOEMG_H
 

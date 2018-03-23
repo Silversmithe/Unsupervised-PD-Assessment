@@ -21,14 +21,14 @@ Tx16Request tx_bc = Tx16Request(DEST_XBEE_ADDRESS, broadcast, sizeof(broadcast))
 TxStatusResponse txStatus = TxStatusResponse();
 
 /* logger and SD card */
-File __logfile;
-bool __log_open;
+File __logfile,__datafile;
+bool __log_open, __data_open;
 
 /*
- * function:             initialize all hardware connections for all mediums
+ * @function:            initialize all hardware connections for all mediums
  *                       of communication
  *
- *  description:         the function attempts to connect the wearable device
+ * @description:         the function attempts to connect the wearable device
  *                       with the chosen method of communication and will react
  *                       accordingly if unable to do so. It will also always
  *                       open a connection with the SD card port as a place to
@@ -79,14 +79,15 @@ bool init_com(void){
     }
   }
   __log_open = false;
+  __data_open = false;
 
   return hardware_success;
 }
 
 /*
- * function:     isAnyoneThere
+ * @function:     isAnyoneThere
  *
- *  description:  have the radio try and contact the local server and wait for
+ * @description:  have the radio try and contact the local server and wait for
  *                a response. Return true or false depending on if you get a
  *                response or not. (true) a server is there, (false) a server
  *                is NOT there.
@@ -104,79 +105,104 @@ bool isAnyoneThere(void){
   }
 }
 
-void open_log(void){
-  if(!__log_open){__logfile = SD.open("log.txt", FILE_WRITE); }
-  __log_open = true;
-}
-
 /*
-*/
-void close_log(void){
-  if(__log_open){ __logfile.close(); }
-  __log_open = false;
-}
-
-/*
-*/
-void log(char * message){
-  if(!__log_open){ __logfile = SD.open("log.txt", FILE_WRITE); }
-  __logfile.println(message);
-  __logfile.close();
-}
-
-/*
-*/
-void log_payload(Data* src, bool burst){
-  if(!burst){open_log();}
-  float * point = src->hand;
-
-  /* print emg*/
-  __logfile.print(src->emg[0]);
-  __logfile.print(" ");
-  __logfile.print(src->emg[1]);
-  __logfile.print(" ");
-
-  /* print emg and position */
-  for(int i=0; i<4; i++){ // IMUS
-    __logfile.print(point[0]);
-    __logfile.print(" ");
-    __logfile.print(point[1]);
-    __logfile.print(" ");
-    __logfile.print(point[2]);
-    __logfile.print(" ");
-    __logfile.print(point[3]);
-    __logfile.print(" ");
-    __logfile.print(point[4]);
-    __logfile.print(" ");
-    __logfile.print(point[5]);
-    __logfile.print(" ");
-    __logfile.print(point[6]);
-    __logfile.print(" ");
-    __logfile.print(point[7]);
-    __logfile.print(" ");
-    __logfile.print(point[8]);
-    __logfile.print(" ");
-    __logfile.print(point[9]);
-    __logfile.print(" ");
-    __logfile.print(point[10]);
-    __logfile.print(" ");
-    __logfile.print(point[11]);
-    __logfile.print(" ");
-    __logfile.print(point[12]);
-    __logfile.print(" ");
-    point = point + 13; // go to the next set
+ * @function:     log
+ *
+ * @param:        (const char*) message:  message to send to log
+ *
+ * @description:  record the given message in a new line in the log
+ */
+void log(const char* message){
+  __logfile = SD.open("log.txt", FILE_WRITE);
+  if(__logfile){
+    __logfile.println(message);
+    __logfile.close();
   }
-  
-  __logfile.println();
-  if(!burst){close_log();}
 }
 
 /*
-  @param: (Data*) src: a pointer to a data sample to print out to the console
+ * @function:     log_payload
+ *
+ * @param:        (Data*) src:  sample to record
+ * @param:        (bool) burst: are samples being recorded in bursts?
+ *
+ * @description:  record the given message in a new line in the log
+ */
+void log_payload(Data* src, bool burst){
+  __logfile = SD.open("log.txt", FILE_WRITE);
 
-  @description: output the information of a given data point to the serial
-                console if the serial monitor has been activated
-*/
+  if(__logfile){
+    // write time elapsed since last sample
+    __logfile.print(src->dt);
+
+    // emg
+    __logfile.print("    ");
+    for(int iter=0; iter<2; iter++){
+      __logfile.print(src->emg[iter]);
+      if(iter < 1) { __logfile.print("    "); }
+    }
+
+    // hand
+    __logfile.print("    ");
+    for(int iter=0; iter<10; iter++){
+      __logfile.print(src->hand[iter]);
+      if(iter < 9) { __logfile.print("    "); }
+    }
+    __logfile.print("    ");
+    for(int iter=0; iter<3; iter++){
+      __logfile.print(src->hand_pos[iter]);
+      if(iter < 2) { __logfile.print("    "); }
+    }
+
+    // thumb
+    __logfile.print("    ");
+    for(int iter=0; iter<10; iter++){
+      __logfile.print(src->thumb[iter]);
+      if(iter < 9) { __logfile.print("    "); }
+    }
+    __logfile.print("    ");
+    for(int iter=0; iter<3; iter++){
+      __logfile.print(src->thumb_pos[iter]);
+      if(iter < 2) { __logfile.print("    "); }
+    }
+
+    // point
+    __logfile.print("    ");
+    for(int iter=0; iter<10; iter++){
+      __logfile.print(src->point[iter]);
+      if(iter < 9) { __logfile.print("    "); }
+    }
+
+    __logfile.print("    ");
+    for(int iter=0; iter<3; iter++){
+      __logfile.print(src->point_pos[iter]);
+      if(iter < 2) { __logfile.print("    "); }
+    }
+
+    // ring
+    __logfile.print("    ");
+    for(int iter=0; iter<10; iter++){
+      __logfile.print(src->ring[iter]);
+      if(iter < 9) { __logfile.print("    "); }
+    }
+    __logfile.print("    ");
+    for(int iter=0; iter<3; iter++){
+      __logfile.print(src->ring_pos[iter]);
+      if(iter < 2) { __logfile.print("    "); }
+    }
+    __logfile.println("");
+    __logfile.close();
+  }
+}
+
+/*
+ * @function:    write_console
+ *
+ *  @param:       (Data*) src: a pointer to a data sample to print out to the console
+ *
+ *  @description: output the information of a given data point to the serial
+ *                console if the serial monitor has been activated
+ */
 void write_console(Data* src){
   if(!SERIAL_SELECT){ return; } // exit if the serial select has not been seleced
 
@@ -251,14 +277,16 @@ void write_console(Data* src){
 }
 
 /*
-  @param: (Data*) src: a pointer to a data sample to send over Xbee radio.
-
-  @description:       check to make sure that the data point has been sent
-                      successfully by waiting for an ACK for a certian amount
-                      of time. Otherwise try resending it.
-                      Eventually, if the message has not been achnowledged a couple
-                      times, the wearable should throw an error and standby
-*/
+ * @function:          write_radio
+ *
+ * @param:             (Data*) src: a pointer to a data sample to send over Xbee radio.
+ *
+ * @description:       check to make sure that the data point has been sent
+ *                      successfully by waiting for an ACK for a certian amount
+ *                      of time. Otherwise try resending it.
+ *                      Eventually, if the message has not been achnowledged a couple
+ *                      times, the wearable should throw an error and standby
+ */
 void write_radio(Data* src){
   if(!XBEE_SELECT || src == NULL) { return; } /* check radio */
   /* check error messages */
@@ -310,7 +338,15 @@ void write_radio(Data* src){
 }
 
 /*
-*/
+ * @function:       pack_float
+ *
+ * @param:          (float) src: the value to pack into a smaller space
+ *
+ * @description:    because floats normally take up four bits, we are taking
+ *                  advantage of the fact that the values the floats are assuming
+ *                  are smaller than their entire space, thus they can be compacted
+ *                  into two bytes instead of four.
+ */
 uint16_t pack_float(float src){
   /* to get decimals mult by 100 */
   if(src >= 0){
@@ -324,16 +360,41 @@ uint16_t pack_float(float src){
   }
 }
 
-
-
+/*
+ * @function:       online_light
+ *
+ * @description:    use the onboard light on the MCU to show the user that the
+ *                  device is running online (aka connected via xbee to the server)
+ */
+void online_light(void){
+  digitalWrite(BUILTIN_LED, HIGH);
+  delay(100);
+  digitalWrite(BUILTIN_LED, LOW);
+  delay(100);
+}
 
 /*
-  @param: (int) led: the digital io pin to control an LED
+ * @function:       offline_light
+ *
+ * @description:    use the onboard light on the MCU to show the user that the
+ *                  device is running offline (aka NOT connected via xbee to the server)
+ */
+void offline_light(void){
+  digitalWrite(BUILTIN_LED, HIGH);
+  delay(1000);
+  digitalWrite(BUILTIN_LED, LOW);
+  delay(1000);
+}
 
-  @description:      command the specified LED to output this particular pattern
-                     to signal to the user that the device is searching for a
-                     communication medium to connect and use
-*/
+/*
+ * @function:         search_light
+ *
+ * @param: (int) led: the digital io pin to control an LED
+ *
+ * @description:      command the specified LED to output this particular pattern
+ *                    to signal to the user that the device is searching for a
+ *                    communication medium to connect and use
+ */
 void search_light(void){
   digitalWrite(BUILTIN_LED, HIGH);
   delay(100);
@@ -346,11 +407,11 @@ void search_light(void){
 }
 
 /*
-  function:     kill_light
-
-  description:  a command to tell the builtin LED to light up and never turn
-                off to get the user's attention that the device needs to be
-                rebooted.
+ * @function:     kill_light
+ *
+ * @description:  a command to tell the builtin LED to light up and never turn
+ *                off to get the user's attention that the device needs to be
+ *                rebooted.
  */
 void kill_light(void){
   digitalWrite(BUILTIN_LED, HIGH);
