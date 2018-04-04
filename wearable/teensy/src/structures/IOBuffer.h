@@ -14,7 +14,7 @@
 
 class IOBuffer {
 public:
-  IOBuffer(uint8_t bsize);
+  IOBuffer(unsigned bsize);
   ~IOBuffer(void);
 
   /* ACCESSORS */
@@ -28,9 +28,9 @@ public:
 
 private:
   Data** buffer;        // array for storing all the data
-  uint8_t SIZE;           // Buffer's static size
-  uint8_t pfront, pback;  // Pointers for the program
-  uint8_t count;          // how many items are in the buffer currently
+  unsigned SIZE;           // Buffer's static size
+  unsigned pfront, pback;  // Pointers for the program
+  unsigned count;          // how many items are in the buffer currently
 };
 
 #endif

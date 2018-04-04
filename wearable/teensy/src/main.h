@@ -34,7 +34,8 @@
 #define RING_SELECT   true      // Turn on/off Ring IMU readings
 
 /* COMMUNICATION DEFINITION */
-#define BUFFER_SIZE    200      // amount of packets that can be
+#define BUFFER_SIZE    200
+#define BUFFER_CAP     100
 #define CONSUMER_RATE  10       // miliseconds
 
 /* EMG DEFINITION */
@@ -60,6 +61,7 @@ const bool XBEE_SELECT = false;         // Xbee (Radio) communication toggle
 const unsigned BUILTIN_LED = 13;     // builtin led for signaling
 const unsigned EMG_RAW_PIN = 12;     // analog pin for emg sampling
 const unsigned EMG_RECT_PIN = 13;    // analog pin for emg rectified sampling
+const unsigned XBEE_SLEEP = 2;       // digital pin to control power consumption of radio
 
 /* FSM STATES */
 enum State {

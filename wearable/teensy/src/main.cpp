@@ -19,8 +19,9 @@ static Data* temp_data;
 static uint32_t current_time, instant_time, delta_time;
 
 /* STATE */
-State __current_state;
-ERROR __error;
+volatile State __current_state;
+volatile ERROR __error;
+static bool __radio_on;
 
 /* DEVICE INITIALIZATION */
 bool __enabled[4] = {
@@ -54,26 +55,30 @@ void setup(void) {
   /* HARDWARE INITIALIZATION PROCEDURE */
   // 1. can you initialize all hardware?
   // STATE <- YES: INIT, NO: KILL
-  pinMode(BUILTIN_LED, OUTPUT);   // BUILTIN_LED -> 13 D
+  pinMode(BUILTIN_LED, OUTPUT);
+  pinMode(XBEE_SLEEP, OUTPUT);
   hardware_success |= init_com();            // setup HWSERIAL & XBEE
   hardware_success |= imu_setup(false);      // setup IMU
   if(!hardware_success){
     __current_state = KILL;
+    __error = IMU_ERROR;
     kill();
   }
 
   /* NETWORK INITIALIZATION PROCEDURE */
   // 1. Can you contact the server?
   //    STATE <- YES: ONLINE, NO: OFFLINE
-  // 2. How strong is the connection?
-  //    STATE <- > 50%: ONLINE, < 50%: OFFLINE
   if(XBEE_SELECT){ network_success = isAnyoneThere(); }
 
   __current_state = (network_success)? ONLINE : OFFLINE;
   if(__current_state == ONLINE)
-    log("current state: ONLINE");
+    log("state: online");
   else
-    log("current state: OFFLINE");
+    log("state: offline");
+
+  /* turn the radio off */
+  __radio_on = false;
+  digitalWrite(XBEE_SLEEP, LOW);
 
   /* delay and signal before running */
   for(int i=0; i<5; i++){
@@ -101,28 +106,53 @@ void loop(void) {
   if(__error != NONE){
     // could eventually do error recovery here
     /* output into the log */
-    log("error: an error has occurred...");
-    log(__error);
-    __current_state = KILL;
-    kill();
-  }
+    switch (__error) {
+      case FATAL_ERROR:
+        log("error: an fatal error has occurred...");
+        __current_state = KILL;
+        kill();
+        break;
+      case ISOLATED_DEVICE_ERROR:
+        log("error: device is unable to sufficiently connect to the network...");
+        __current_state = OFFLINE;
+        __error = NONE;
+        break;
+      case BUFFER_OVERFLOW:
+        log("error: device buffer has reached its limit");
+        if(__current_state == ONLINE) { __current_state = OFFLINE; }
+        if(__current_state == OFFLINE) {
+          log("error: an fatal error has occurred...");
+          __current_state = KILL;
+          kill();
+          break;
+        default:
+          break;
+        }
+    }
+  } // end switch
 
   // eventually do BURST logging
   // wait to log after a set of points have been collected
 
   if(!BUFFER.is_empty()){
+      __radio_on = (BUFFER.num_elts() >= BUFFER_CAP)? true: false; // set radio
       // remove a Data item from buffer
       temp_data = BUFFER.remove_front();
       /* DATA PROCESSING */
       // Load Position data into Data structures using Mahony Filter
       // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
       /* DATA TRANSFER */
-      if(SERIAL_SELECT){ write_console(temp_data); }
+      if(SERIAL_SELECT){ __error = write_console(temp_data); }
 
       if(__current_state == ONLINE){ /* ONLINE */
-        write_radio(temp_data);
-      } else { /* OFFLINE */
-        log_payload(temp_data);
+        if(__radio_on){
+          digitalWrite(XBEE_SLEEP, HIGH); // turn on radio if past limit
+          __error = write_radio(temp_data);
+        } else {
+          digitalWrite(XBEE_SLEEP, LOW);  // turn off radio otherwise
+        }
+      } else {                       /* OFFLINE */
+        __error = log_payload(temp_data);
       }
   }
   delay(CONSUMER_RATE);
@@ -135,6 +165,7 @@ void loop(void) {
  *                the user that the device should be rebooted or debugged
  */
 void kill(void){
+  log("state: kill");
   kill_light();
   while(1){ delay(10000); }
 }
@@ -274,5 +305,5 @@ void sensor_isr(void){
   }
 
   // store packet in buffer
-  BUFFER.push_back(packet);
+  if(BUFFER.push_back(packet)){ __error = BUFFER_OVERFLOW; }
 }

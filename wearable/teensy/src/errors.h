@@ -9,8 +9,10 @@
                 down accordingly
                 This file will also be in control of error handling if such a
                 thing is possible.
-                
+
   errors:
+                NONE                      No error exists
+
                 IMU_ERROR                 Any issue reguarding the control of
                                           the IMU including communication,
                                           reading, data quality.
@@ -23,38 +25,27 @@
                                           disconnection of the wearable from
                                           the server
 
-                ZIGBEE_ERROR              issues reguarding the control and use
-                                          of the Xbee, including device
-                                          communication server communication,
-                                          data quality, data loss
-
-                SERIAL_ERROR              issues reguarding the control and use
-                                          of the Serial connection between the
-                                          computer and the wearable device
-
                 BUFFER_OVERFLOW           issues reguarding the use and
                                           functionality of the RAM buffer on
                                           the device.
 
-                EXTERAL_MEMORY_OVERFLOW   issues reguarding the use and
-                                          functionality of the external storage
-                                          device on the wearable device
+                SD_ERROR                  Error recording information on the sd
+                                          device
   ----------------------------------------------------------------------------*/
 #ifndef ERRORS_H
 #define ERRORS_H
 
 enum ERROR {
   NONE,
+  /* NEEDS TO KILL */
+  FATAL_ERROR,
   /* SENSOR ERRORS */
   IMU_ERROR,
   EMG_ERROR,
   /* COMMUNICATION ERRORS */
   ISOLATED_DEVICE_ERROR,
-  ZIGBEE_ERROR,
-  SERIAL_ERROR,
   /* MEMORY ERRORS */
   BUFFER_OVERFLOW,
-  EXTERAL_MEMORY_OVERFLOW
 };
 
 #endif

@@ -68,6 +68,7 @@ if __name__ == '__main__':
                 # prossess and send the information
                 response = xbee.wait_read_frame()
                 print(response)
+                # should send an acknowledgement
                 # process data and store somewhere
 
             except KeyboardInterrupt:

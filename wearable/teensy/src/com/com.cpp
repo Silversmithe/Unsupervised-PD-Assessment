@@ -15,14 +15,15 @@
 /* xbee communication */
 XBee xbee = XBee();
 uint8_t payload[52];
-uint8_t broadcast[1] = { 0xFF };
+uint8_t broadcast[6] = { 'h', 'e', 'l', 'l', 'o', '?'};
 Tx16Request tx_pl = Tx16Request(DEST_XBEE_ADDRESS, payload, sizeof(payload));
 Tx16Request tx_bc = Tx16Request(DEST_XBEE_ADDRESS, broadcast, sizeof(broadcast));
 TxStatusResponse txStatus = TxStatusResponse();
+uint8_t __missed_messages;
 
 /* logger and SD card */
-File __logfile,__datafile;
-bool __log_open, __data_open;
+File __file;
+bool __file_open;
 
 /*
  * @function:            initialize all hardware connections for all mediums
@@ -68,18 +69,18 @@ bool init_com(void){
   if (!SD.begin(chip_select)){ hardware_success = false; }
   else {
     /* initialize logger */
-    __logfile = SD.open("log.txt", FILE_WRITE);
-    if(__logfile){
+    __file = SD.open("log.txt", FILE_WRITE);
+    if(__file){
       /* file created successfully */
-      __logfile.println("----- logfile -----");
-      __logfile.close();
+      __file.println("----- logfile -----");
+      __file.close();
     } else {
       /* error creating file */
       hardware_success = false;
     }
   }
-  __log_open = false;
-  __data_open = false;
+  /* initialize missed messages */
+  __missed_messages = 0;
 
   return hardware_success;
 }
@@ -113,10 +114,10 @@ bool isAnyoneThere(void){
  * @description:  record the given message in a new line in the log
  */
 void log(const char* message){
-  __logfile = SD.open("log.txt", FILE_WRITE);
-  if(__logfile){
-    __logfile.println(message);
-    __logfile.close();
+  __file = SD.open("log.txt", FILE_WRITE);
+  if(__file){
+    __file.println(message);
+    __file.close();
   }
 }
 
@@ -128,71 +129,73 @@ void log(const char* message){
  *
  * @description:  record the given message in a new line in the log
  */
-void log_payload(Data* src, bool burst){
-  __datafile = SD.open("data.txt", FILE_WRITE);
+ERROR log_payload(Data* src, bool burst){
+  __file = SD.open("data.txt", FILE_WRITE);
 
-  if(__datafile){
+  if(__file){
     // write time elapsed since last sample
-    __datafile.print(src->dt);
+    __file.print(src->dt);
 
     // emg
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<2; iter++){
-      __datafile.print(src->emg[iter]);
-      if(iter < 1) { __datafile.print("    "); }
+      __file.print(src->emg[iter]);
+      if(iter < 1) { __file.print("    "); }
     }
 
     // hand
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<10; iter++){
-      __datafile.print(src->hand[iter]);
-      if(iter < 9) { __datafile.print("    "); }
+      __file.print(src->hand[iter]);
+      if(iter < 9) { __file.print("    "); }
     }
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<3; iter++){
-      __datafile.print(src->hand_pos[iter]);
-      if(iter < 2) { __datafile.print("    "); }
+      __file.print(src->hand_pos[iter]);
+      if(iter < 2) { __file.print("    "); }
     }
 
     // thumb
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<10; iter++){
-      __datafile.print(src->thumb[iter]);
-      if(iter < 9) { __datafile.print("    "); }
+      __file.print(src->thumb[iter]);
+      if(iter < 9) { __file.print("    "); }
     }
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<3; iter++){
-      __datafile.print(src->thumb_pos[iter]);
-      if(iter < 2) { __datafile.print("    "); }
+      __file.print(src->thumb_pos[iter]);
+      if(iter < 2) { __file.print("    "); }
     }
 
     // point
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<10; iter++){
-      __datafile.print(src->point[iter]);
-      if(iter < 9) { __datafile.print("    "); }
+      __file.print(src->point[iter]);
+      if(iter < 9) { __file.print("    "); }
     }
 
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<3; iter++){
-      __datafile.print(src->point_pos[iter]);
-      if(iter < 2) { __datafile.print("    "); }
+      __file.print(src->point_pos[iter]);
+      if(iter < 2) { __file.print("    "); }
     }
 
     // ring
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<10; iter++){
-      __datafile.print(src->ring[iter]);
-      if(iter < 9) { __datafile.print("    "); }
+      __file.print(src->ring[iter]);
+      if(iter < 9) { __file.print("    "); }
     }
-    __datafile.print("    ");
+    __file.print("    ");
     for(int iter=0; iter<3; iter++){
-      __datafile.print(src->ring_pos[iter]);
-      if(iter < 2) { __datafile.print("    "); }
+      __file.print(src->ring_pos[iter]);
+      if(iter < 2) { __file.print("    "); }
     }
-    __datafile.println("");
-    __datafile.close();
+    __file.println("");
+    __file.close();
   }
+
+  return NONE;
 }
 
 /*
@@ -203,8 +206,8 @@ void log_payload(Data* src, bool burst){
  *  @description: output the information of a given data point to the serial
  *                console if the serial monitor has been activated
  */
-void write_console(Data* src){
-  if(!SERIAL_SELECT){ return; } // exit if the serial select has not been seleced
+ERROR write_console(Data* src){
+  if(!SERIAL_SELECT){ return NONE; } // exit if the serial select has not been seleced
 
   // write time elapsed since last sample
   Serial.print("(");
@@ -274,6 +277,8 @@ void write_console(Data* src){
     if(iter < 2) { Serial.print(", "); }
   }
   Serial.println("]");
+
+  return NONE;
 }
 
 /*
@@ -287,8 +292,8 @@ void write_console(Data* src){
  *                      Eventually, if the message has not been achnowledged a couple
  *                      times, the wearable should throw an error and standby
  */
-void write_radio(Data* src){
-  if(!XBEE_SELECT || src == NULL) { return; } /* check radio */
+ERROR write_radio(Data* src){
+  if(!XBEE_SELECT || src == NULL) { return NONE; } /* check radio */
   /* check error messages */
   uint16_t packet_info;
   unsigned packet_index = 0;
@@ -334,7 +339,24 @@ void write_radio(Data* src){
     packet_index = packet_index + 1;
   }
 
-  xbee.send(tx_pl);
+  // attempt to send information over a pseudo TCP/IP
+  for(int i=0; i<MISSED_LIMIT; i++){
+    xbee.send(tx_pl);
+    if(xbee.readPacket(XBEE_INIT_TIMEOUT)){ // wait for timeout
+      if(xbee.getResponse().getApiId() == RX_16_RESPONSE)
+        break;
+      else
+        __missed_messages += 1;
+
+    } else if (xbee.getResponse().isError()){
+      __missed_messages += 1;
+    } else {
+      __missed_messages += 1;
+    }
+  }
+
+  if(__missed_messages >= MISSED_LIMIT) { return ISOLATED_DEVICE_ERROR; }
+  return NONE;
 }
 
 /*

@@ -16,6 +16,7 @@
 #include <../sd/SD.h>
 #include <SPI.h>
 #include <math.h>
+#include "../errors.h"
 
 #ifndef COM_H
 #define COM_H
@@ -29,6 +30,7 @@
 #define HWSERIAL    Serial3
 #define USB_BAUD    115200
 #define RADIO_BAUD  9600
+#define MISSED_LIMIT 100
 
 /* addressing */
 extern const int SRC_XBEE_ADDRESS;
@@ -44,8 +46,8 @@ const int chip_select = BUILTIN_SDCARD;
 
 /* communication functions */
 bool init_com(void);                      /* Initialize Communication Device */
-void write_console(Data* src);
-void write_radio(Data* src);
+ERROR write_console(Data* src);
+ERROR write_radio(Data* src);
 bool isAnyoneThere(void);
 
 /* helper functions */
@@ -53,11 +55,7 @@ uint16_t pack_float(float src);           /* pack float into 16 bit */
 
 /* sd card functions */
 void log(const char* msg);
-void open_log(void);
-void close_log(void);
-void open_sd_data(void);
-void close_sd_data(void);
-void log_payload(Data* src, bool burst=false);
+ERROR log_payload(Data* src, bool burst=false);
 
 /* VISUAL HARDWARE COMMUNICATION */
 void online_light(void);

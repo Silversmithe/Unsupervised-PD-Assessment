@@ -17,13 +17,13 @@
  *                  create a circular data buffer of a specified
  *                  size and initialize all of its different components
  */
-IOBuffer::IOBuffer(uint8_t bsize){
+IOBuffer::IOBuffer(unsigned bsize){
   SIZE = bsize;
   pfront = pback = count = 0;
   buffer = new Data*[SIZE];
 
   // initialize all structs here
-  for(int i=0; i<SIZE; i++){
+  for(unsigned i=0; i<SIZE; i++){
     buffer[i] = new Data;
   }
 }
@@ -36,7 +36,7 @@ IOBuffer::IOBuffer(uint8_t bsize){
  *                     constructur
  */
 IOBuffer::~IOBuffer(void){
-  for(int i=0; i<SIZE; i++)
+  for(unsigned i=0; i<SIZE; i++)
     delete buffer[i];
 
   delete[] buffer;
