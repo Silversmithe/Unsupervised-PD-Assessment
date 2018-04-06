@@ -31,6 +31,10 @@
 
                 SD_ERROR                  Error recording information on the sd
                                           device
+
+                FATAL_ERROR               Errors that cannot be recovered from
+                                          Usually happens when there is another
+                                          error in an uncompromising state
   ----------------------------------------------------------------------------*/
 #ifndef ERRORS_H
 #define ERRORS_H
@@ -46,6 +50,8 @@ enum ERROR {
   ISOLATED_DEVICE_ERROR,
   /* MEMORY ERRORS */
   BUFFER_OVERFLOW,
+  /* SD CARD ERRORS */
+  SD_ERROR,
 };
 
 #endif

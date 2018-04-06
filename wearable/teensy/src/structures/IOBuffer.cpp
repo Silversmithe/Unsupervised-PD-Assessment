@@ -75,8 +75,6 @@ Data* IOBuffer::remove_front(void){
  */
 bool IOBuffer::push_back(Data item){
   if(count == SIZE){ return false; } // if full do not add
-  // store address of data in buffer
-  buffer[pback]->dt = item.dt;
 
   /* deep copy */
   // emg
@@ -84,20 +82,11 @@ bool IOBuffer::push_back(Data item){
     buffer[pback]->emg[i] = item.emg[i];
 
   for(int i=0; i<10; i++){
-    if(i<3){
-      buffer[pback]->hand_pos[i] = item.hand_pos[i];
-      buffer[pback]->thumb_pos[i] = item.thumb_pos[i];
-      buffer[pback]->point_pos[i] = item.point_pos[i];
-      buffer[pback]->ring_pos[i] = item.ring_pos[i];
-    }
-    // add rest
     buffer[pback]->hand[i] = item.hand[i];
     buffer[pback]->thumb[i] = item.thumb[i];
     buffer[pback]->point[i] = item.point[i];
     buffer[pback]->ring[i] = item.ring[i];
   }
-
-  buffer[pback]->dt = item.dt;
 
   pback = (pback + 1) % SIZE;
   count++;

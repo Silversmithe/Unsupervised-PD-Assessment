@@ -14,6 +14,7 @@
    ---------------------------------------------------------------------------*/
 #include "quaternionFilters.h"
 #include "../structures/Data.h"
+#include "../errors.h"
 
 #ifndef ANALYSIS_H
 #define ANALYSIS_H

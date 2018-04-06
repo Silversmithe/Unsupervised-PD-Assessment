@@ -15,15 +15,14 @@
 /* xbee communication */
 XBee xbee = XBee();
 uint8_t payload[52];
-uint8_t broadcast[6] = { 'h', 'e', 'l', 'l', 'o', '?'};
+uint8_t broadcast[11] = { 'U','P','D','A','-','W','E','A','R','-', DEVICE_ID};
 Tx16Request tx_pl = Tx16Request(DEST_XBEE_ADDRESS, payload, sizeof(payload));
 Tx16Request tx_bc = Tx16Request(DEST_XBEE_ADDRESS, broadcast, sizeof(broadcast));
-TxStatusResponse txStatus = TxStatusResponse();
+TxStatusResponse tx_status = TxStatusResponse();
 uint8_t __missed_messages;
 
 /* logger and SD card */
 File __file;
-bool __file_open;
 
 /*
  * @function:            initialize all hardware connections for all mediums
@@ -38,7 +37,7 @@ bool __file_open;
 bool init_com(void){
   unsigned long start_time, current_time;
   bool hardware_success = true;
-  /* SERIAL */
+  /* ------------------------------- SERIAL ------------------------------ */
   if(SERIAL_SELECT){
     start_time = millis();
     Serial.begin(USB_BAUD);
@@ -51,7 +50,7 @@ bool init_com(void){
       }
     }
   }
-  /* XBEE */
+  /* ------------------------------- XBEE ------------------------------- */
   if (XBEE_SELECT){
     start_time = millis();
     HWSERIAL.begin(RADIO_BAUD);
@@ -65,7 +64,7 @@ bool init_com(void){
     }
     xbee.setSerial(HWSERIAL);
   }
-  /* SD */
+  /* ------------------------------- SD ------------------------------- */
   if (!SD.begin(chip_select)){ hardware_success = false; }
   else {
     /* initialize logger */
@@ -107,6 +106,26 @@ bool isAnyoneThere(void){
 }
 
 /*
+ * @function:     open_datastream
+ *
+ * @description:  Open the file for data logging so that it can be read
+ *                constantly to flush out the buffer
+ */
+void open_datastream(void){
+  if(!__file) { __file = SD.open("data.txt", FILE_WRITE); }
+}
+
+/*
+ * @function:     close_datastream
+ *
+ * @description:  Close the file for data logging so that other files can be
+ *                written to
+ */
+void close_datastream(void){
+  if(__file) { __file.close(); }
+}
+
+/*
  * @function:     log
  *
  * @param:        (const char*) message:  message to send to log
@@ -125,19 +144,14 @@ void log(const char* message){
  * @function:     log_payload
  *
  * @param:        (Data*) src:  sample to record
- * @param:        (bool) burst: are samples being recorded in bursts?
  *
  * @description:  record the given message in a new line in the log
  */
-ERROR log_payload(Data* src, bool burst){
-  __file = SD.open("data.txt", FILE_WRITE);
+ERROR log_payload(Data* src){
+  // __file = SD.open("data.txt", FILE_WRITE);
 
   if(__file){
-    // write time elapsed since last sample
-    __file.print(src->dt);
-
     // emg
-    __file.print("    ");
     for(int iter=0; iter<2; iter++){
       __file.print(src->emg[iter]);
       if(iter < 1) { __file.print("    "); }
@@ -192,8 +206,8 @@ ERROR log_payload(Data* src, bool burst){
       if(iter < 2) { __file.print("    "); }
     }
     __file.println("");
-    __file.close();
-  }
+    // __file.close();
+  } else { return SD_ERROR; }
 
   return NONE;
 }
@@ -208,11 +222,6 @@ ERROR log_payload(Data* src, bool burst){
  */
 ERROR write_console(Data* src){
   if(!SERIAL_SELECT){ return NONE; } // exit if the serial select has not been seleced
-
-  // write time elapsed since last sample
-  Serial.print("(");
-  Serial.print(src->dt);
-  Serial.print(")\t");
 
   // emg
   Serial.print("(");
@@ -368,6 +377,7 @@ ERROR write_radio(Data* src){
  *                  advantage of the fact that the values the floats are assuming
  *                  are smaller than their entire space, thus they can be compacted
  *                  into two bytes instead of four.
+ *                  NOTE: all float multiplied by 100 and then stored
  */
 uint16_t pack_float(float src){
   /* to get decimals mult by 100 */

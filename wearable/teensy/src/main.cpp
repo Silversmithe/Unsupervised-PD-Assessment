@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------
-  file:         main.cpp (Wearable Version 2: SECOND SKIN)
+  file:         main.cpp (Wearable Version 2: Iron Fist)
 
   author:       Alexander S. Adranly
   ------------------------------------------------------------------------------
@@ -16,7 +16,6 @@
 /* VARIABLES */
 static IOBuffer BUFFER(BUFFER_SIZE);
 static Data* temp_data;
-static uint32_t current_time, instant_time, delta_time;
 
 /* STATE */
 volatile State __current_state;
@@ -56,7 +55,7 @@ void setup(void) {
   // 1. can you initialize all hardware?
   // STATE <- YES: INIT, NO: KILL
   pinMode(BUILTIN_LED, OUTPUT);
-  pinMode(XBEE_SLEEP, OUTPUT);
+  pinMode(XBEE_SLEEP_PIN, OUTPUT);
   hardware_success |= init_com();            // setup HWSERIAL & XBEE
   hardware_success |= imu_setup(false);      // setup IMU
   if(!hardware_success){
@@ -78,7 +77,7 @@ void setup(void) {
 
   /* turn the radio off */
   __radio_on = false;
-  digitalWrite(XBEE_SLEEP, LOW);
+  digitalWrite(XBEE_SLEEP_PIN, LOW);
 
   /* delay and signal before running */
   for(int i=0; i<5; i++){
@@ -87,11 +86,9 @@ void setup(void) {
   }
   log("starting device...");
 
-  // kill();
   /* START SENSOR INTERRUPT */
-  Timer1.initialize(FULL_SAMPLE_RATE); // DEMO_RATE FULL_SAMPLE_RATE DOUBLE_SAMPLE_RATE
+  Timer1.initialize(FULL_SAMPLE_RATE);
   Timer1.attachInterrupt(sensor_isr);
-  current_time = micros();            // initialize timer
 }
 
 /*
@@ -102,59 +99,85 @@ void setup(void) {
  *                monitor.
  */
 void loop(void) {
-  /* check errors */
+  /* ERROR CHECKING */
   if(__error != NONE){
-    // could eventually do error recovery here
-    /* output into the log */
+    close_datastream();
     switch (__error) {
       case FATAL_ERROR:
         log("error: an fatal error has occurred...");
         __current_state = KILL;
         kill();
         break;
+
       case ISOLATED_DEVICE_ERROR:
-        log("error: device is unable to sufficiently connect to the network...");
+        log("error: device is unable to sustain a network connection...");
+        log("msg: transitioning to OFFLINE state");
         __current_state = OFFLINE;
         __error = NONE;
         break;
+
       case BUFFER_OVERFLOW:
-        log("error: device buffer has reached its limit");
-        if(__current_state == ONLINE) { __current_state = OFFLINE; }
-        if(__current_state == OFFLINE) {
+        log("error: I/O buffer has overflown...");
+        if(__current_state == ONLINE) {
+          log("msg: transitioning to OFFLINE state");
+          __current_state = OFFLINE;
+        } else if(__current_state == OFFLINE) {
           log("error: an fatal error has occurred...");
           __current_state = KILL;
           kill();
-          break;
-        default:
-          break;
         }
+        break;
+
+      case SD_ERROR:
+        log("error: cannot write to SD card...");
+        log("error: an fatal error has occurred...");
+        __current_state = KILL;
+        kill();
+        break;
+
+      default: /* all other errors */
+        log("error: an fatal error has occurred...");
+        __current_state = KILL;
+        kill();
+        break;
+    } // end switch
+  }
+
+  /* CONSUMER BEHAVIOR */
+  if(BUFFER.num_elts() >= BUFFER_STALL){
+    /* open connection to consume */
+    if(__current_state == ONLINE){
+      digitalWrite(XBEE_SLEEP_PIN, HIGH);
+    } else {  /* OFFLINE */
+      open_datastream();
     }
-  } // end switch
 
-  // eventually do BURST logging
-  // wait to log after a set of points have been collected
-
-  if(!BUFFER.is_empty()){
-      __radio_on = (BUFFER.num_elts() >= BUFFER_CAP)? true: false; // set radio
+    /* entirely flush the buffer */
+    while(BUFFER.num_elts() > BUFFER_FLUSH){
       // remove a Data item from buffer
       temp_data = BUFFER.remove_front();
+
       /* DATA PROCESSING */
       // Load Position data into Data structures using Mahony Filter
       // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
-      /* DATA TRANSFER */
-      if(SERIAL_SELECT){ __error = write_console(temp_data); }
 
-      if(__current_state == ONLINE){ /* ONLINE */
-        if(__radio_on){
-          digitalWrite(XBEE_SLEEP, HIGH); // turn on radio if past limit
-          __error = write_radio(temp_data);
-        } else {
-          digitalWrite(XBEE_SLEEP, LOW);  // turn off radio otherwise
-        }
-      } else {                       /* OFFLINE */
-        __error = log_payload(temp_data);
-      }
+      /* DATA TRANSFER */
+      #if SERIAL_SELECT
+        __error = write_console(temp_data);
+      #endif
+
+      if(__current_state == ONLINE) { __error = write_radio(temp_data); }
+      else { __error = log_payload(temp_data); } /* OFFLINE */
+    }
+
+    /* close connection to consume */
+    if(__current_state == ONLINE){
+      digitalWrite(XBEE_SLEEP_PIN, LOW);
+    } else {  /* OFFLINE */
+      close_datastream();
+    }
   }
+
   delay(CONSUMER_RATE);
 }
 
@@ -209,9 +232,6 @@ bool imu_setup(bool trace){
  *                onto the buffer.
  */
 void sensor_isr(void){
-  instant_time = micros();
-  delta_time = instant_time - current_time;
-  current_time = instant_time;
 
   // new information set for buffer
   Data packet = {
@@ -224,7 +244,6 @@ void sensor_isr(void){
     {0,0,0},                  // PPOSITION
     {0,0,0,0,0,0,0,0,0,0},    // RING
     {0,0,0},                  // RPOSITION
-    delta_time                // dt
   };
 
   if(EMG_SELECT){

@@ -18,9 +18,9 @@ public:
   ~IOBuffer(void);
 
   /* ACCESSORS */
-  uint8_t num_elts(void){ return count; }           // how many items are stored
-  bool is_full(void){ return count == SIZE; }
-  bool is_empty(void){ return count == 0; }
+  inline unsigned num_elts(void){ return count; }
+  inline bool is_full(void){ return count == SIZE; }
+  inline bool is_empty(void){ return count == 0; }
 
   /* MUTATORS */
   Data* remove_front(void); // consuming an item from the front

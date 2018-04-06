@@ -25,18 +25,20 @@
 
 /* PROGRAM INFO */
 #define VERSION 1
+const uint8_t DEVICE_ID = 1;    // ID for this specific wearable device
 
 /* DEVICE SELECTORS */
-#define EMG_SELECT    false      // Turn on/off Forearm EMG readings
+#define EMG_SELECT    false     // Turn on/off Forearm EMG readings
 #define HAND_SELECT   true      // Turn on/off dorsum hand IMU readings
 #define THUMB_SELECT  true      // Turn on/off Thumb IMU readings
 #define POINT_SELECT  true      // Turn on/off Pointer IMU readings
 #define RING_SELECT   true      // Turn on/off Ring IMU readings
 
 /* COMMUNICATION DEFINITION */
-#define BUFFER_SIZE    200
-#define BUFFER_CAP     100
-#define CONSUMER_RATE  10       // miliseconds
+#define BUFFER_SIZE    500
+#define BUFFER_STALL   200
+#define BUFFER_FLUSH   10       // how much the consumer is allowed to leave in buffer
+#define CONSUMER_RATE  10       // miliseconds: amount of delay for consumer
 
 /* EMG DEFINITION */
 #define RAW_PIN   12            // Teensy pin to read RAW signal
@@ -51,7 +53,7 @@
 #define FULL_SAMPLE_RATE   10000    // microseconds, 100 Hz
 #define DEMO_RATE          1000000  // microseconds
 
-/* COMMUNICATION SELECTORS */
+/* COMMUNICATION CONSTANTS */
 const int SRC_XBEE_ADDRESS = 0x0001;   // MY address (for reference)
 const int DEST_XBEE_ADDRESS = 0x0002;  // Destination address (for use)
 const bool SERIAL_SELECT = false;       // Serial communication toggle
@@ -61,7 +63,7 @@ const bool XBEE_SELECT = false;         // Xbee (Radio) communication toggle
 const unsigned BUILTIN_LED = 13;     // builtin led for signaling
 const unsigned EMG_RAW_PIN = 12;     // analog pin for emg sampling
 const unsigned EMG_RECT_PIN = 13;    // analog pin for emg rectified sampling
-const unsigned XBEE_SLEEP = 2;       // digital pin to control power consumption of radio
+const unsigned XBEE_SLEEP_PIN = 2;   // digital pin to sleep/wake radio
 
 /* FSM STATES */
 enum State {

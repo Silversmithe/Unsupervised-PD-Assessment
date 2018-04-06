@@ -21,6 +21,9 @@
 #ifndef COM_H
 #define COM_H
 
+/* identification */
+extern const uint8_t DEVICE_ID;
+
 /* hardware variables */
 #define HW_TIMEOUT        10000          /* 10000ms : 10 seconds */
 #define XBEE_INIT_TIMEOUT 5000
@@ -54,8 +57,10 @@ bool isAnyoneThere(void);
 uint16_t pack_float(float src);           /* pack float into 16 bit */
 
 /* sd card functions */
+void open_datastream(void);
+void close_datastream(void);
 void log(const char* msg);
-ERROR log_payload(Data* src, bool burst=false);
+ERROR log_payload(Data* src);
 
 /* VISUAL HARDWARE COMMUNICATION */
 void online_light(void);

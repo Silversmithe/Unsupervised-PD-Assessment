@@ -5,7 +5,6 @@
   ------------------------------------------------------------------------------
   description:  This struct contains the all the information gathered and
                 produced by the wearable device and other processing algorithms
-                4B + 4 *(2*6) = 52B
   ----------------------------------------------------------------------------*/
 #include "stdint.h"
 
@@ -30,9 +29,6 @@ struct Data {
 
   float ring[10];
   float ring_pos[3];
-
-  /* TIMING */
-  uint32_t dt; // distance between interrupts
 };
 
 typedef struct Data Data;
