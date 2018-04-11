@@ -12,7 +12,6 @@
                - data filtering to extract data
                - device health
    ---------------------------------------------------------------------------*/
-#include "quaternionFilters.h"
 #include "../structures/Data.h"
 #include "../errors.h"
 
@@ -25,6 +24,6 @@ float to_yaw(void);     // quaternion -> yaw
 float to_roll(void);    // quaternion -> roll
 
 // convert sensor data to orientation data
-void orient(Data* item, bool hand, bool thumb, bool point, bool ring);
+void orient(Data* item);
 
 #endif

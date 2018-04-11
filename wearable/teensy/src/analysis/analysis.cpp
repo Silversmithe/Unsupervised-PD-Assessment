@@ -13,6 +13,8 @@
                - device health
    ---------------------------------------------------------------------------*/
 #include "analysis.h"
+#include "quaternionFilters.h"
+
 
 /*
  * @function:      to_pitch
@@ -65,10 +67,6 @@ inline float to_roll(void){
  *
  *  @param: (Data *) item: a pointer to a data structure to calculate orientation
  *                         data for
- *  @param: (bool) hand: determine if the hand IMU pos should be calculated
- *  @param: (bool) thumb: determine if the thumb IMU pos should be calculated
- *  @param: (bool) point: determine if the point IMU pos should be calculated
- *  @param: (bool) ring: determine if the ring IMU pos should be calculated
  *
  *  @description: given a data point, pass the selected imu sensors through a
  *                mahony filter to produce quick, but accurate estimations of
@@ -76,7 +74,7 @@ inline float to_roll(void){
  *                those quaternion coordinates and convert them to roll, pitch,
  *                and yaw for processing.
  */
-void orient(Data* item, bool hand, bool thumb, bool point, bool ring){
+ void orient(Data* item){
   // Define output variables from updated quaternion---these are Tait-Bryan
   // angles, commonly used in aircraft orientation. In this coordinate system,
   // the positive z-axis is down toward Earth. Yaw is the angle between Sensor
@@ -91,47 +89,44 @@ void orient(Data* item, bool hand, bool thumb, bool point, bool ring){
   // must be applied in the correct order which for this configuration is yaw,
   // pitch, and then roll.
 
-  if(hand){
-    MahonyQuaternionUpdate(item->hand[0], item->hand[1], item->hand[2],
-                           item->hand[3], item->hand[4], item->hand[5],
-                           item->hand[6], item->hand[7], item->hand[8],
-                           item->hand[9]);
+  /* HAND */
+  MahonyQuaternionUpdate(item->hand[0], item->hand[1], item->hand[2],
+                         item->hand[3], item->hand[4], item->hand[5],
+                         item->hand[6], item->hand[7], item->hand[8],
+                         item->dt);
 
-    item->hand_pos[0] = to_pitch();
-    item->hand_pos[1] = to_roll();
-    item->hand_pos[2] = to_yaw();
-  }
+  item->hand_pos[0] = to_pitch();
+  item->hand_pos[1] = to_roll();
+  item->hand_pos[2] = to_yaw();
 
-  if(thumb){
-    MahonyQuaternionUpdate(item->thumb[0], item->thumb[1], item->thumb[2],
-                          item->thumb[3], item->thumb[4], item->thumb[5],
-                          item->thumb[6], item->thumb[7], item->thumb[8],
-                          item->thumb[9]);
+  /* THUMB */
+  MahonyQuaternionUpdate(item->thumb[0], item->thumb[1], item->thumb[2],
+                        item->thumb[3], item->thumb[4], item->thumb[5],
+                        item->thumb[6], item->thumb[7], item->thumb[8],
+                        item->dt);
 
-    item->thumb_pos[0] = to_pitch();
-    item->thumb_pos[1] = to_roll();
-    item->thumb_pos[2] = to_yaw();
-  }
+  item->thumb_pos[0] = to_pitch();
+  item->thumb_pos[1] = to_roll();
+  item->thumb_pos[2] = to_yaw();
 
-  if(point){
-    MahonyQuaternionUpdate(item->point[0], item->point[1], item->point[2],
-                           item->point[3], item->point[4], item->point[5],
-                           item->point[6], item->point[7], item->point[8],
-                           item->point[9]);
 
-    item->point_pos[0] = to_pitch();
-    item->point_pos[1] = to_roll();
-    item->point_pos[2] = to_yaw();
-  }
+  /* POINT */
+  MahonyQuaternionUpdate(item->point[0], item->point[1], item->point[2],
+                         item->point[3], item->point[4], item->point[5],
+                         item->point[6], item->point[7], item->point[8],
+                         item->dt);
 
-  if(ring){
-    MahonyQuaternionUpdate(item->ring[0], item->ring[1], item->ring[2],
-                          item->ring[3], item->ring[4], item->ring[5],
-                          item->ring[6], item->ring[7], item->ring[8],
-                          item->ring[9]);
+  item->point_pos[0] = to_pitch();
+  item->point_pos[1] = to_roll();
+  item->point_pos[2] = to_yaw();
 
-    item->ring_pos[0] = to_pitch();
-    item->ring_pos[1] = to_roll();
-    item->ring_pos[2] = to_yaw();
-  }
+  /* RING */
+  MahonyQuaternionUpdate(item->ring[0], item->ring[1], item->ring[2],
+                        item->ring[3], item->ring[4], item->ring[5],
+                        item->ring[6], item->ring[7], item->ring[8],
+                        item->dt);
+
+  item->ring_pos[0] = to_pitch();
+  item->ring_pos[1] = to_roll();
+  item->ring_pos[2] = to_yaw();
 }

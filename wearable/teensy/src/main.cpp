@@ -10,6 +10,7 @@
   ----------------------------------------------------------------------------*/
 #include "main.h"
 #include <Arduino.h>              // Arduino Library
+#include "analysis/analysis.h"    // analysis functions
 #include "stdint.h"               // Integer Library
 #include "TimerOne.h"             // Timer Libaray
 
@@ -169,12 +170,10 @@ void loop(void) {
       interrupts();
 
       /* DATA PROCESSING */
-      // Load Position data into Data structures using Mahony Filter
-      // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
+      orient(temp_data);    // Mahoney filtering -> orientation generation
 
       /* DATA TRANSFER */
       if(SERIAL_SELECT) { __error = write_console(temp_data); }
-
 
       if(__current_state == ONLINE) { __error = write_radio(temp_data); }
       else { __error = log_payload(temp_data); } /* OFFLINE */
@@ -251,16 +250,16 @@ void sensor_isr(void){
 
   // new information set for buffer
   Data packet = {
-    {0,0},                    // EMG DATA
-    {0,0,0,0,0,0,0,0,0,0},    // HAND
-    {0,0,0},                  // HPOSITION
-    {0,0,0,0,0,0,0,0,0,0},    // THUMB
-    {0,0,0},                  // TPOSITION
-    {0,0,0,0,0,0,0,0,0,0},    // POINT
-    {0,0,0},                  // PPOSITION
-    {0,0,0,0,0,0,0,0,0,0},    // RING
-    {0,0,0},                  // RPOSITION
-    delta_time
+    {0,0},                          // EMG DATA
+    {0,0,0,0,0,0,0,0,0,0},          // HAND
+    {0,0,0},                        // HPOSITION
+    {0,0,0,0,0,0,0,0,0,0},          // THUMB
+    {0,0,0},                        // TPOSITION
+    {0,0,0,0,0,0,0,0,0,0},          // POINT
+    {0,0,0},                        // PPOSITION
+    {0,0,0,0,0,0,0,0,0,0},          // RING
+    {0,0,0},                        // RPOSITION
+    (float)(delta_time/1000000.0f)  // dt (seconds) = micros * sec/micros
   };
 
   if(EMG_SELECT){

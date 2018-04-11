@@ -234,7 +234,7 @@ ERROR write_console(Data* src){
   // delta time
   Serial.print(src->dt);
   Serial.print("\t");
-
+  
   // emg
   Serial.print("(");
   for(int iter=0; iter<2; iter++){

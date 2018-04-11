@@ -14,7 +14,6 @@
   ----------------------------------------------------------------------------*/
 #include "myoEMG/MyoEMG.h"                // EMG library
 #include "mpu9250/MPU9250.h"              // IMU library
-#include "analysis/analysis.h"            // analysis functions
 #include "structures/IOBuffer.h"          // IOBuffer
 #include "structures/Data.h"              // Data Struct
 #include "com/com.h"                      // Communications Functions
@@ -36,7 +35,7 @@ const uint8_t DEVICE_ID = 1;    // ID for this specific wearable device
 
 /* COMMUNICATION DEFINITION */
 #define BUFFER_SIZE    500
-#define BUFFER_STALL   200
+#define BUFFER_STALL   200      
 #define BUFFER_FLUSH   10       // how much the consumer is allowed to leave in buffer
 #define CONSUMER_RATE  10       // miliseconds: amount of delay for consumer
 
