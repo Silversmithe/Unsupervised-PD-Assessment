@@ -29,6 +29,9 @@ struct Data {
 
   float ring[10];
   float ring_pos[3];
+
+  /* TIMING */
+  uint32_t dt; // distance between interrupts
 };
 
 typedef struct Data Data;

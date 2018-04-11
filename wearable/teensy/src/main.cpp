@@ -16,11 +16,11 @@
 /* VARIABLES */
 static IOBuffer BUFFER(BUFFER_SIZE);
 static Data* temp_data;
+static uint32_t current_time, instant_time, delta_time;
 
 /* STATE */
 volatile State __current_state;
 volatile ERROR __error;
-static bool __radio_on;
 
 /* DEVICE INITIALIZATION */
 bool __enabled[4] = {
@@ -46,18 +46,19 @@ MPU9250 __imus[4] = {
  *                logging, and initializing the automata and error states.
  */
 void setup(void) {
-  bool hardware_success = false;
+  bool hardware_success = true;
   bool network_success = false;
   __error = NONE;           // initialize error
   __current_state = INIT;   // Initialization state
+  current_time = micros();  // initial time
 
   /* HARDWARE INITIALIZATION PROCEDURE */
   // 1. can you initialize all hardware?
   // STATE <- YES: INIT, NO: KILL
   pinMode(BUILTIN_LED, OUTPUT);
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
-  hardware_success |= init_com();            // setup HWSERIAL & XBEE
-  hardware_success |= imu_setup(false);      // setup IMU
+  hardware_success &= init_com();            // setup HWSERIAL & XBEE
+  hardware_success &= imu_setup(true);      // setup IMU
   if(!hardware_success){
     __current_state = KILL;
     __error = IMU_ERROR;
@@ -67,16 +68,22 @@ void setup(void) {
   /* NETWORK INITIALIZATION PROCEDURE */
   // 1. Can you contact the server?
   //    STATE <- YES: ONLINE, NO: OFFLINE
-  if(XBEE_SELECT){ network_success = isAnyoneThere(); }
+  if(XBEE_SELECT){
+    log("checking network status...");
+    network_success = isAnyoneThere();
+  }
 
   __current_state = (network_success)? ONLINE : OFFLINE;
   if(__current_state == ONLINE)
     log("state: online");
-  else
+    /* FUTURE */
+    // try to send data stored on SD wirelessly before getting a new batch
+  else{
     log("state: offline");
+    // if a data file exists, send it up
+  }
 
   /* turn the radio off */
-  __radio_on = false;
   digitalWrite(XBEE_SLEEP_PIN, LOW);
 
   /* delay and signal before running */
@@ -101,15 +108,16 @@ void setup(void) {
 void loop(void) {
   /* ERROR CHECKING */
   if(__error != NONE){
-    close_datastream();
     switch (__error) {
       case FATAL_ERROR:
+        close_datastream();
         log("error: an fatal error has occurred...");
         __current_state = KILL;
         kill();
         break;
 
       case ISOLATED_DEVICE_ERROR:
+        close_datastream();
         log("error: device is unable to sustain a network connection...");
         log("msg: transitioning to OFFLINE state");
         __current_state = OFFLINE;
@@ -117,6 +125,7 @@ void loop(void) {
         break;
 
       case BUFFER_OVERFLOW:
+        close_datastream();
         log("error: I/O buffer has overflown...");
         if(__current_state == ONLINE) {
           log("msg: transitioning to OFFLINE state");
@@ -129,13 +138,13 @@ void loop(void) {
         break;
 
       case SD_ERROR:
-        log("error: cannot write to SD card...");
-        log("error: an fatal error has occurred...");
         __current_state = KILL;
-        kill();
+        kill_light();
+        while(1){ delay(10000); }
         break;
 
       default: /* all other errors */
+        close_datastream();
         log("error: an fatal error has occurred...");
         __current_state = KILL;
         kill();
@@ -155,16 +164,17 @@ void loop(void) {
     /* entirely flush the buffer */
     while(BUFFER.num_elts() > BUFFER_FLUSH){
       // remove a Data item from buffer
+      noInterrupts();
       temp_data = BUFFER.remove_front();
+      interrupts();
 
       /* DATA PROCESSING */
       // Load Position data into Data structures using Mahony Filter
       // orient(data, HAND_SELECT, THUMB_SELECT, POINT_SELECT, RING_SELECT);
 
       /* DATA TRANSFER */
-      #if SERIAL_SELECT
-        __error = write_console(temp_data);
-      #endif
+      if(SERIAL_SELECT) { __error = write_console(temp_data); }
+
 
       if(__current_state == ONLINE) { __error = write_radio(temp_data); }
       else { __error = log_payload(temp_data); } /* OFFLINE */
@@ -204,19 +214,21 @@ void kill(void){
  */
 bool imu_setup(bool trace){
   int status[4];
-  bool out = false;
+  bool out = true;
   if(trace && !SERIAL_SELECT) { return false; }
 
   for(int i=0; i<4; i++){
     if(__enabled[i]){
       status[i] = __imus[i].begin();
-      out = out | !(status[i] < 0);
-      if(trace && status[i] < 0){
-        Serial.print("(");
-        Serial.print(i);
-        Serial.print("): hardware error, CODE: ");
-        Serial.println(status[i]);
-        delay(1000);
+      out = out & !(status[i] < 0);
+      if(trace && !out){
+        while(true){
+          Serial.print("(");
+          Serial.print(i);
+          Serial.print("): hardware error, CODE: ");
+          Serial.println(status[i]);
+          delay(1000);
+        }
       }
     }
   }
@@ -232,6 +244,10 @@ bool imu_setup(bool trace){
  *                onto the buffer.
  */
 void sensor_isr(void){
+  // update the time
+  instant_time = micros();
+  delta_time = instant_time - current_time;
+  current_time = instant_time;
 
   // new information set for buffer
   Data packet = {
@@ -244,6 +260,7 @@ void sensor_isr(void){
     {0,0,0},                  // PPOSITION
     {0,0,0,0,0,0,0,0,0,0},    // RING
     {0,0,0},                  // RPOSITION
+    delta_time
   };
 
   if(EMG_SELECT){
@@ -324,5 +341,5 @@ void sensor_isr(void){
   }
 
   // store packet in buffer
-  if(BUFFER.push_back(packet)){ __error = BUFFER_OVERFLOW; }
+  if(!BUFFER.push_back(packet)){ __error = BUFFER_OVERFLOW; }
 }

@@ -56,8 +56,8 @@ const uint8_t DEVICE_ID = 1;    // ID for this specific wearable device
 /* COMMUNICATION CONSTANTS */
 const int SRC_XBEE_ADDRESS = 0x0001;   // MY address (for reference)
 const int DEST_XBEE_ADDRESS = 0x0002;  // Destination address (for use)
-const bool SERIAL_SELECT = false;       // Serial communication toggle
-const bool XBEE_SELECT = false;         // Xbee (Radio) communication toggle
+const bool SERIAL_SELECT = true;       // Serial communication toggle
+const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
 
 /* PINS */
 const unsigned BUILTIN_LED = 13;     // builtin led for signaling
@@ -70,7 +70,6 @@ enum State {
   INIT,
   ONLINE,
   OFFLINE,
-  RECOVER,
   KILL
 };
 

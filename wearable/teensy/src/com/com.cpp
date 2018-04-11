@@ -20,6 +20,7 @@ Tx16Request tx_pl = Tx16Request(DEST_XBEE_ADDRESS, payload, sizeof(payload));
 Tx16Request tx_bc = Tx16Request(DEST_XBEE_ADDRESS, broadcast, sizeof(broadcast));
 TxStatusResponse tx_status = TxStatusResponse();
 uint8_t __missed_messages;
+uint32_t __packet_counter; // FOR PACKET ACCOUNTABILITY EXPERIMENT
 
 /* logger and SD card */
 File __file;
@@ -41,10 +42,10 @@ bool init_com(void){
   if(SERIAL_SELECT){
     start_time = millis();
     Serial.begin(USB_BAUD);
-    while(!Serial.available()) {
+    while(!Serial) {
       search_light();
       current_time = millis();
-      if((current_time-start_time) < HW_TIMEOUT){
+      if((current_time-start_time) > HW_TIMEOUT){
         hardware_success = false;
         break;
       }
@@ -57,7 +58,7 @@ bool init_com(void){
     while(!(HWSERIAL.availableForWrite() > 0)){
       search_light();
       current_time = millis();
-      if((current_time-start_time) < HW_TIMEOUT){
+      if((current_time-start_time) > HW_TIMEOUT){
         hardware_success = false;
         break;
       }
@@ -69,15 +70,22 @@ bool init_com(void){
   else {
     /* initialize logger */
     __file = SD.open("log.txt", FILE_WRITE);
-    if(__file){
-      /* file created successfully */
+    if(__file){ /* file created successfully */
       __file.println("----- logfile -----");
       __file.close();
-    } else {
-      /* error creating file */
+    } else { /* error creating file */
+      hardware_success = false;
+    }
+
+    __file = SD.open("data.txt", FILE_WRITE);
+    if(__file){ /* file created successfully */
+      __file.println("----- datafile -----");
+      __file.close();
+    } else { /* error creating file */
       hardware_success = false;
     }
   }
+
   /* initialize missed messages */
   __missed_messages = 0;
 
@@ -222,6 +230,10 @@ ERROR log_payload(Data* src){
  */
 ERROR write_console(Data* src){
   if(!SERIAL_SELECT){ return NONE; } // exit if the serial select has not been seleced
+
+  // delta time
+  Serial.print(src->dt);
+  Serial.print("\t");
 
   // emg
   Serial.print("(");
