@@ -40,7 +40,7 @@ Our goal is to create a device that will utilize patient’s daily actions inste
 - maybe if communication is bad (given a counter) have ONLINE transition to OFFLINE and never go back
 
 ### April 11th, 2018
-- mahoney filter (thanks to sparkfun), is now functional with the UPDA system
+- mahoney filter (courtesy of sparkfun), is now functional with the UPDA system
 - radio energy saving
 - offline code completed
    * gathers data at the correct rate
