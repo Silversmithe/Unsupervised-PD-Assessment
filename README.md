@@ -38,3 +38,13 @@ Our goal is to create a device that will utilize patient’s daily actions inste
 - ONLINE just sends data out as best it can
 - OFFLINE just stores all the data on the SD card
 - maybe if communication is bad (given a counter) have ONLINE transition to OFFLINE and never go back
+
+### April 11th, 2018
+- mahoney filter (thanks to sparkfun), is now functional with the UPDA system
+- radio energy saving
+- offline code completed
+   * gathers data at the correct rate
+   * stores data on the SD card
+   * can send information to the serial console
+- error handling complete
+   
