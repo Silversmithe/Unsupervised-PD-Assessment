@@ -47,4 +47,5 @@ Our goal is to create a device that will utilize patient’s daily actions inste
    * stores data on the SD card
    * can send information to the serial console
 - error handling complete
+- switching over to digi xbee python library for Zigbee communication
    
