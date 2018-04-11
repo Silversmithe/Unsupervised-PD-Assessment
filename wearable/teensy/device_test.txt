@@ -29,13 +29,24 @@ This is a document stating all the different tests that are run on the device
 - successful sd data storage
 - successful serial output
 
-- correct data 
+- correct data
 - does it meet sampling requirements
 
-- triggers correct error handling   !!!
+- triggers correct error handling   !!! ?
   * correct logging
   * fatal error
   * buffer overflow
   * sd error
 
   3.0 ONLINE SAMPLING
+
+  - successful radio transfer !!!
+  - successful acknowledgement from server !!!
+  - successful ack recieved !!!
+
+  - successful transition to offline on network error !!!
+
+  - triggers correct error handling !!!
+    * correct logging
+    * fatal error
+    * isolated device
