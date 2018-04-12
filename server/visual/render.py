@@ -11,7 +11,7 @@
     draw rest of the static stuff
 
 """
-from quad import QuadPoly
+from visual.quad import QuadPoly
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
