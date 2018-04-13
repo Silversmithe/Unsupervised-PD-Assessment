@@ -59,7 +59,7 @@ void setup(void) {
   pinMode(BUILTIN_LED, OUTPUT);
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
   hardware_success &= init_com();            // setup HWSERIAL & XBEE
-  hardware_success &= imu_setup(true);      // setup IMU
+  hardware_success &= imu_setup(false);      // setup IMU
   if(!hardware_success){
     __current_state = KILL;
     __error = IMU_ERROR;
@@ -71,15 +71,19 @@ void setup(void) {
   //    STATE <- YES: ONLINE, NO: OFFLINE
   if(XBEE_SELECT){
     log("checking network status...");
+    digitalWrite(XBEE_SLEEP_PIN, HIGH);
+    delay(100);
     network_success = isAnyoneThere();
+    digitalWrite(XBEE_SLEEP_PIN, LOW);
   }
 
   __current_state = (network_success)? ONLINE : OFFLINE;
-  if(__current_state == ONLINE)
+  if(__current_state == ONLINE){
     log("state: online");
+    kill();
     /* FUTURE */
     // try to send data stored on SD wirelessly before getting a new batch
-  else{
+  } else {
     log("state: offline");
     // if a data file exists, send it up
   }

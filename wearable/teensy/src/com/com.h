@@ -24,6 +24,10 @@
 /* identification */
 extern const uint8_t DEVICE_ID;
 
+/* addressing */
+extern const int SERVER_ADDR;
+extern const int WEAR_ADDR;
+
 /* hardware variables */
 #define HW_TIMEOUT        10000          /* 10000ms : 10 seconds */
 #define XBEE_INIT_TIMEOUT 5000
@@ -34,10 +38,6 @@ extern const uint8_t DEVICE_ID;
 #define USB_BAUD    115200
 #define RADIO_BAUD  9600
 #define MISSED_LIMIT 100
-
-/* addressing */
-extern const int SRC_XBEE_ADDRESS;
-extern const int DEST_XBEE_ADDRESS;
 
 /* pins */
 extern const bool SERIAL_SELECT;

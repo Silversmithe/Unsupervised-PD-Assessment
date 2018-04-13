@@ -16,9 +16,11 @@
 XBee xbee = XBee();
 uint8_t payload[52];
 uint8_t broadcast[11] = { 'U','P','D','A','-','W','E','A','R','-', DEVICE_ID};
-Tx16Request tx_pl = Tx16Request(DEST_XBEE_ADDRESS, payload, sizeof(payload));
-Tx16Request tx_bc = Tx16Request(DEST_XBEE_ADDRESS, broadcast, sizeof(broadcast));
+
+Tx16Request tx_pl = Tx16Request(SERVER_ADDR, payload, sizeof(payload));
+Tx16Request tx_bc = Tx16Request(SERVER_ADDR, broadcast, sizeof(broadcast));
 TxStatusResponse tx_status = TxStatusResponse();
+
 uint8_t __missed_messages;
 uint32_t __packet_counter; // FOR PACKET ACCOUNTABILITY EXPERIMENT
 
@@ -101,16 +103,36 @@ bool init_com(void){
  *                is NOT there.
  */
 bool isAnyoneThere(void){
-  xbee.send(tx_bc);
-  if(xbee.readPacket(XBEE_INIT_TIMEOUT)){ // wait for timeout
-    if(xbee.getResponse().getApiId() == RX_16_RESPONSE)
-      return true;
-    return false;
-  } else if (xbee.getResponse().isError()){
-    return false;
-  } else {
-    return false; // could not contact local xbee
+
+  digitalWrite(BUILTIN_LED, HIGH);
+  while(true){
+    xbee.send(tx_bc);
+    xbee.readPacket(XBEE_INIT_TIMEOUT);
+
+    if(xbee.getResponse().isAvailable()){
+      Serial.println("got a response!");
+    } else {
+      Serial.println("no info available");
+    }
   }
+  digitalWrite(BUILTIN_LED, LOW);
+
+  // if(xbee.readPacket(XBEE_INIT_TIMEOUT)){ // wait for timeout
+  //   if(xbee.getResponse().isAvailable()){
+  //     log("received packet");
+  //     return true;
+  //   }
+  // }
+
+  //   if(xbee.getResponse().getApiId() == RX_16_RESPONSE || xbee.getResponse().getApiId() == RX_64_RESPONSE)
+  //     return true;
+  //   return false;
+  // } else if (xbee.getResponse().isError()){
+  //   return false;
+  // } else {
+  //   return false; // could not contact local xbee
+  // }
+  return false;
 }
 
 /*
@@ -234,7 +256,7 @@ ERROR write_console(Data* src){
   // delta time
   Serial.print(src->dt);
   Serial.print("\t");
-  
+
   // emg
   Serial.print("(");
   for(int iter=0; iter<2; iter++){

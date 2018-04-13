@@ -24,7 +24,7 @@
 
 /* PROGRAM INFO */
 #define VERSION 1
-const uint8_t DEVICE_ID = 1;    // ID for this specific wearable device
+const uint8_t DEVICE_ID = '1';    // ID for this specific wearable device
 
 /* DEVICE SELECTORS */
 #define EMG_SELECT    false     // Turn on/off Forearm EMG readings
@@ -34,8 +34,11 @@ const uint8_t DEVICE_ID = 1;    // ID for this specific wearable device
 #define RING_SELECT   true      // Turn on/off Ring IMU readings
 
 /* COMMUNICATION DEFINITION */
+const int SERVER_ADDR = 0xFE2F;
+const int WEAR_ADDR = 0xFE31;
+
 #define BUFFER_SIZE    500
-#define BUFFER_STALL   200      
+#define BUFFER_STALL   200
 #define BUFFER_FLUSH   10       // how much the consumer is allowed to leave in buffer
 #define CONSUMER_RATE  10       // miliseconds: amount of delay for consumer
 
@@ -53,8 +56,6 @@ const uint8_t DEVICE_ID = 1;    // ID for this specific wearable device
 #define DEMO_RATE          1000000  // microseconds
 
 /* COMMUNICATION CONSTANTS */
-const int SRC_XBEE_ADDRESS = 0x0001;   // MY address (for reference)
-const int DEST_XBEE_ADDRESS = 0x0002;  // Destination address (for use)
 const bool SERIAL_SELECT = true;       // Serial communication toggle
 const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
 
