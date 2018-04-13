@@ -37,6 +37,7 @@ NULL_ADDR = XBee16BitAddress.from_hex_string("0x0000")
 XBEE SERVER 
 """
 
+
 class Wearable(object):
     
     def __init__(self):
@@ -56,6 +57,7 @@ class Wearable(object):
 
 # create a device object
 upda_wear = Wearable()
+
 
 def server():
     """
@@ -86,7 +88,7 @@ def server():
                     print("linking with {}({})".format(upda_wear.id, upda_wear.address))
                     # send acknowledgement
                     print("acknowledging...\n")
-                    device.send_data_async(upda_wear.remote_device, ACK_CONNECT)
+                    device.send_data_async(upda_wear.remote_device, DATA_ACK_CONNECT)
     
                 elif upda_wear.address != xbee_message.remote_device.get_16bit_addr():
                     # already connected, cannot take another device
@@ -95,7 +97,6 @@ def server():
             elif upda_wear.address == xbee_message.remote_device.get_16bit_addr():
                 # address of connected device is same as our linked device
                 pass
-
 
         device.add_data_received_callback(data_receive_callback)
 
@@ -127,6 +128,7 @@ def stats(tokens):
     print("address: {}".format(upda_wear.address))
     print("received messages: {}".format(upda_wear.received_count))
 
+
 def start(tokens):
     """
     start server
@@ -144,6 +146,7 @@ def start(tokens):
 
     else:
         print("unknown object to start...")
+
 
 def load(tokens):
     """
@@ -185,9 +188,11 @@ def load(tokens):
                             f = open("data/patient-{}.txt".format(str(i+num_patients)), 'w')
                             f.write(content[i])
                             f.close()
-                        except:
+
+                        except BlockingIOError:
                             print("\nerror: could not open new patient file")
                             break
+
                     else:
                         print("\ndownload complete!")
 
@@ -196,9 +201,9 @@ def load(tokens):
                 try:
                     dfile.truncate()
                     print("process complete!")
-                except:
-                    print("error clearing sd card data...")
 
+                except OSError:
+                    print("error: could not clear SD card")
 
         if len(tokens) > 1:
             if tokens[1] == 'and' and tokens[2] == 'process':
@@ -206,7 +211,7 @@ def load(tokens):
                 # pass data off to evaluation
 
             else:
-                print("undefined load conjuction")
+                print("undefined load conjunction")
                 print("try: 'load and process'")
 
 
