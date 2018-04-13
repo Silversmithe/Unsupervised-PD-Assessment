@@ -4,6 +4,7 @@ of analysis
 """
 from Sample import Sample
 
+
 class Packet(object):
 
     def __init__(self):
@@ -21,12 +22,3 @@ class Packet(object):
             @param: r: a  result to store in the list
         """
         self.result_set.append(r)
-
-"""
-sample1 = Sample()
-packet = Packet()
-
-packet.add_sample(sample1)
-packet.sample_set[0].emg[1] = "foo"
-print(packet.sample_set[0].emg[1])
-"""

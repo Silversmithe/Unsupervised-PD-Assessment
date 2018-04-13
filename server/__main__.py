@@ -16,6 +16,10 @@ from digi.xbee.devices import XBeeDevice
 # GLOBALS
 VERSION = 1
 RUNNING = True
+# SERVER
+PORT = "ttyUSB0"
+SERVER_NAME = "XB_SERVE"
+DEVICE_NAME = "XB_WEAR"
 
 """
 XBEE SERVER 
@@ -100,10 +104,23 @@ def main():
     server
     :return:
     """
-    print('_'*50)
+    print('*'*50)
+    print("\n  .----.-----.-----.-----.\n",
+          "/      \     \     \     \\\n",
+          "|  \/    |     |   __L_____L__\n",
+          "|   |    |     |  (           \\\n",
+          "|    \___/    /    \______/    |\n",
+          "|        \___/\___/\___/       |\n",
+          "\      \     /               /\n",
+          "|                        __/\n",
+          "\_                   __/\n",
+          "|        |         |\n",
+          "|                  |\n",
+          "|                  |\n\n")
+
     print("Unsupervised Parkinson's Disease Assessment Console")
     print("Version {}".format(VERSION))
-    print('_' * 50, '\n')
+    print('*' * 50, '\n')
 
     while RUNNING:
         try:

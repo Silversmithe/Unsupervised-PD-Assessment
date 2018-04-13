@@ -2,6 +2,8 @@
 Object responsible for UPDRS scoring
 of
 """
+
+
 class Score(object):
 
     def __init__(self):
