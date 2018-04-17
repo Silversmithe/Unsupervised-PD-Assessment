@@ -27,7 +27,7 @@
 const uint8_t DEVICE_ID = '1';    // ID for this specific wearable device
 
 /* DEVICE SELECTORS */
-#define EMG_SELECT    false     // Turn on/off Forearm EMG readings
+#define EMG_SELECT    true     // Turn on/off Forearm EMG readings
 #define HAND_SELECT   true      // Turn on/off dorsum hand IMU readings
 #define THUMB_SELECT  true      // Turn on/off Thumb IMU readings
 #define POINT_SELECT  true      // Turn on/off Pointer IMU readings
@@ -57,7 +57,7 @@ const int WEAR_ADDR = 0xFE31;
 
 /* COMMUNICATION CONSTANTS */
 const bool SERIAL_SELECT = true;       // Serial communication toggle
-const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
+const bool XBEE_SELECT = false;         // Xbee (Radio) communication toggle
 
 /* PINS */
 const unsigned BUILTIN_LED = 13;     // builtin led for signaling

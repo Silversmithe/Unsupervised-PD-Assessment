@@ -7,6 +7,13 @@
   sensors in one. This is the prototype for the main application.
   Wearable device gathers information about the muscles of the arm and its
   fingers to perform diagnostics of parkinson's disease.
+
+  NOTE: ADD A CAPACITOR THAT WILL KEEP THE PROTOTYPE RUNNING LONG ENOUGH SO THAT
+  THE DEVICE CAN SHUT DOWN CORRECTLY
+
+  check switch:
+  if voltage == 0 :
+    close data stream
   ----------------------------------------------------------------------------*/
 #include "main.h"
 #include <Arduino.h>              // Arduino Library
@@ -18,6 +25,7 @@
 static IOBuffer BUFFER(BUFFER_SIZE);
 static Data* temp_data;
 static uint32_t current_time, instant_time, delta_time;
+static bool burst_write;
 
 /* STATE */
 volatile State __current_state;
@@ -26,17 +34,17 @@ volatile ERROR __error;
 /* DEVICE INITIALIZATION */
 bool __enabled[4] = {
   HAND_SELECT,
-  THUMB_SELECT,
+  RING_SELECT,
   POINT_SELECT,
-  RING_SELECT
+  THUMB_SELECT
 };
 
 EMG forearm(RECT_PIN, RAW_PIN);
 MPU9250 __imus[4] = {
-  MPU9250(Wire1, IMU_ADDR_HI),   // hand
-  MPU9250(Wire, IMU_ADDR_LO),   // thumb finger
-  MPU9250(Wire, IMU_ADDR_HI),   // pointer finger
-  MPU9250(Wire1, IMU_ADDR_LO)   // ring finger
+  MPU9250(Wire, IMU_ADDR_HI),   // hand
+  MPU9250(Wire, IMU_ADDR_LO),   // ring
+  MPU9250(Wire1, IMU_ADDR_LO),   // pointer finger
+  MPU9250(Wire1, IMU_ADDR_HI)   // thumb
 };
 
 /*
@@ -47,6 +55,7 @@ MPU9250 __imus[4] = {
  *                logging, and initializing the automata and error states.
  */
 void setup(void) {
+  burst_write = false;
   bool hardware_success = true;
   bool network_success = false;
   __error = NONE;           // initialize error
@@ -71,6 +80,7 @@ void setup(void) {
   //    STATE <- YES: ONLINE, NO: OFFLINE
   if(XBEE_SELECT){
     log("checking network status...");
+    if(SERIAL_SELECT){ Serial.println("checking network status..."); }
     digitalWrite(XBEE_SLEEP_PIN, HIGH);
     delay(100);
     network_success = isAnyoneThere();
@@ -80,11 +90,12 @@ void setup(void) {
   __current_state = (network_success)? ONLINE : OFFLINE;
   if(__current_state == ONLINE){
     log("state: online");
-    kill();
+    if(SERIAL_SELECT){ Serial.println("state: online"); }
     /* FUTURE */
     // try to send data stored on SD wirelessly before getting a new batch
   } else {
     log("state: offline");
+    if(SERIAL_SELECT){ Serial.println("state: offline"); }
     // if a data file exists, send it up
   }
 
@@ -97,6 +108,7 @@ void setup(void) {
     else { offline_light(); }
   }
   log("starting device...");
+  if(SERIAL_SELECT){ Serial.println("starting device..."); }
 
   /* START SENSOR INTERRUPT */
   Timer1.initialize(FULL_SAMPLE_RATE);
@@ -117,6 +129,7 @@ void loop(void) {
       case FATAL_ERROR:
         close_datastream();
         log("error: an fatal error has occurred...");
+        if(SERIAL_SELECT){ Serial.println("error: an fatal error has occurred..."); }
         __current_state = KILL;
         kill();
         break;
@@ -124,7 +137,9 @@ void loop(void) {
       case ISOLATED_DEVICE_ERROR:
         close_datastream();
         log("error: device is unable to sustain a network connection...");
+        if(SERIAL_SELECT){ Serial.println("error: device is unable to sustain a network connection..."); }
         log("msg: transitioning to OFFLINE state");
+        if(SERIAL_SELECT){ Serial.println("msg: transitioning to OFFLINE state"); }
         __current_state = OFFLINE;
         __error = NONE;
         break;
@@ -132,17 +147,22 @@ void loop(void) {
       case BUFFER_OVERFLOW:
         close_datastream();
         log("error: I/O buffer has overflown...");
+        if(SERIAL_SELECT){ Serial.println("error: I/O buffer has overflown..."); }
         if(__current_state == ONLINE) {
           log("msg: transitioning to OFFLINE state");
+          if(SERIAL_SELECT){ Serial.println("msg: transitioning to OFFLINE state"); }
           __current_state = OFFLINE;
         } else if(__current_state == OFFLINE) {
           log("error: an fatal error has occurred...");
+          if(SERIAL_SELECT){ Serial.println("error: an fatal error has occurred..."); }
           __current_state = KILL;
           kill();
         }
         break;
 
       case SD_ERROR:
+        close_datastream();
+        if(SERIAL_SELECT){ Serial.println("error: a sd card error has occured..."); }
         __current_state = KILL;
         kill_light();
         while(1){ delay(10000); }
@@ -151,6 +171,7 @@ void loop(void) {
       default: /* all other errors */
         close_datastream();
         log("error: an fatal error has occurred...");
+        if(SERIAL_SELECT){ Serial.println("error: an fatal error has occurred..."); }
         __current_state = KILL;
         kill();
         break;
@@ -169,6 +190,8 @@ void loop(void) {
     /* entirely flush the buffer */
     while(BUFFER.num_elts() > BUFFER_FLUSH){
       // remove a Data item from buffer
+      digitalWrite(BUILTIN_LED, HIGH);
+
       noInterrupts();
       temp_data = BUFFER.remove_front();
       interrupts();
@@ -181,6 +204,7 @@ void loop(void) {
 
       if(__current_state == ONLINE) { __error = write_radio(temp_data); }
       else { __error = log_payload(temp_data); } /* OFFLINE */
+      digitalWrite(BUILTIN_LED, LOW);
     }
 
     /* close connection to consume */
@@ -202,6 +226,7 @@ void loop(void) {
  */
 void kill(void){
   log("state: kill");
+  if(SERIAL_SELECT){ Serial.println("state: kill"); }
   kill_light();
   while(1){ delay(10000); }
 }
@@ -290,7 +315,7 @@ void sensor_isr(void){
   }
 
   if(THUMB_SELECT){
-    __imus[1].readSensor();
+    __imus[3].readSensor();
     // accel
     packet.thumb[0] = __imus[1].getAccelX_mss();
     packet.thumb[1] = __imus[1].getAccelY_mss();
@@ -326,7 +351,7 @@ void sensor_isr(void){
   }
 
   if(RING_SELECT){
-    __imus[3].readSensor();
+    __imus[1].readSensor();
     // accel
     packet.ring[0] = __imus[3].getAccelX_mss();
     packet.ring[1] = __imus[3].getAccelY_mss();
