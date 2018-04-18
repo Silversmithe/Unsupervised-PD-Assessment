@@ -12,7 +12,7 @@ NOTE: use the arg parse library for command-line tools
 import os
 import time
 import serial
-from digi.xbee.devices import XBeeDevice, RemoteXBeeDevice
+from digi.xbee.devices import XBeeDevice, RemoteXBeeDevice, Raw802Device, RemoteRaw802Device
 from digi.xbee.models.address import XBee16BitAddress, XBee64BitAddress
 
 # GLOBALS
@@ -21,10 +21,11 @@ RUNNING = True
 # SERVER
 PORT = "/dev/ttyUSB0"
 BAUD_RATE = 9600
-SERVER_NAME = "XB_SERVE"
+SERVER_NAME = "SERVE"
 SERVER_64B_ADDR = "0013A2004163FE2F"
+SERVER_16B_ADDR = "FE2F"
 WEAR_64B_ADDR = "0013A2004163FE31"
-REMOTE_NAME = "XB_WEAR"
+WEAR_16B_ADDR = "FE31"
 # SD CARD
 SD_PATH = "/media/iron-fist/WEARV2"
 SD_DATA_PATH = "/media/iron-fist/WEARV2/DATA.txt"
@@ -69,39 +70,25 @@ def server():
     # INIT SERVER
     print("starting server...")
      
-    device = XBeeDevice(PORT, BAUD_RATE)
+    device = Raw802Device(PORT, BAUD_RATE)
+    remote = RemoteRaw802Device(device, x16bit_addr=XBee16BitAddress.from_hex_string(WEAR_16B_ADDR)) 
 
     try:
         device.open()
 
-        def data_receive_callback(xbee_message):
-            print("From %s >> %s" % (xbee_message.remote_device.get_16bit_addr(), xbee_message.data.decode()))
+
+        def msg_callback(xbee_message):
             upda_wear.received_count = upda_wear.received_count + 1
+            print("{} >> {}".format(remote.get_16bit_addr(), xbee_message.data.decode()))
+            #device.send_data_async(remote, "hello")
 
-            if len(xbee_message.data) == 11: # request information
-                if upda_wear.address == NULL_ADDR:
-                    # not connected yet
-                    upda_wear.id = xbee_message.data.decode()
-                    upda_wear.address = xbee_message.remote_device.get_16bit_addr()
-                    upda_wear.remote_device = RemoteXBeeDevice(device, x16bit_addr=upda_wear.address)
+        device.add_data_received_callback(msg_callback)
 
-                    print("linking with {}({})".format(upda_wear.id, upda_wear.address))
-                    # send acknowledgement
-                    print("acknowledging...\n")
-                    device.send_data_async(upda_wear.remote_device, DATA_ACK_CONNECT)
-    
-                elif upda_wear.address != xbee_message.remote_device.get_16bit_addr():
-                    # already connected, cannot take another device
-                    print("occuped: unable to link with {}".xbee_message.data.decode())
-
-            elif upda_wear.address == xbee_message.remote_device.get_16bit_addr():
-                # address of connected device is same as our linked device
-                pass
-
-        device.add_data_received_callback(data_receive_callback)
-
-        print("Waiting for data...\n")
+        print("press enter to stop server...")
         input()
+
+    except KeyboardInterrupt:
+        pass # just escaping the loop
 
     except serial.serialutil.SerialException:
         print("Unable to open {}".format(PORT))
