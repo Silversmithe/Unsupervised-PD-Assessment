@@ -25,7 +25,6 @@
 static IOBuffer BUFFER(BUFFER_SIZE);
 static Data* temp_data;
 static uint32_t current_time, instant_time, delta_time;
-static bool burst_write;
 
 /* STATE */
 volatile State __current_state;
@@ -55,7 +54,6 @@ MPU9250 __imus[4] = {
  *                logging, and initializing the automata and error states.
  */
 void setup(void) {
-  burst_write = false;
   bool hardware_success = true;
   bool network_success = false;
   __error = NONE;           // initialize error
@@ -69,23 +67,25 @@ void setup(void) {
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
   hardware_success &= init_com();            // setup HWSERIAL & XBEE
   hardware_success &= imu_setup(false);      // setup IMU
-  if(!hardware_success){
-    __current_state = KILL;
-    __error = IMU_ERROR;
-    kill();
-  }
+  // if(!hardware_success){
+  //   __current_state = KILL;
+  //   __error = IMU_ERROR;
+  //   kill();
+  // }
 
   /* NETWORK INITIALIZATION PROCEDURE */
   // 1. Can you contact the server?
   //    STATE <- YES: ONLINE, NO: OFFLINE
   if(XBEE_SELECT){
-    log("checking network status...");
+    // log("checking network status...");
     if(SERIAL_SELECT){ Serial.println("checking network status..."); }
     digitalWrite(XBEE_SLEEP_PIN, HIGH);
     delay(100);
     network_success = isAnyoneThere();
     digitalWrite(XBEE_SLEEP_PIN, LOW);
   }
+
+  kill();
 
   __current_state = (network_success)? ONLINE : OFFLINE;
   if(__current_state == ONLINE){

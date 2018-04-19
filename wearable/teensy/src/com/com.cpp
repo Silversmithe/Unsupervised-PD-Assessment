@@ -14,12 +14,16 @@
 
 /* xbee communication */
 XBee xbee = XBee();
-uint8_t payload[52];
+uint8_t payload[100]; // 52 usually, 100 for stress
 uint8_t broadcast[11] = { 'U','P','D','A','-','W','E','A','R','-', DEVICE_ID};
 
 Tx16Request tx_pl = Tx16Request(SERVER_ADDR, payload, sizeof(payload));
 Tx16Request tx_bc = Tx16Request(SERVER_ADDR, broadcast, sizeof(broadcast));
-TxStatusResponse tx_status = TxStatusResponse();
+
+/* response information */
+TxStatusResponse tx16 = TxStatusResponse();
+Rx16Response rx16 = Rx16Response();
+uint8_t* data = 0;
 
 uint8_t __missed_messages;
 uint32_t __packet_counter; // FOR PACKET ACCOUNTABILITY EXPERIMENT
@@ -95,6 +99,49 @@ bool init_com(void){
 }
 
 /*
+ * Send data over XBee
+ *
+ *
+ */
+int xbee_push(){
+  // Serial.println("sending...");
+  xbee.send(tx_pl);
+  /* get the tx status response */
+  xbee.readPacket();
+  if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
+    xbee.getResponse().getTxStatusResponse(tx16);
+    // Serial.println("here");
+    if(tx16.getStatus() == SUCCESS){
+      /* successfully sent */
+      Serial.println("successfully sent");
+
+    } else {
+      /* did not send correctly */
+      Serial.println("poorly sent");
+    }
+  }
+
+  return 0;
+}
+
+/*
+ * Get data over XBee
+ *
+ *
+ */
+int xbee_pull(){
+  Serial.println("receiving...");
+  if(xbee.readPacket(500)){
+    if(xbee.getResponse().getApiId() == RX_16_RESPONSE){
+      Serial.println("got a message!");
+    } else {
+      Serial.println("did not get message!");
+    }
+  }
+  return 0;
+}
+
+/*
  * @function:     isAnyoneThere
  *
  * @description:  have the radio try and contact the local server and wait for
@@ -103,15 +150,37 @@ bool init_com(void){
  *                is NOT there.
  */
 bool isAnyoneThere(void){
+
+  /* TESTING */
+  Serial.println(millis());
+  for(int i=0; i<100; i++){
+    xbee_push();
+    // xbee.send(tx_pl);
+    // Serial.println();
+    // delay(10);
+  }
+  Serial.println(millis());
+
+  delay(10000);
+
+  /* FUNCTION */
   xbee.send(tx_bc);
+  /* check that payload sent successfully */
+  if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
+    xbee.getResponse().getTxStatusResponse(tx16);
+    if(tx16.getStatus() == SUCCESS){
+      /* successfully sent */
+    } else {
+      /* did not send correctly */
+    }
+  }
+
   if(xbee.readPacket(XBEE_INIT_TIMEOUT)){ // wait for timeout
-    if(xbee.getResponse().getApiId() == RX_16_RESPONSE || xbee.getResponse().getApiId() == RX_64_RESPONSE)
+    if(xbee.getResponse().getApiId() == RX_16_RESPONSE){
+      data = rx16.getData();
+      /* process the data retrieved */
       return true;
-    return false;
-  } else if (xbee.getResponse().isError()){
-    return false;
-  } else {
-    return false; // could not contact local xbee
+    }
   }
   return false;
 }

@@ -12,8 +12,8 @@
   configured here to run or not run different sensors depending on what is
   necessary. This is particularly useful for unittesting the system.
   ----------------------------------------------------------------------------*/
-#include "myoEMG/MyoEMG.h"                // EMG library
-#include "mpu9250/MPU9250.h"              // IMU library
+#include "MyoEMG/MyoEMG.h"                // EMG library
+#include "MPU9250/MPU9250.h"              // IMU library
 #include "structures/IOBuffer.h"          // IOBuffer
 #include "structures/Data.h"              // Data Struct
 #include "com/com.h"                      // Communications Functions
@@ -34,8 +34,8 @@ const uint8_t DEVICE_ID = '1';    // ID for this specific wearable device
 #define RING_SELECT   true      // Turn on/off Ring IMU readings
 
 /* COMMUNICATION DEFINITION */
-const int SERVER_ADDR = 0xFE2F;
-const int WEAR_ADDR = 0xFE31;
+const int SERVER_ADDR = 0xFE2F; // 0xFE2F
+const int WEAR_ADDR = 0xFE31; // 0xFE31
 
 #define BUFFER_SIZE    500
 #define BUFFER_STALL   200
@@ -57,7 +57,7 @@ const int WEAR_ADDR = 0xFE31;
 
 /* COMMUNICATION CONSTANTS */
 const bool SERIAL_SELECT = true;       // Serial communication toggle
-const bool XBEE_SELECT = false;         // Xbee (Radio) communication toggle
+const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
 
 /* PINS */
 const unsigned BUILTIN_LED = 13;     // builtin led for signaling
