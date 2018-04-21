@@ -27,8 +27,8 @@ SERVER_16B_ADDR = "FE2F"
 WEAR_64B_ADDR = "0013A2004163FE31"
 WEAR_16B_ADDR = "FE31"
 # SD CARD
-SD_PATH = "/media/iron-fist/WEARV2"
-SD_DATA_PATH = "/media/iron-fist/WEARV2/DATA.txt"
+SD_PATH = "/media/iron-fist/UPDA-SD"
+SD_DATA_PATH = "/media/iron-fist/UPDA-SD/DATA.txt"
 
 
 """
@@ -79,7 +79,6 @@ def run_server():
     upda_wear.id = "UPDA-WEAR-1"
     upda_wear.address = XBee16BitAddress.from_hex_string(WEAR_16B_ADDR)
     upda_wear.remote = RemoteRaw802Device(server, upda_wear.address)
-    start_time = time.time()
 
     try:
         # might not want this
@@ -92,7 +91,8 @@ def run_server():
         def msg_callback(message):
             upda_wear.received_count = upda_wear.received_count + 1
             # register the device
-            print("{} >> {}".format(server.get_16bit_addr(), message.data.decode()))
+            print("got it!")
+            # print("{} >> {}".format(server.get_16bit_addr(), message.data.decode()))
             # pass information off to a buffer
 
         server.add_data_received_callback(msg_callback)
@@ -108,7 +108,6 @@ def run_server():
 
     finally:
         if server is not None and server.is_open():
-            upda_wear.runtime = time.time() - start_time
             server.close()
 
     print("closing run_server...")
@@ -128,7 +127,7 @@ def stats(tokens):
     print("previously linked with: {}".format(upda_wear.id))
     print("address: {}".format(upda_wear.address))
     print("received messages: {}".format(upda_wear.received_count))
-    print("server runtime: {}".format(upda_wear.received_count))
+    print("known wearable runtime: {} seconds".format(0.01 * upda_wear.received_count))
 
 
 def start(tokens):
@@ -198,14 +197,14 @@ def load(tokens):
                     else:
                         print("\ndownload complete!")
 
-            with open(SD_DATA_PATH, 'w') as dfile:
-                print("wiping SD card data...")
-                try:
-                    dfile.truncate()
-                    print("process complete!")
-
-                except OSError:
-                    print("error: could not clear SD card")
+            # with open(SD_DATA_PATH, 'w') as dfile:
+            #     print("wiping SD card data...")
+            #     try:
+            #         dfile.truncate()
+            #         print("process complete!")
+            #
+            #     except OSError:
+            #         print("error: could not clear SD card")
 
 
 def list_items(tokens):
