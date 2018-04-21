@@ -8,6 +8,7 @@ Our goal is to create a device that will utilize patient’s daily actions inste
 * http://pyopengl.sourceforge.net/documentation/
 * https://github.com/digidotcom/python-xbee
 * https://github.com/PaulStoffregen/SD
+* https://github.com/PaulStoffregen/CapacitiveSensor
 
 ## Project Notes
 
