@@ -50,15 +50,22 @@ const int chip_select = BUILTIN_SDCARD;
 /* communication functions */
 bool init_com(void);                      /* Initialize Communication Device */
 ERROR write_console(Data* src);
+
+/* sending data */
+bool write_to_server(void);
 ERROR write_radio(Data* src);
 bool isAnyoneThere(void);
-
-/* zigbee stack */
-int xbee_push();
-int xbee_pull();
+bool poke_radio(Data* src);
 
 /* helper functions */
 uint16_t pack_float(float src);           /* pack float into 16 bit */
+
+bool match_space(char* sp);
+bool match_newline(char* nl);
+bool match_int(int16_t* it);
+bool match_float(float* ft);
+
+bool match(uint8_t val);
 
 /* sd card functions */
 void open_datastream(void);
@@ -67,6 +74,7 @@ void log(const char* msg);
 ERROR log_payload(Data* src);
 
 /* VISUAL HARDWARE COMMUNICATION */
+void transfer_mode_light(void);
 void online_light(void);
 void offline_light(void);
 void search_light(void);

@@ -42,10 +42,6 @@ const int WEAR_ADDR = 0xFE31; // 0xFE31
 #define BUFFER_FLUSH   10       // how much the consumer is allowed to leave in buffer
 #define CONSUMER_RATE  10       // miliseconds: amount of delay for consumer
 
-/* EMG DEFINITION */
-#define RAW_PIN   12            // Teensy pin to read RAW signal
-#define RECT_PIN  13            // Teensy pin to read RECT signal
-
 /* IMU DEFINITION */
 #define IMU_ADDR_LO 0x68        // Low address for IMU
 #define IMU_ADDR_HI 0x69        // High address for IMU
@@ -54,16 +50,20 @@ const int WEAR_ADDR = 0xFE31; // 0xFE31
 #define DOUBLE_SAMPLE_RATE 5000     // microseconds, 200Hz
 #define FULL_SAMPLE_RATE   10000    // microseconds, 100 Hz
 #define DEMO_RATE          1000000  // microseconds
+#define MODE_SW_TO         5000     // time to hold until switch
+#define TRANSFER_POLL_TIME 5000     // time between each check 
 
 /* COMMUNICATION CONSTANTS */
 const bool SERIAL_SELECT = true;       // Serial communication toggle
 const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
 
 /* PINS */
-const unsigned BUILTIN_LED = 13;     // builtin led for signaling
-const unsigned EMG_RAW_PIN = 12;     // analog pin for emg sampling
-const unsigned EMG_RECT_PIN = 13;    // analog pin for emg rectified sampling
-const unsigned XBEE_SLEEP_PIN = 2;   // digital pin to sleep/wake radio
+const unsigned BUILTIN_LED = 13;    // builtin led for signaling
+const unsigned LED_MODE_STAT = 21;  // led to display mode
+const unsigned BTN_MODE = 32;       // button for switching modes
+const unsigned EMG_RAW_PIN = 9;     // A9 analog pin for emg sampling
+const unsigned EMG_RECT_PIN = 8;    // A8 analog pin for emg rectified sampling
+const unsigned XBEE_SLEEP_PIN = 2;  // digital pin to sleep/wake radio
 
 /* FSM STATES */
 enum State {
@@ -74,6 +74,8 @@ enum State {
 };
 
 /* FUNCTION PROTOTYPES */
+void transfer_mode(void);
+void btn_isr(void);                        // read button presses
 bool imu_setup(bool trace);                // initialize all imus accordingly
 void sensor_isr(void);                     // called whenever the device samples
 void kill(void);                           // load the bootloader state

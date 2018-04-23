@@ -82,13 +82,7 @@ bool IOBuffer::push_back(Data item){
   for(int i=0; i<2; i++)          // emg
     buffer[pback]->emg[i] = item.emg[i];
 
-  for(int i=0; i<10; i++){        // imu
-    if(i<3){
-      buffer[pback]->hand_pos[i] = item.hand_pos[i];
-      buffer[pback]->thumb_pos[i] = item.thumb_pos[i];
-      buffer[pback]->point_pos[i] = item.point_pos[i];
-      buffer[pback]->ring_pos[i] = item.ring_pos[i];
-    }
+  for(int i=0; i<9; i++){        // imu
     buffer[pback]->hand[i] = item.hand[i];
     buffer[pback]->thumb[i] = item.thumb[i];
     buffer[pback]->point[i] = item.point[i];

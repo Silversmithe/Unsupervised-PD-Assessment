@@ -7,17 +7,9 @@
   sensors in one. This is the prototype for the main application.
   Wearable device gathers information about the muscles of the arm and its
   fingers to perform diagnostics of parkinson's disease.
-
-  NOTE: ADD A CAPACITOR THAT WILL KEEP THE PROTOTYPE RUNNING LONG ENOUGH SO THAT
-  THE DEVICE CAN SHUT DOWN CORRECTLY
-
-  check switch:
-  if voltage == 0 :
-    close data stream
   ----------------------------------------------------------------------------*/
 #include "main.h"
 #include <Arduino.h>              // Arduino Library
-#include "analysis/analysis.h"    // analysis functions
 #include "stdint.h"               // Integer Library
 #include "TimerOne.h"             // Timer Libaray
 
@@ -27,8 +19,10 @@ static Data* temp_data;
 static uint32_t current_time, instant_time, delta_time;
 
 /* STATE */
-volatile State __current_state;
-volatile ERROR __error;
+volatile bool __sampling_mode;          // sampling (true), transferring (false)
+volatile State __current_state;         // what peripherals can device use
+volatile ERROR __error;                 // any complications
+volatile bool __isr_buffer_overflow;    // isr-triggered error
 
 /* DEVICE INITIALIZATION */
 bool __enabled[4] = {
@@ -38,7 +32,7 @@ bool __enabled[4] = {
   THUMB_SELECT
 };
 
-EMG forearm(RECT_PIN, RAW_PIN);
+EMG forearm(EMG_RECT_PIN, EMG_RAW_PIN);
 MPU9250 __imus[4] = {
   MPU9250(Wire, IMU_ADDR_HI),   // hand
   MPU9250(Wire, IMU_ADDR_LO),   // ring
@@ -56,36 +50,38 @@ MPU9250 __imus[4] = {
 void setup(void) {
   bool hardware_success = true;
   bool network_success = false;
-  __error = NONE;           // initialize error
-  __current_state = INIT;   // Initialization state
-  current_time = micros();  // initial time
+  __sampling_mode = false;
+  __isr_buffer_overflow = false;
+  __error = NONE;
+  __current_state = INIT;
+  current_time = micros();
 
   /* HARDWARE INITIALIZATION PROCEDURE */
   // 1. can you initialize all hardware?
   // STATE <- YES: INIT, NO: KILL
   pinMode(BUILTIN_LED, OUTPUT);
+  pinMode(BTN_MODE, INPUT);
+  pinMode(LED_MODE_STAT, OUTPUT);
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
   hardware_success &= init_com();            // setup HWSERIAL & XBEE
-  hardware_success &= imu_setup(false);      // setup IMU
-  // if(!hardware_success){
-  //   __current_state = KILL;
-  //   __error = IMU_ERROR;
-  //   kill();
-  // }
+  hardware_success &= imu_setup(true);      // setup IMU
+  if(!hardware_success){
+    __current_state = KILL;
+    __error = IMU_ERROR;
+    kill();
+  }
 
   /* NETWORK INITIALIZATION PROCEDURE */
   // 1. Can you contact the server?
   //    STATE <- YES: ONLINE, NO: OFFLINE
   if(XBEE_SELECT){
-    // log("checking network status...");
+    log("checking network status...");
     if(SERIAL_SELECT){ Serial.println("checking network status..."); }
     digitalWrite(XBEE_SLEEP_PIN, HIGH);
     delay(100);
     network_success = isAnyoneThere();
     digitalWrite(XBEE_SLEEP_PIN, LOW);
   }
-
-  kill();
 
   __current_state = (network_success)? ONLINE : OFFLINE;
   if(__current_state == ONLINE){
@@ -101,18 +97,24 @@ void setup(void) {
 
   /* turn the radio off */
   digitalWrite(XBEE_SLEEP_PIN, LOW);
+  digitalWrite(LED_MODE_STAT, HIGH);
 
   /* delay and signal before running */
   for(int i=0; i<5; i++){
     if(__current_state == ONLINE) { online_light(); }
     else { offline_light(); }
   }
+
+  /* declare start of device and current mode */
   log("starting device...");
   if(SERIAL_SELECT){ Serial.println("starting device..."); }
+  log("starting in transfer mode");
+  if(SERIAL_SELECT){ Serial.println("starting in transfer mode"); }
 
-  /* START SENSOR INTERRUPT */
-  Timer1.initialize(FULL_SAMPLE_RATE);
-  Timer1.attachInterrupt(sensor_isr);
+  /* INITIALIZE BUTTON INTERRUPT */
+  attachInterrupt(BTN_MODE, btn_isr, CHANGE);
+  /* INITIALIZE SENSOR INTERRUPT */
+  Timer1.initialize(FULL_SAMPLE_RATE);  // FULL_SAMPLE_RATE
 }
 
 /*
@@ -123,8 +125,14 @@ void setup(void) {
  *                monitor.
  */
 void loop(void) {
-  /* ERROR CHECKING */
-  if(__error != NONE){
+  /* error handling */
+  if(__error != NONE || __isr_buffer_overflow){
+    // isr generated interrupts
+    if(__isr_buffer_overflow){
+      __error = BUFFER_OVERFLOW;
+      __isr_buffer_overflow = false;
+    }
+
     switch (__error) {
       case FATAL_ERROR:
         close_datastream();
@@ -148,16 +156,10 @@ void loop(void) {
         close_datastream();
         log("error: I/O buffer has overflown...");
         if(SERIAL_SELECT){ Serial.println("error: I/O buffer has overflown..."); }
-        if(__current_state == ONLINE) {
-          log("msg: transitioning to OFFLINE state");
-          if(SERIAL_SELECT){ Serial.println("msg: transitioning to OFFLINE state"); }
-          __current_state = OFFLINE;
-        } else if(__current_state == OFFLINE) {
-          log("error: an fatal error has occurred...");
-          if(SERIAL_SELECT){ Serial.println("error: an fatal error has occurred..."); }
-          __current_state = KILL;
-          kill();
-        }
+        log("error: an fatal error has occurred...");
+        if(SERIAL_SELECT){ Serial.println("error: an fatal error has occurred..."); }
+        __current_state = KILL;
+        kill();
         break;
 
       case SD_ERROR:
@@ -165,6 +167,7 @@ void loop(void) {
         if(SERIAL_SELECT){ Serial.println("error: a sd card error has occured..."); }
         __current_state = KILL;
         kill_light();
+        noInterrupts();
         while(1){ delay(10000); }
         break;
 
@@ -175,47 +178,37 @@ void loop(void) {
         __current_state = KILL;
         kill();
         break;
-    } // end switch
+    }
   }
 
-  /* CONSUMER BEHAVIOR */
-  if(BUFFER.num_elts() >= BUFFER_STALL){
-    /* open connection to consume */
-    if(__current_state == ONLINE){
-      digitalWrite(XBEE_SLEEP_PIN, HIGH);
-    } else {  /* OFFLINE */
-      open_datastream();
-    }
-
-    /* entirely flush the buffer */
-    while(BUFFER.num_elts() > BUFFER_FLUSH){
-      // remove a Data item from buffer
-      digitalWrite(BUILTIN_LED, HIGH);
-
+  /* mode behavior */
+  if(__sampling_mode){
+    /* allow for sampling BEHAVIOR */
+    if(!BUFFER.is_empty()){
       noInterrupts();
       temp_data = BUFFER.remove_front();
       interrupts();
 
-      /* DATA PROCESSING */
-      orient(temp_data);    // Mahoney filtering -> orientation generation
-
       /* DATA TRANSFER */
-      if(SERIAL_SELECT) { __error = write_console(temp_data); }
-
-      if(__current_state == ONLINE) { __error = write_radio(temp_data); }
-      else { __error = log_payload(temp_data); } /* OFFLINE */
-      digitalWrite(BUILTIN_LED, LOW);
+      // if(SERIAL_SELECT){ __error = write_console(temp_data); }
+      __error = log_payload(temp_data);
     }
+  } else {
+    transfer_mode();
+  }
+}
 
-    /* close connection to consume */
-    if(__current_state == ONLINE){
-      digitalWrite(XBEE_SLEEP_PIN, LOW);
-    } else {  /* OFFLINE */
-      close_datastream();
-    }
+void transfer_mode(void){
+  if(OFFLINE){
+    delay(TRANSFER_POLL_TIME);
+    /* check for connection */
+    __current_state = (XBEE_SELECT && isAnyoneThere())? ONLINE: OFFLINE;
+  }
+  if(ONLINE){
+    /* start sending data */
+
   }
 
-  delay(CONSUMER_RATE);
 }
 
 /*
@@ -225,6 +218,9 @@ void loop(void) {
  *                the user that the device should be rebooted or debugged
  */
 void kill(void){
+  Timer1.detachInterrupt();
+  detachInterrupt(BTN_MODE);
+  close_datastream();
   log("state: kill");
   if(SERIAL_SELECT){ Serial.println("state: kill"); }
   kill_light();
@@ -264,6 +260,54 @@ bool imu_setup(bool trace){
 }
 
 /*
+ * @function:     btn_isr
+ *
+ * @description:  function that is triggered when the button changes to HIGH
+ *                on the wearable device. this isr will wait for a period of
+ *                time, say 10 seconds, and if the button is still high after
+ *                that then the device will switch modes.
+ *                There are two modes to switch between:
+ *                sampling mode: collecting data
+ *                transfer mode: transferring data to the network if available
+ */
+void btn_isr(void){
+  // pin should be high
+  unsigned value = digitalRead(BTN_MODE);
+  if(value == 0){ return; } // exit if not 1
+  for(unsigned i=0; i < MODE_SW_TO; i+=1000){
+    digitalWrite(BUILTIN_LED, HIGH);
+    delay(500);
+    digitalWrite(BUILTIN_LED, LOW);
+    delay(500);
+  }
+  value = digitalRead(BTN_MODE);
+  delay(250);
+  /* constant val high -> change modes */
+  if(value == 1){
+    __sampling_mode = !__sampling_mode;
+    close_datastream(); // just in case a file is being written to
+    if(__sampling_mode){
+      log("switching to: sampling mode");
+      if(SERIAL_SELECT) { Serial.println("switching to: sampling mode"); }
+      digitalWrite(LED_MODE_STAT, LOW);
+      /* write new data segment */
+
+      /* turn on the sensor isr */
+      open_datastream();
+      Timer1.attachInterrupt(sensor_isr);
+
+    } else {
+      log("switching to: transfer mode");
+      if(SERIAL_SELECT) { Serial.println("switching to: transfer mode"); }
+      digitalWrite(LED_MODE_STAT, HIGH);
+      /* turn off the sensor isr */
+      Timer1.detachInterrupt();
+    }
+  }
+  delay(1000); // just in case
+}
+
+/*
  * @function:     sensor_isr
  *
  * @description:  method that runs after each interrupt from the main thread.
@@ -279,16 +323,12 @@ void sensor_isr(void){
 
   // new information set for buffer
   Data packet = {
-    {0,0},                          // EMG DATA
-    {0,0,0,0,0,0,0,0,0,0},          // HAND
-    {0,0,0},                        // HPOSITION
-    {0,0,0,0,0,0,0,0,0,0},          // THUMB
-    {0,0,0},                        // TPOSITION
-    {0,0,0,0,0,0,0,0,0,0},          // POINT
-    {0,0,0},                        // PPOSITION
-    {0,0,0,0,0,0,0,0,0,0},          // RING
-    {0,0,0},                        // RPOSITION
-    (float)(delta_time/1000000.0f)  // dt (seconds) = micros * sec/micros
+    {0,0},                        // EMG DATA
+    {0,0,0,0,0,0,0,0,0},          // HAND
+    {0,0,0,0,0,0,0,0,0},          // THUMB
+    {0,0,0,0,0,0,0,0,0},          // POINT
+    {0,0,0,0,0,0,0,0,0},          // RING
+    (float)(delta_time/1000000.0f)// dt (seconds) = micros * sec/micros
   };
 
   if(EMG_SELECT){
@@ -310,8 +350,6 @@ void sensor_isr(void){
     packet.hand[6] = __imus[0].getMagX_uT();
     packet.hand[7] = __imus[0].getMagY_uT();
     packet.hand[8] = __imus[0].getMagZ_uT();
-    // temp
-    packet.hand[9] = __imus[0].getTemperature_C();
   }
 
   if(THUMB_SELECT){
@@ -328,8 +366,6 @@ void sensor_isr(void){
     packet.thumb[6] = __imus[1].getMagX_uT();
     packet.thumb[7] = __imus[1].getMagY_uT();
     packet.thumb[8] = __imus[1].getMagZ_uT();
-    // temp
-    packet.thumb[9] = __imus[1].getTemperature_C();
   }
 
   if(POINT_SELECT){
@@ -346,8 +382,6 @@ void sensor_isr(void){
     packet.point[6] = __imus[2].getMagX_uT();
     packet.point[7] = __imus[2].getMagY_uT();
     packet.point[8] = __imus[2].getMagZ_uT();
-    // temp
-    packet.point[9] = __imus[2].getTemperature_C();
   }
 
   if(RING_SELECT){
@@ -364,10 +398,7 @@ void sensor_isr(void){
     packet.ring[6] = __imus[3].getMagX_uT();
     packet.ring[7] = __imus[3].getMagY_uT();
     packet.ring[8] = __imus[3].getMagZ_uT();
-    // temp
-    packet.ring[9] = __imus[3].getTemperature_C();
   }
 
-  // store packet in buffer
-  if(!BUFFER.push_back(packet)){ __error = BUFFER_OVERFLOW; }
+  if(!BUFFER.push_back(packet)){ __isr_buffer_overflow = true; }
 }
