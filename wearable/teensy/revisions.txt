@@ -20,6 +20,12 @@ February 16th, 2018
 February 28th, 2018
 - implementing basic communication software for
   phase 1.
-  
+
 March 10th, 2018
 - pushed final version of PHASE 1 - naiive software -- to github
+
+April 24th, 2018
+- creating a radio connection with the server after the device has stopped
+collecting information
+- sends one sample in FOUR packets, so that all information can get there
+while maintaining integrity

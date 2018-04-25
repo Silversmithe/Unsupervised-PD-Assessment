@@ -77,8 +77,6 @@ bool IOBuffer::push_back(Data item){
   if(count >= SIZE){ return false; } // if full do not add
 
   /* deep copy */
-  buffer[pback]->dt = item.dt;    // time between interrupts
-
   for(int i=0; i<2; i++)          // emg
     buffer[pback]->emg[i] = item.emg[i];
 

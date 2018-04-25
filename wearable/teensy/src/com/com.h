@@ -13,7 +13,7 @@
 #include "Arduino.h"
 #include "../structures/Data.h"
 #include <XBee.h>
-#include <../sd/SD.h>
+#include "../sd/SD.h"
 #include <SPI.h>
 #include <math.h>
 #include "../errors.h"
@@ -34,15 +34,35 @@ extern const int WEAR_ADDR;
 #define XBEE_COM_TIMEOUT  10
 
 /* serial information */
-#define HWSERIAL    Serial3
-#define USB_BAUD    115200
-#define RADIO_BAUD  57600
+#define HWSERIAL     Serial3
+#define USB_BAUD     115200
+#define RADIO_BAUD   57600
 #define MISSED_LIMIT 100
+
+/* buffer variables */
+#define FILE_BUFFER  300
+
+/* radio information */
+#define PAYLOAD_SIZE 100
+#define TX_STAT_WAIT 100
+
+/* communication protocol variables */
+/* should have a byte for identifying the message type */
+// new_datafile
+// continue_datafile
+// sample/payload
+// broadcast
+const uint8_t BROADCAST     = 0x01;   // tell the server you are here
+const uint8_t NEW_DATA      = 0x02;   // signify server to create new file
+const uint8_t CONTINUE_DATA = 0x03;   // if not all data in segment transferred
+const uint8_t PAYLOAD       = 0x04;
+static uint8_t __packet_id;           // modulo 100
 
 /* pins */
 extern const bool SERIAL_SELECT;
 extern const bool XBEE_SELECT;
 extern const unsigned BUILTIN_LED;        /* builtin led on pin 13 */
+extern const unsigned LED_MODE_STAT;      /* for controlling mode */
 
 /* sd card communication */
 const int chip_select = BUILTIN_SDCARD;
@@ -52,24 +72,22 @@ bool init_com(void);                      /* Initialize Communication Device */
 ERROR write_console(Data* src);
 
 /* sending data */
-bool write_to_server(void);
+uint32_t write_to_server(uint32_t pos);
 ERROR write_radio(Data* src);
 bool isAnyoneThere(void);
-bool poke_radio(Data* src);
 
 /* helper functions */
-uint16_t pack_float(float src);           /* pack float into 16 bit */
-
-bool match_space(char* sp);
-bool match_newline(char* nl);
-bool match_int(int16_t* it);
-bool match_float(float* ft);
-
-bool match(uint8_t val);
+uint16_t float_to_halfword(float src);
+/* read line of current file */
+unsigned read_line(uint8_t* buffer);
+/* parse buffer and create packet*/
+bool parse_line(unsigned size, uint8_t* buffer, Data* store);
+bool match(unsigned& index, uint8_t* buffer, uint8_t val);
 
 /* sd card functions */
 void open_datastream(void);
 void close_datastream(void);
+bool clear_datastream(void);
 void log(const char* msg);
 ERROR log_payload(Data* src);
 

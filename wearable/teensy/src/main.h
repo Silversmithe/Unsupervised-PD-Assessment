@@ -24,7 +24,7 @@
 
 /* PROGRAM INFO */
 #define VERSION 1
-const uint8_t DEVICE_ID = '1';    // ID for this specific wearable device
+const uint8_t DEVICE_ID = 0x01;    // ID for this specific wearable device
 
 /* DEVICE SELECTORS */
 #define EMG_SELECT    true     // Turn on/off Forearm EMG readings
@@ -51,7 +51,7 @@ const int WEAR_ADDR = 0xFE31; // 0xFE31
 #define FULL_SAMPLE_RATE   10000    // microseconds, 100 Hz
 #define DEMO_RATE          1000000  // microseconds
 #define MODE_SW_TO         5000     // time to hold until switch
-#define TRANSFER_POLL_TIME 5000     // time between each check 
+#define TRANSFER_POLL_TIME 3000    // time between each check
 
 /* COMMUNICATION CONSTANTS */
 const bool SERIAL_SELECT = true;       // Serial communication toggle

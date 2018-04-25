@@ -14,16 +14,19 @@
 
 /* xbee communication */
 XBee xbee = XBee();
-uint8_t payload[148]; // 52 usually, 100 for stress
-uint8_t broadcast[11] = { 'U','P','D','A','-','W','E','A','R','-', DEVICE_ID};
 
-Tx16Request tx_pl = Tx16Request(SERVER_ADDR, payload, sizeof(payload));
+uint8_t broadcast[]     = { BROADCAST, DEVICE_ID};
+uint8_t new_data[]      = { NEW_DATA, DEVICE_ID };
+uint8_t continue_data[] = { CONTINUE_DATA, DEVICE_ID };
+uint8_t char_buffer[PAYLOAD_SIZE];
+
 Tx16Request tx_bc = Tx16Request(SERVER_ADDR, broadcast, sizeof(broadcast));
+Tx16Request tx_nd = Tx16Request(SERVER_ADDR, new_data, sizeof(new_data));
+Tx16Request tx_cd = Tx16Request(SERVER_ADDR, continue_data, sizeof(continue_data));
+Tx16Request tx_char = Tx16Request(SERVER_ADDR, char_buffer, sizeof(char_buffer));
 
 /* response information */
 TxStatusResponse tx16 = TxStatusResponse();
-Rx16Response rx16 = Rx16Response();
-uint8_t* data = 0;
 
 uint8_t __missed_messages;
 uint32_t __packet_counter; // FOR PACKET ACCOUNTABILITY EXPERIMENT
@@ -85,9 +88,14 @@ bool init_com(void){
       hardware_success = false;
     }
 
+    /* clean slate with each new run */
+    if(SD.exists("data.txt")){
+      SD.remove("data.txt");
+    }
+
     __file = SD.open("data.txt", FILE_WRITE);
     if(__file){ /* file created successfully */
-      __file.println("#");
+      __file.println("----- datafile -----");
       __file.close();
     } else { /* error creating file */
       hardware_success = false;
@@ -96,6 +104,7 @@ bool init_com(void){
 
   /* initialize missed messages */
   __missed_messages = 0;
+  __packet_id = 0;
 
   return hardware_success;
 }
@@ -110,6 +119,7 @@ bool init_com(void){
  */
 bool isAnyoneThere(void){
   /* continue to send messages until you miss the limit */
+  __missed_messages = 0;
   while(__missed_messages < MISSED_LIMIT){
     xbee.send(tx_bc);
     /* get the tx status response */
@@ -133,7 +143,7 @@ void open_datastream(void){
   if(!__file) {
     __file = SD.open("data.txt", FILE_WRITE);
     if(__file){ /* file created successfully */
-      __file.println("#");
+      __file.println("----- datafile -----");
     }
   }
 }
@@ -156,6 +166,7 @@ void close_datastream(void){
  * @description:  record the given message in a new line in the log
  */
 void log(const char* message){
+  if(SERIAL_SELECT) { Serial.println(message); }
   __file = SD.open("log.txt", FILE_WRITE);
   if(__file){
     __file.println(message);
@@ -226,10 +237,6 @@ ERROR log_payload(Data* src){
 ERROR write_console(Data* src){
   if(!SERIAL_SELECT){ return NONE; } // exit if the serial select has not been seleced
 
-  // delta time
-  Serial.print(src->dt);
-  Serial.print("\t");
-
   // emg
   Serial.print("(");
   for(int iter=0; iter<2; iter++){
@@ -273,222 +280,235 @@ ERROR write_console(Data* src){
   return NONE;
 }
 
+bool match(unsigned& index, uint8_t* buffer, uint8_t val){
+  if(buffer[index] == val){
+    index++;
+    return true;
+  }
+  return false;
+}
+
+bool header(unsigned& index, uint8_t* buffer){
+  bool result = false;
+  // '----- '
+  for(int i=0; i<5; i++){
+    result |= match(index, buffer, '-');
+  }
+  result |= match(index, buffer, ' ');
+
+  // match 'datafile'
+  result |= match(index, buffer, 'd');
+  result |= match(index, buffer, 'a');
+  result |= match(index, buffer, 't');
+  result |= match(index, buffer, 'a');
+  result |= match(index, buffer, 'f');
+  result |= match(index, buffer, 'i');
+  result |= match(index, buffer, 'l');
+  result |= match(index, buffer, 'e');
+
+  // ' -----'
+  result |= match(index, buffer, ' ');
+  for(int i=0; i<5; i++){
+    result |= match(index, buffer, '-');
+  }
+
+  return result;
+}
+
+/*
+  read until a newline character
+
+  space should already be allocated (300 bytes)
+  does NOT store newline
+ */
+unsigned read_line(uint8_t* buffer){
+  uint8_t lookahead;
+  unsigned count = 0;
+
+  /* clearing out the spaces */
+  if(__file.available()) {
+    lookahead = __file.read();
+    while(__file.available() && (lookahead == '\n' || lookahead == 13)){
+      lookahead = __file.read(); // skip to the next one
+    }
+  } else { return 0; } /* error */
+
+
+  /* actually going to read to file */
+  if(__file.available()){
+    while(__file.available()){
+      if(count >= FILE_BUFFER){ return count; } // too large!
+      if(count != 0) { lookahead = __file.read(); }
+      /* stop if nl | cr */
+      if(lookahead == '\n' || lookahead == 13){ break; }
+      buffer[count++] = lookahead;
+    }
+  } else { return 0; } /* error */
+
+  return count;
+}
+
+/*
+  parse the line
+
+  uint8_t: buffer of the line read
+
+  return boolean: is the line a header or not
+*/
+bool parse_line(unsigned size, uint8_t* buffer){
+  unsigned index = 0;
+
+  /* detect lookahead */
+  if(buffer[index] == '-' && header(index, buffer)){ return true; }
+
+  return false;
+}
+
+bool write_line(unsigned size, uint8_t* buffer){
+  unsigned index = 3;
+
+  char_buffer[0] = PAYLOAD;
+  char_buffer[1] = __packet_id;
+  char_buffer[2] = ' ';
+
+  for(unsigned i = 0; i < size; i++){
+    if(index == PAYLOAD_SIZE){
+      /* packet is full */
+      /* send information */
+      while(__missed_messages < MISSED_LIMIT){
+        xbee.send(tx_char);
+        /* get the tx status response */
+        xbee.readPacket(TX_STAT_WAIT);
+        if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
+          xbee.getResponse().getTxStatusResponse(tx16);
+          if(tx16.getStatus() == SUCCESS){ break; }
+          else { Serial.println("missed");}
+        }
+        __missed_messages = __missed_messages + 1;
+      }
+      if(__missed_messages >= MISSED_LIMIT) { return false; }
+
+      index = 3; // reset that index
+    }
+
+    /* store the valuable information to send in char buffer */
+    char_buffer[index++] = buffer[i];
+  }
+
+  /* send out last message */
+  while(__missed_messages < MISSED_LIMIT){
+    xbee.send(tx_char);
+    /* get the tx status response */
+    xbee.readPacket(TX_STAT_WAIT);
+    if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
+      xbee.getResponse().getTxStatusResponse(tx16);
+      if(tx16.getStatus() == SUCCESS){ break; }
+      else { Serial.println("missed");}
+    }
+    __missed_messages = __missed_messages + 1;
+  }
+  if(__missed_messages >= MISSED_LIMIT) { return false; }
+
+  return true;
+}
+
+bool write_data_radio(bool isnew){
+  while(__missed_messages < MISSED_LIMIT){
+    if(isnew){ xbee.send(tx_nd); }
+    else { xbee.send(tx_cd); }
+
+    /* get the tx status response */
+    xbee.readPacket(TX_STAT_WAIT);
+    if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
+      xbee.getResponse().getTxStatusResponse(tx16);
+      if(tx16.getStatus() == SUCCESS){ return true; }
+    }
+    __missed_messages = __missed_messages + 1;
+  }
+  return false;
+}
+
 /*
  * @function:         write_to_server
  *
  * @description:      send all of the information for all the different
  *                    sessions
  *
+ *  note: return value is the position of the device in the file currently
+ *
  */
-bool write_to_server(void){
+uint32_t write_to_server(uint32_t position){
+  uint8_t* buffer = new uint8_t[FILE_BUFFER];
+  unsigned size;
+  uint32_t current_pos = position;
+  bool header = false;
+
   if(__file){ __file.close(); }
 
   if(SD.exists("data.txt")){
-    __file = SD.open("data.txt");
 
-    while(__file.available()){
+    Serial.println();
+    Serial.println("ready to transmit...");
+    delay(5000);
 
+    /* should prepare file to be opened */
+    if(!__file){
+      __file = SD.open("data.txt");
+      if(__file.seek(current_pos)){
+        Serial.println("found the current position");
+      } else {
+        Serial.println("could not reach position!!");
+      }
     }
+    digitalWrite(LED_MODE_STAT, LOW);
 
+    /*
+    PARSE A DATA SEGMENT
+
+    a segment consists of a header line
+    and multiple sample lines
+    */
+    if(__file){
+      /* check for the header */
+      __packet_id = 0;
+      if(__file.available()){
+        size = read_line(buffer);
+        header = parse_line(size, buffer);
+      }
+
+      /* header devices */
+      if(header){ write_data_radio(true); } /* send header signal */
+      else { write_data_radio(false); }
+
+      /* read samples */
+      while(__file.available()){
+        size = read_line(buffer);
+        header = parse_line(size, buffer);
+
+        if(header){ break; } // bread out of data segment
+
+        // WRITE TO THE "XBEE"
+        if(!write_line(size, buffer)) {
+          Serial.println("error writing to radio");
+          break;
+        }
+        __packet_id = (__packet_id + 1) % 16; // keep within the size of a file
+        // delay(10); // slight delay is healthy for server
+        transfer_mode_light();
+      }
+
+      current_pos = __file.position();
+      __file.close();
+    }
   } else {
     log("no data exists to write");
     if(SERIAL_SELECT){ Serial.println("no data exists to write"); }
   }
+  // turn btn_mode light back on
+  digitalWrite(LED_MODE_STAT, HIGH);
 
-  return false;
-}
-
-
-/*
- * @function:         match
- *
- * @description:      given a number, match with a specific type of character
- *
- * @note:
- *                    0 = ' '
- *                    1 = number
- *                    2 = '.'
- *                    3 = '-'
- *                    4 = '\n'
- */
-bool match(unsigned val){
-
-  switch (val) {
-    case 0:
-      break;
-    case 1:
-      break;
-    case 2:
-      break;
-    case 3:
-      break;
-    case 4:
-      break;
-  }
-
-  return false;
-}
-
-/*
- * @function:          write_radio
- *
- * @param:             (Data*) src: a pointer to a data sample to send over Xbee radio.
- *
- * @description:       check to make sure that the data point has been sent
- *                      successfully by waiting for an ACK for a certian amount
- *                      of time. Otherwise try resending it.
- *                      Eventually, if the message has not been achnowledged a couple
- *                      times, the wearable should throw an error and standby
- */
-ERROR write_radio(Data* src){
-  if(!XBEE_SELECT || src == NULL) { return NONE; } /* check radio */
-  /* check error messages */
-  uint16_t packet_info;
-  unsigned packet_index = 0;
-
-  // transform into a packet
-  /* emg */
-  for(int i=0; i<2; i++){
-    payload[packet_index] = (src->emg[i] >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = src->emg[i] & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-  /* hand */
-  for(int i=0; i<6; i++){
-    packet_info = pack_float(src->hand[i]);
-    payload[packet_index] = (packet_info >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = packet_info & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-  /* thumb */
-  for(int i=0; i<6; i++){
-    packet_info = pack_float(src->thumb[i]);
-    payload[packet_index] = (packet_info >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = packet_info & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-  /* point */
-  for(int i=0; i<6; i++){
-    packet_info = pack_float(src->point[i]);
-    payload[packet_index] = (packet_info >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = packet_info & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-  /* ring */
-  for(int i=0; i<6; i++){
-    packet_info = pack_float(src->ring[i]);
-    payload[packet_index] = (packet_info >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = packet_info & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-
-  // attempt to send information over a pseudo TCP/IP
-  while(__missed_messages < MISSED_LIMIT){
-    xbee.send(tx_pl);
-    /* get the tx status response */
-    xbee.readPacket(50);
-    if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
-      xbee.getResponse().getTxStatusResponse(tx16);
-      if(tx16.getStatus() == SUCCESS){ return NONE; }
-    }
-    __missed_messages = __missed_messages + 1;
-  }
-
-  if(__missed_messages >= MISSED_LIMIT) { return ISOLATED_DEVICE_ERROR; }
-  return NONE;
-}
-
-/*
-  POKE
-*/
-
-bool poke_radio(Data* src){
-  if(!XBEE_SELECT || src == NULL) { return false; } /* check radio */
-  /* check error messages */
-  uint16_t packet_info;
-  unsigned packet_index = 0;
-
-  // transform into a packet
-  /* emg */
-  for(int i=0; i<2; i++){
-    payload[packet_index] = (src->emg[i] >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = src->emg[i] & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-  /* hand */
-  for(int i=0; i<6; i++){
-    packet_info = pack_float(src->hand[i]);
-    payload[packet_index] = (packet_info >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = packet_info & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-  /* thumb */
-  for(int i=0; i<6; i++){
-    packet_info = pack_float(src->thumb[i]);
-    payload[packet_index] = (packet_info >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = packet_info & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-  /* point */
-  for(int i=0; i<6; i++){
-    packet_info = pack_float(src->point[i]);
-    payload[packet_index] = (packet_info >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = packet_info & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-  /* ring */
-  for(int i=0; i<6; i++){
-    packet_info = pack_float(src->ring[i]);
-    payload[packet_index] = (packet_info >> 8) & 0x00FF;
-    packet_index = packet_index + 1;
-    payload[packet_index] = packet_info & 0x00FF;
-    packet_index = packet_index + 1;
-  }
-
-  // attempt to send information xbee
-  xbee.send(tx_pl);
-  /* get the tx status response */
-  xbee.readPacket(10);
-  if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
-    xbee.getResponse().getTxStatusResponse(tx16);
-    if(tx16.getStatus() == SUCCESS){ return true; }
-    return false;
-  }
-  __missed_messages = __missed_messages + 1;
-  return false;
-}
-
-/*
- * @function:       pack_float
- *
- * @param:          (float) src: the value to pack into a smaller space
- *
- * @description:    because floats normally take up four bits, we are taking
- *                  advantage of the fact that the values the floats are assuming
- *                  are smaller than their entire space, thus they can be compacted
- *                  into two bytes instead of four.
- *                  NOTE: all float multiplied by 100 and then stored
- */
-uint16_t pack_float(float src){
-  /* to get decimals mult by 100 */
-  if(src >= 0){
-    return (uint16_t)(src*100);
-  } else {
-    // turn positive and then manually
-    // place bit
-    uint16_t result = (uint16_t) ((-1 * src) * 100);
-    result = result | 0x8000;  // set MSB for negation
-    return result;
-  }
+  delete[] buffer;
+  return current_pos;
 }
 
 /*
@@ -546,7 +566,10 @@ void search_light(void){
  *                    happening and that the power should NOT be turned off
  */
 void transfer_mode_light(void){
-
+  digitalWrite(BUILTIN_LED, HIGH);
+  delay(5);
+  digitalWrite(BUILTIN_LED, LOW);
+  delay(5);
 }
 
 /*
