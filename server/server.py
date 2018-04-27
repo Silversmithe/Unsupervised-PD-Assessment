@@ -12,6 +12,8 @@ NOTE: use the arg parse library for command-line tools
 import os
 import time
 import serial
+from threading import Thread, ThreadError, Lock
+from Filter import RawDataFilter
 from digi.xbee.devices import XBeeDevice, RemoteXBeeDevice, Raw802Device, RemoteRaw802Device
 from digi.xbee.models.address import XBee16BitAddress, XBee64BitAddress
 
@@ -30,17 +32,20 @@ WEAR_16B_ADDR = "FE31"
 SD_PATH = "/media/iron-fist/UPDA-SD"
 SD_DATA_PATH = "/media/iron-fist/UPDA-SD/DATA.txt"
 
-
 """
-XBEE SERVER 
+WEARABLE DEVICE
+
+Keeps track of general statistics and characteristics of the radio
+mounted on the wearable device in communication with this specific
+server.
 """
 
 
 class Wearable(object):
-    
+
     def __init__(self):
         self.id = "unknown"
-        self.address = XBee16BitAddress.from_hex_string("0x0000") 
+        self.address = XBee16BitAddress.from_hex_string("0x0000")
         self.received_count = 0
         self.sent_count = 0
         self.remote = None
@@ -48,7 +53,7 @@ class Wearable(object):
 
     def reset(self):
         self.id = "unknown"
-        self.address = XBee16BitAddress.from_hex_string("0x0000") 
+        self.address = XBee16BitAddress.from_hex_string("0x0000")
         self.received_count = 0
         self.sent_count = 0
         self.remote = None
@@ -56,13 +61,106 @@ class Wearable(object):
 
 
 """
-XBee Wearable Devices
+GLOBAL VARIABLES
+
+Used for IPC between threads as well as general book keeping for 
+the entire console system with reference to the wearable device
+in communication.
 """
-upda_wear = Wearable()
+
+UpdaWear = Wearable()
+MessageBuffer = list()
+BufferLock = Lock()
+
+"""
+INSTANCE LOADER
+
+takes all the raw data over the radio and passes it through a filter
+Listens to an array that is populated by the XBee server and uses it to 
+filter and process instances for certain files
+"""
+
+
+class InstanceLoader(Thread):
+
+    def __init__(self, file_count):
+        Thread.__init__(self)
+        self.__raw_instances = list()
+        self.__file_count = file_count  # file count
+        self.raw_filter = RawDataFilter()
+        self.__file = None
+
+    def run(self):
+        """
+        Given a list of samples, open up or append a new file and start
+        writing the information there
+        :return:
+        """
+        try:
+            while True:
+
+                # if MessageBuffer past Sample threshold, take them and start processing them
+                # eventually would be nice: len(MessageBuffer) >= 200
+                if len(MessageBuffer) > 0 and len(self.__raw_instances) == 0:
+                    with BufferLock:
+                        self.__raw_instances = list(MessageBuffer)
+
+                elif len(self.__raw_instances) > 0:
+                    # process the values that are in your buffer
+                    # instances are byte arrays
+                    # payloads are twins
+
+                    while len(self.__raw_instances) > 0:
+                        # look at opcode
+                        instance = int(self.__raw_instances[0][0], 16)
+
+                        if instance == self.raw_filter.BROADCAST_MSG:
+                            # okay cool, do not need to store
+                            pass
+
+                        if instance == self.raw_filter.OLD_DATASEG_MSG:
+                            # okay cool, do not need to store FOR NOW
+                            pass
+
+                        elif instance == self.raw_filter.NEW_DATASEG_MSG:
+                            # okay need to open a new file
+                            self.__file_count += 1          # increment file count for new file name
+                            if self.__file is not None:     # close any previously open file
+                                self.__file.close()
+
+                            # create a new file to write to
+                            self.__file = open("./data/patient-{}.txt".format(self.__file_count), "w")
+
+                        elif instance == self.raw_filter.PAYLOAD_MSG:
+                            # pass data through payload filter
+                            if int(self.__raw_instances[0][1], 16) == int(self.__raw_instances[1][1], 16):
+                                _, _, _data = self.raw_filter.process(self.__raw_instances[0], self.__raw_instances[1])
+                                self.__raw_instances.pop(0)  # pop the first val, the next is popped at end of loop
+                                # write to file
+                                for value in _data:
+                                    self.__file.write('{}\t'.format(value))
+
+                        else:
+                            # should be the CLOSE Message
+                            # close all files
+                            self.__file.close()
+                            break
+
+                        self.__raw_instances.pop(0)
+
+                else:
+                    time.sleep(1)
+
+        finally:
+            if self.__file is not None:
+                self.__file.close()
 
 
 """
-Server
+SERVER
+
+code to run the actual server that communicates with the wearable
+device via the XBee connected via USB serial port.
 """
 
 
@@ -73,12 +171,13 @@ def run_server():
     """
     # INIT SERVER
     print("starting run_server...")
-    upda_wear.reset()
+    UpdaWear.reset()
 
     server = Raw802Device(PORT, BAUD_RATE)
-    upda_wear.id = "UPDA-WEAR-1"
-    upda_wear.address = XBee16BitAddress.from_hex_string(WEAR_16B_ADDR)
-    upda_wear.remote = RemoteRaw802Device(server, upda_wear.address)
+    UpdaWear.id = "UPDA-WEAR-1"
+    UpdaWear.address = XBee16BitAddress.from_hex_string(WEAR_16B_ADDR)
+    UpdaWear.remote = RemoteRaw802Device(server, UpdaWear.address)
+    instance_manager = None
 
     try:
         # might not want this
@@ -86,14 +185,21 @@ def run_server():
             print("unable to find './data' to store information")
             raise KeyboardInterrupt
 
+        # get patient count to make a new file
+        num_patients = len([name for name in os.listdir('./data')])
+
+        instance_manager = InstanceLoader(num_patients)
+        instance_manager.run()
         server.open()
 
         def msg_callback(message):
-            upda_wear.received_count = upda_wear.received_count + 1
+            UpdaWear.received_count = UpdaWear.received_count + 1
             # register the device
-            print("got it!")
             # print("{} >> {}".format(server.get_16bit_addr(), message.data.decode()))
             # pass information off to a buffer
+            # store the data (byte array)
+            with BufferLock:
+                MessageBuffer.append(message.data)
 
         server.add_data_received_callback(msg_callback)
 
@@ -107,6 +213,9 @@ def run_server():
         print("Unable to open {}".format(PORT))
 
     finally:
+        if instance_manager is not None:
+            instance_manager.join()
+
         if server is not None and server.is_open():
             server.close()
 
@@ -115,6 +224,9 @@ def run_server():
 
 """
 Simple UPDA CONSOLE
+
+functions that are triggered based on input from the actual 
+console system.
 """
 
 
@@ -124,10 +236,10 @@ def stats(tokens):
     :return:
     """
     print("stats from previous run_server session...")
-    print("previously linked with: {}".format(upda_wear.id))
-    print("address: {}".format(upda_wear.address))
-    print("received messages: {}".format(upda_wear.received_count))
-    print("known wearable runtime: {} seconds".format(0.01 * upda_wear.received_count))
+    print("previously linked with: {}".format(UpdaWear.id))
+    print("address: {}".format(UpdaWear.address))
+    print("received messages: {}".format(UpdaWear.received_count))
+    print("known wearable runtime: {} seconds".format(0.01 * UpdaWear.received_count))
 
 
 def start(tokens):
