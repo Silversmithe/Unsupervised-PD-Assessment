@@ -332,12 +332,12 @@ uint16_t getDigit(uint8_t b){
   }
 }
 
-uint16_t halfword(unsigned& index, uint8_t* buffer){
+uint16_t halfword(unsigned& index, unsigned size, uint8_t* buffer){
   uint8_t start=index;
   float e=-1.0;
   uint16_t sum=0;
 
-  while(isDigit(buffer[index])){
+  while(isDigit(buffer[index]) && index < size){
     match(index, buffer, buffer[index]);
     e=e+1.0;
   }
@@ -349,36 +349,34 @@ uint16_t halfword(unsigned& index, uint8_t* buffer){
   return sum;
 }
 
-uint32_t floating(unsigned& index, uint8_t* buffer){
-  unsigned start=index;
-  unsigned punct=start;
-  float up=0.0, bt=0.0;
+uint32_t floating(unsigned& index, unsigned size, uint8_t* buffer){
+  unsigned start = index;
+  unsigned punct;
+  float pwr;
   float sum=0.0;
   bool negate = (match(index, buffer, '-'))? true: false;
 
-  /* converting stream of bytes to float */
-  while(isDigit(buffer[index]) || buffer[index] == '.'){
-    if(buffer[index] == '.'){
-      punct = index;
+  if(isDigit(buffer[index])){
+    // digits here
+    while((isDigit(buffer[index]) || buffer[index] == '.') && index < size){
+      if(buffer[index] == '.'){ punct = index; } // save period location
       match(index, buffer, buffer[index]);
-      continue;
     }
-    match(index, buffer, buffer[index]);
-    if(punct == start){ up=up+1.0; }
-    else { bt=bt-1.0; }
-  }
 
-  /* calculate upper part of float */
-  for(unsigned i=start; i<punct; i++){
-    sum += ((float)getDigit(buffer[i]) * pow(10.0, up));
-    up = up -1.0;
-  }
+    pwr = ((float)punct - (float) start) - 1.0;
+    /* converting bytes to float */
+    for(unsigned i=start; i<punct; i++){
+      sum += ((float)getDigit(buffer[i]) * pow(10.0, pwr));
+      pwr = pwr - 1.0;
+    }
 
-  /* calculate lower part of float */
-  for(unsigned i=index-1; i>punct; i--){
-    sum += ((float)getDigit(buffer[i]) * pow(10.0, bt));
-    bt = bt +1.0;
-  }
+    pwr = (float)punct - (float)(index-1);
+    for(unsigned i=index-1; i> punct; i--){
+      sum += ((float)getDigit(buffer[i]) * pow(10.0, pwr));
+      pwr = pwr + 1.0;
+    }
+
+  } else { return 0; } // error: cannot read digit
 
   /* convert the float into a 32-bit value */
   if(negate){ return (~((uint32_t)(sum*100.0))) + 1; }
@@ -438,13 +436,13 @@ bool parse_line(unsigned& size, uint8_t* buffer){
   /* parse emg */
   for(unsigned i=0; i<2; i++){
     whitepace(index, buffer);
-    emg[i] = halfword(index, buffer);
+    emg[i] = halfword(index, size, buffer);
   }
 
   /* parse imus */
   for(unsigned i=0; i<36; i++){
     whitepace(index, buffer);
-    imu[i] = floating(index, buffer);
+    imu[i] = floating(index, size, buffer);
   }
 
   /* load EMG into buffer */
@@ -588,7 +586,6 @@ uint32_t write_to_server(uint32_t position){
         header = parse_line(size, buffer);
 
         if(header){ break; } // bread out of data segment
-
 
         // WRITE TO THE "XBEE"
         if(!write_line(size, buffer)) {
