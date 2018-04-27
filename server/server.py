@@ -115,11 +115,10 @@ class InstanceLoader(Thread):
                     while len(self.__raw_instances) > 0:
                         # look at opcode
                         instance = int(str(self.__raw_instances[0][0]), 16)
-                        
 
                         if instance == self.raw_filter.BROADCAST_MSG:
                             # okay cool, do not need to store
-                            print("msg: recieved device broadcast")
+                            print("msg: received device broadcast")
                             pass
 
                         elif instance == self.raw_filter.OLD_DATASEG_MSG:
@@ -145,6 +144,11 @@ class InstanceLoader(Thread):
                                 for value in _data:
                                     self.__file.write('{}\t'.format(value))
                                 self.__file.write('\n')  # end with a newline
+
+                            else:
+                                # second part of packet did not show up, so the packet is not useful
+                                print("warning: unable to find packet pair")
+                                pass
 
                         else:
                             # should be the CLOSE Message
