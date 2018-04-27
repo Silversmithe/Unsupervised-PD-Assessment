@@ -466,15 +466,15 @@ bool parse_line(unsigned& size, uint8_t* buffer){
 
 bool write_line(unsigned size, uint8_t* buffer){
   unsigned byte_size = 176;
+  unsigned offset = 2;
   bool success = false;
 
   char_buffer[0] = PAYLOAD;
   char_buffer[1] = __packet_id;
-  char_buffer[2] = ' ';
 
   /* first segment */
-  for(unsigned i=0; i<PAYLOAD_SIZE-3; i++)
-    char_buffer[i+3] = buffer[i];
+  for(unsigned i=0; i<PAYLOAD_SIZE-offset; i++)
+    char_buffer[i+offset] = buffer[i];
 
   /* send first packet */
   while(__missed_messages < MISSED_LIMIT){
@@ -492,8 +492,8 @@ bool write_line(unsigned size, uint8_t* buffer){
   }
 
   /* second segment */
-  for(unsigned i=0; i<byte_size-(PAYLOAD_SIZE-3); i++)
-    char_buffer[i+3] = buffer[i+(PAYLOAD_SIZE-3)];
+  for(unsigned i=0; i<byte_size-(PAYLOAD_SIZE-offset); i++)
+    char_buffer[i+offset] = buffer[i+(PAYLOAD_SIZE-offset)];
 
   /* send second packet */
   while(__missed_messages < MISSED_LIMIT){
