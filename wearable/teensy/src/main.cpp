@@ -53,7 +53,7 @@ void setup(void) {
   bool hardware_success = true;
   bool network_success = false;
   __enable_sampling = false;
-  __new_data = false;
+  __new_data = true; // usually false
   __file_pos = 0;
   __prev_pos = 0;
   __sampling_mode = false;
@@ -68,7 +68,7 @@ void setup(void) {
   pinMode(BTN_MODE, INPUT);
   pinMode(LED_MODE_STAT, OUTPUT);
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
-  hardware_success &= init_com();            // setup HWSERIAL & XBEE
+  hardware_success &= init_com(false);      // setup HWSERIAL & XBEE
   hardware_success &= imu_setup(true);      // setup IMU
   if(!hardware_success){
     __current_state = KILL;
@@ -177,7 +177,7 @@ void loop(void) {
 
   /* enable interrupts */
   if(__enable_sampling){
-    Serial.println("sampling enabled");
+    if(SERIAL_SELECT) {Serial.println("sampling enabled");}
     Timer1.attachInterrupt(sensor_isr);
     open_datastream();
     __enable_sampling = false;

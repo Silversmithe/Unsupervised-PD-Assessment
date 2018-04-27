@@ -44,7 +44,7 @@ File __file;
  *                       open a connection with the SD card port as a place to
  *                       do logging
  */
-bool init_com(void){
+bool init_com(bool erase){
   unsigned long start_time, current_time;
   bool hardware_success = true;
   /* ------------------------------- SERIAL ------------------------------ */
@@ -89,13 +89,10 @@ bool init_com(void){
     }
 
     /* clean slate with each new run */
-    if(SD.exists("data.txt")){
-      SD.remove("data.txt");
-    }
+    if(erase && SD.exists("data.txt")){ SD.remove("data.txt"); }
 
     __file = SD.open("data.txt", FILE_WRITE);
     if(__file){ /* file created successfully */
-      __file.println("----- datafile -----");
       __file.close();
     } else { /* error creating file */
       hardware_success = false;
@@ -289,31 +286,105 @@ bool match(unsigned& index, uint8_t* buffer, uint8_t val){
 }
 
 bool header(unsigned& index, uint8_t* buffer){
-  bool result = false;
+  bool result = true;
   // '----- '
-  for(int i=0; i<5; i++){
-    result |= match(index, buffer, '-');
-  }
-  result |= match(index, buffer, ' ');
+  for(int i=0; i<5; i++)
+    result &= match(index, buffer, '-');
+
+  result &= match(index, buffer, ' ');
 
   // match 'datafile'
-  result |= match(index, buffer, 'd');
-  result |= match(index, buffer, 'a');
-  result |= match(index, buffer, 't');
-  result |= match(index, buffer, 'a');
-  result |= match(index, buffer, 'f');
-  result |= match(index, buffer, 'i');
-  result |= match(index, buffer, 'l');
-  result |= match(index, buffer, 'e');
+  result &= match(index, buffer, 'd');
+  result &= match(index, buffer, 'a');
+  result &= match(index, buffer, 't');
+  result &= match(index, buffer, 'a');
+  result &= match(index, buffer, 'f');
+  result &= match(index, buffer, 'i');
+  result &= match(index, buffer, 'l');
+  result &= match(index, buffer, 'e');
 
   // ' -----'
-  result |= match(index, buffer, ' ');
-  for(int i=0; i<5; i++){
-    result |= match(index, buffer, '-');
-  }
+  result &= match(index, buffer, ' ');
+  for(int i=0; i<5; i++)
+    result &= match(index, buffer, '-');
 
   return result;
 }
+
+void whitepace(unsigned& index, uint8_t* buffer){
+  while(isWhitespace(buffer[index]) || isSpace(buffer[index]))
+      match(index, buffer, buffer[index]);
+}
+
+uint16_t getDigit(uint8_t b){
+  switch (b) {
+    case '0': return 0;
+    case '1': return 1;
+    case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
+    case '5': return 5;
+    case '6': return 6;
+    case '7': return 7;
+    case '8': return 8;
+    case '9': return 9;
+    default: return 0;
+  }
+}
+
+uint16_t halfword(unsigned& index, uint8_t* buffer){
+  uint8_t start=index;
+  float e=-1.0;
+  uint16_t sum=0;
+
+  while(isDigit(buffer[index])){
+    match(index, buffer, buffer[index]);
+    e=e+1.0;
+  }
+
+  for(unsigned i=start; i<index; i++){
+    sum += (getDigit(buffer[i]) * (uint16_t)(pow(10.0, e)));
+    e=e-1.0;
+  }
+  return sum;
+}
+
+uint32_t floating(unsigned& index, uint8_t* buffer){
+  unsigned start=index;
+  unsigned punct=start;
+  float up=0.0, bt=0.0;
+  float sum=0.0;
+  bool negate = (match(index, buffer, '-'))? true: false;
+
+  /* converting stream of bytes to float */
+  while(isDigit(buffer[index]) || buffer[index] == '.'){
+    if(buffer[index] == '.'){
+      punct = index;
+      match(index, buffer, buffer[index]);
+      continue;
+    }
+    match(index, buffer, buffer[index]);
+    if(punct == start){ up=up+1.0; }
+    else { bt=bt-1.0; }
+  }
+
+  /* calculate upper part of float */
+  for(unsigned i=start; i<punct; i++){
+    sum += ((float)getDigit(buffer[i]) * pow(10.0, up));
+    up = up -1.0;
+  }
+
+  /* calculate lower part of float */
+  for(unsigned i=index-1; i>punct; i--){
+    sum += ((float)getDigit(buffer[i]) * pow(10.0, bt));
+    bt = bt +1.0;
+  }
+
+  /* convert the float into a 32-bit value */
+  if(negate){ return (~((uint32_t)(sum*100.0))) + 1; }
+  return (uint32_t)(sum*100.0);
+}
+
 
 /*
   read until a newline character
@@ -355,61 +426,91 @@ unsigned read_line(uint8_t* buffer){
 
   return boolean: is the line a header or not
 */
-bool parse_line(unsigned size, uint8_t* buffer){
+bool parse_line(unsigned& size, uint8_t* buffer){
   unsigned index = 0;
+  unsigned fill_ptr=0;
+  uint16_t emg[2];
+  uint32_t imu[36];
 
   /* detect lookahead */
   if(buffer[index] == '-' && header(index, buffer)){ return true; }
+
+  /* parse emg */
+  for(unsigned i=0; i<2; i++){
+    whitepace(index, buffer);
+    emg[i] = halfword(index, buffer);
+  }
+
+  /* parse imus */
+  for(unsigned i=0; i<36; i++){
+    whitepace(index, buffer);
+    imu[i] = floating(index, buffer);
+  }
+
+  /* load EMG into buffer */
+  for(unsigned i=0; i<2; i++){
+    buffer[fill_ptr++] = (uint8_t)((emg[i] >> 8) & 0x00FF);
+    buffer[fill_ptr++] = (uint8_t)((emg[i]) & 0x00FF);
+  }
+
+  /* load IMU into buffer */
+  for(unsigned i=0; i<36; i++){
+    buffer[fill_ptr++] = (uint8_t)((imu[i] >> 24) & 0x00FF);
+    buffer[fill_ptr++] = (uint8_t)((imu[i] >> 16) & 0x00FF);
+    buffer[fill_ptr++] = (uint8_t)((imu[i] >> 8) & 0x00FF);
+    buffer[fill_ptr++] = (uint8_t)((imu[i]) & 0x00FF);
+  }
 
   return false;
 }
 
 bool write_line(unsigned size, uint8_t* buffer){
-  unsigned index = 3;
+  unsigned byte_size = 176;
+  bool success = false;
 
   char_buffer[0] = PAYLOAD;
   char_buffer[1] = __packet_id;
   char_buffer[2] = ' ';
 
-  for(unsigned i = 0; i < size; i++){
-    if(index == PAYLOAD_SIZE){
-      /* packet is full */
-      /* send information */
-      while(__missed_messages < MISSED_LIMIT){
-        xbee.send(tx_char);
-        /* get the tx status response */
-        xbee.readPacket(TX_STAT_WAIT);
-        if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
-          xbee.getResponse().getTxStatusResponse(tx16);
-          if(tx16.getStatus() == SUCCESS){ break; }
-          else { Serial.println("missed");}
-        }
-        __missed_messages = __missed_messages + 1;
-      }
-      if(__missed_messages >= MISSED_LIMIT) { return false; }
+  /* first segment */
+  for(unsigned i=0; i<PAYLOAD_SIZE-3; i++)
+    char_buffer[i+3] = buffer[i];
 
-      index = 3; // reset that index
-    }
-
-    /* store the valuable information to send in char buffer */
-    char_buffer[index++] = buffer[i];
-  }
-
-  /* send out last message */
+  /* send first packet */
   while(__missed_messages < MISSED_LIMIT){
     xbee.send(tx_char);
     /* get the tx status response */
-    xbee.readPacket(TX_STAT_WAIT);
+    xbee.readPacket(50);
     if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
       xbee.getResponse().getTxStatusResponse(tx16);
-      if(tx16.getStatus() == SUCCESS){ break; }
-      else { Serial.println("missed");}
+      if(tx16.getStatus() == SUCCESS){
+        success = true;
+        break;
+      }
     }
-    __missed_messages = __missed_messages + 1;
+    __missed_messages++;
   }
-  if(__missed_messages >= MISSED_LIMIT) { return false; }
 
-  return true;
+  /* second segment */
+  for(unsigned i=0; i<byte_size-(PAYLOAD_SIZE-3); i++)
+    char_buffer[i+3] = buffer[i+(PAYLOAD_SIZE-3)];
+
+  /* send second packet */
+  while(__missed_messages < MISSED_LIMIT){
+    xbee.send(tx_char);
+    /* get the tx status response */
+    xbee.readPacket(50);
+    if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
+      xbee.getResponse().getTxStatusResponse(tx16);
+      if(tx16.getStatus() == SUCCESS){
+        success = true;
+        break;
+      }
+    }
+    __missed_messages++;
+  }
+
+  return success;
 }
 
 bool write_data_radio(bool isnew){
@@ -469,6 +570,7 @@ uint32_t write_to_server(uint32_t position){
     and multiple sample lines
     */
     if(__file){
+
       /* check for the header */
       __packet_id = 0;
       if(__file.available()){
@@ -486,6 +588,7 @@ uint32_t write_to_server(uint32_t position){
         header = parse_line(size, buffer);
 
         if(header){ break; } // bread out of data segment
+
 
         // WRITE TO THE "XBEE"
         if(!write_line(size, buffer)) {

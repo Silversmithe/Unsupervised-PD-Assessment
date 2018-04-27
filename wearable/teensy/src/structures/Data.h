@@ -6,7 +6,7 @@
   description:  This struct contains the all the information gathered and
                 produced by the wearable device and other processing algorithms
 
-                (16*2) + (2*9)*4 = 104
+                (16*2) + (4*9)*4 = 176
   ----------------------------------------------------------------------------*/
 #include "stdint.h"
 

@@ -68,7 +68,7 @@ extern const unsigned LED_MODE_STAT;      /* for controlling mode */
 const int chip_select = BUILTIN_SDCARD;
 
 /* communication functions */
-bool init_com(void);                      /* Initialize Communication Device */
+bool init_com(bool erase);                 /* Initialize Communication Device */
 ERROR write_console(Data* src);
 
 /* sending data */
@@ -81,7 +81,7 @@ uint16_t float_to_halfword(float src);
 /* read line of current file */
 unsigned read_line(uint8_t* buffer);
 /* parse buffer and create packet*/
-bool parse_line(unsigned size, uint8_t* buffer, Data* store);
+bool parse_line(unsigned& size, uint8_t* buffer, Data* store);
 bool match(unsigned& index, uint8_t* buffer, uint8_t val);
 
 /* sd card functions */
