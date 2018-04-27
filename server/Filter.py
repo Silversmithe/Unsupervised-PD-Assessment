@@ -59,7 +59,7 @@ class RawDataFilter(object):
                 result.append((raw0[i] << 8) + raw0[i+1])  # store RAW and RECT emg
 
             # build first half of floats
-            for i in range(6, 99, 4):
+            for i in range(6, 98, 4):
                 _real = (raw0[i] << 24) + (raw0[i+1] << 16) + (raw0[i+2] << 8) + raw0[i+3]
                 if _real > 0x7fffffff:
                     _real -= 0x100000000

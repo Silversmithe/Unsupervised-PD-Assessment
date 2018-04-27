@@ -102,7 +102,7 @@ class InstanceLoader(Thread):
 
                 # if MessageBuffer past Sample threshold, take them and start processing them
                 # eventually would be nice: len(MessageBuffer) >= 200
-                if len(MessageBuffer) > 0 and len(self.__raw_instances) == 0:
+                if len(MessageBuffer) > 0 and len(self.__raw_instances) <= 1:
                     with BufferLock:
                         self.__raw_instances = list(MessageBuffer)
                         MessageBuffer.clear()
@@ -137,18 +137,19 @@ class InstanceLoader(Thread):
 
                         elif instance == self.raw_filter.PAYLOAD_MSG:
                             # pass data through payload filter
-                            if int(str(self.__raw_instances[0][1]), 16) == int(str(self.__raw_instances[1][1]), 16):
-                                _, _, _data = self.raw_filter.process(self.__raw_instances[0], self.__raw_instances[1])
-                                self.__raw_instances.pop(0)  # pop the first val, the next is popped at end of loop
-                                # write to file
-                                for value in _data:
-                                    self.__file.write('{}\t'.format(value))
-                                self.__file.write('\n')  # end with a newline
+                            if len(self.__raw_instances) > 1:
+                                if int(str(self.__raw_instances[0][1]), 16) == int(str(self.__raw_instances[1][1]), 16):
+                                    _, _, _data = self.raw_filter.process(self.__raw_instances[0], self.__raw_instances[1])
+                                    self.__raw_instances.pop(0)  # pop the first val, the next is popped at end of loop
+                                    # write to file
+                                    for value in _data:
+                                        self.__file.write('{}\t'.format(value))
+                                    self.__file.write('\n')  # end with a newline
 
-                            else:
-                                # second part of packet did not show up, so the packet is not useful
-                                print("warning: unable to find packet pair")
-                                pass
+                                else:
+                                    # second part of packet did not show up, so the packet is not useful
+                                    print("warning: unable to find packet pair")
+                                    pass
 
                         else:
                             # should be the CLOSE Message
