@@ -189,7 +189,7 @@ def run_server():
         num_patients = len([name for name in os.listdir('./data')])
 
         instance_manager = InstanceLoader(num_patients)
-        instance_manager.run()
+        instance_manager.start()
         server.open()
 
         def msg_callback(message):
