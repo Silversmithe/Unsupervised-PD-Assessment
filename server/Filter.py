@@ -44,7 +44,7 @@ class RawDataFilter(object):
         """
 
         # get command and id
-        _command, _pid = int(raw0[0], 16), int(raw0[1], 16)
+        _command, _pid = int(str(raw0[0]), 16), int(str(raw0[1]), 16)
 
         # process command
         if _command == self.PAYLOAD_MSG:

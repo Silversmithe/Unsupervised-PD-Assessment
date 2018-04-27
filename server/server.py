@@ -96,14 +96,16 @@ class InstanceLoader(Thread):
         writing the information there
         :return:
         """
+        __running = True
         try:
-            while True:
+            while __running:
 
                 # if MessageBuffer past Sample threshold, take them and start processing them
                 # eventually would be nice: len(MessageBuffer) >= 200
                 if len(MessageBuffer) > 0 and len(self.__raw_instances) == 0:
                     with BufferLock:
                         self.__raw_instances = list(MessageBuffer)
+                        MessageBuffer.clear()
 
                 elif len(self.__raw_instances) > 0:
                     # process the values that are in your buffer
@@ -112,13 +114,15 @@ class InstanceLoader(Thread):
 
                     while len(self.__raw_instances) > 0:
                         # look at opcode
-                        instance = int(self.__raw_instances[0][0], 16)
+                        instance = int(str(self.__raw_instances[0][0]), 16)
+                        
 
                         if instance == self.raw_filter.BROADCAST_MSG:
                             # okay cool, do not need to store
+                            print("msg: recieved device broadcast")
                             pass
 
-                        if instance == self.raw_filter.OLD_DATASEG_MSG:
+                        elif instance == self.raw_filter.OLD_DATASEG_MSG:
                             # okay cool, do not need to store FOR NOW
                             pass
 
@@ -130,20 +134,25 @@ class InstanceLoader(Thread):
 
                             # create a new file to write to
                             self.__file = open("./data/patient-{}.txt".format(self.__file_count), "w")
+                            print("msg: created new patient session")
 
                         elif instance == self.raw_filter.PAYLOAD_MSG:
                             # pass data through payload filter
-                            if int(self.__raw_instances[0][1], 16) == int(self.__raw_instances[1][1], 16):
+                            if int(str(self.__raw_instances[0][1]), 16) == int(str(self.__raw_instances[1][1]), 16):
                                 _, _, _data = self.raw_filter.process(self.__raw_instances[0], self.__raw_instances[1])
                                 self.__raw_instances.pop(0)  # pop the first val, the next is popped at end of loop
                                 # write to file
                                 for value in _data:
                                     self.__file.write('{}\t'.format(value))
+                                self.__file.write('\n')  # end with a newline
 
                         else:
                             # should be the CLOSE Message
                             # close all files
-                            self.__file.close()
+                            print("closing instance manager thread...")
+                            if self.__file is not None:
+                                self.__file.close()
+                            __running = False
                             break
 
                         self.__raw_instances.pop(0)
@@ -152,6 +161,7 @@ class InstanceLoader(Thread):
                     time.sleep(1)
 
         finally:
+
             if self.__file is not None:
                 self.__file.close()
 
@@ -172,12 +182,14 @@ def run_server():
     # INIT SERVER
     print("starting run_server...")
     UpdaWear.reset()
+    MessageBuffer.clear()
 
     server = Raw802Device(PORT, BAUD_RATE)
     UpdaWear.id = "UPDA-WEAR-1"
     UpdaWear.address = XBee16BitAddress.from_hex_string(WEAR_16B_ADDR)
     UpdaWear.remote = RemoteRaw802Device(server, UpdaWear.address)
     instance_manager = None
+    exit_message = bytearray([0x05, 0x00])
 
     try:
         # might not want this
@@ -207,13 +219,17 @@ def run_server():
         input()
 
     except KeyboardInterrupt:
-        pass  # just escaping the loop
+        print()  # add a space so everything is nearly on a different line
 
     except serial.serialutil.SerialException:
         print("Unable to open {}".format(PORT))
 
     finally:
+
         if instance_manager is not None:
+            # close instance manager
+            with BufferLock:
+                MessageBuffer.append(exit_message)
             instance_manager.join()
 
         if server is not None and server.is_open():
