@@ -23,10 +23,7 @@ RUNNING = True
 # SERVER
 PORT = "/dev/ttyUSB0"
 BAUD_RATE = 57600
-SERVER_NAME = "SERVE"
-SERVER_64B_ADDR = "0013A2004163FE2F"
 SERVER_16B_ADDR = "FE2F"
-WEAR_64B_ADDR = "0013A2004163FE31"
 WEAR_16B_ADDR = "FE31"
 # SD CARD
 SD_PATH = "/media/iron-fist/UPDA-SD"
@@ -98,6 +95,7 @@ class InstanceLoader(Thread):
         """
         __running = True
         try:
+            print("starting instance loader thread...")
             while __running:
 
                 # if MessageBuffer past Sample threshold, take them and start processing them
@@ -116,26 +114,42 @@ class InstanceLoader(Thread):
                         # look at opcode
                         instance = int(str(self.__raw_instances[0][0]), 16)
 
+                        ######################
+                        # BROADCAST MESSAGES #
+                        ######################
                         if instance == self.raw_filter.BROADCAST_MSG:
                             # okay cool, do not need to store
                             print("msg: received device broadcast")
                             pass
 
+                        #####################
+                        # OLD DATA MESSAGES #
+                        #####################
                         elif instance == self.raw_filter.OLD_DATASEG_MSG:
                             # okay cool, do not need to store FOR NOW
                             print("msg: continuing previous session")
                             pass
 
+                        #####################
+                        # NEW DATA MESSAGES #
+                        #####################
                         elif instance == self.raw_filter.NEW_DATASEG_MSG:
                             # okay need to open a new file
                             self.__file_count += 1          # increment file count for new file name
                             if self.__file is not None:     # close any previously open file
                                 self.__file.close()
 
+                            # create a new folder for raw file
+                            if not os.path.exists("./data/patient-{}".format(self.__file_count)):
+                                os.mkdir("./data/patient-{}".format(self.__file_count))
+
                             # create a new file to write to
-                            self.__file = open("./data/patient-{}.txt".format(self.__file_count), "w")
+                            self.__file = open("./data/patient-{}/raw.txt".format(self.__file_count), "w")
                             print("msg: created new patient session")
 
+                        ####################
+                        # PAYLOAD MESSAGES #
+                        ####################
                         elif instance == self.raw_filter.PAYLOAD_MSG:
                             # pass data through payload filter
                             if len(self.__raw_instances) > 1:
@@ -152,10 +166,18 @@ class InstanceLoader(Thread):
                                     print("warning: unable to find packet pair")
                                     pass
 
+                        ####################
+                        # PROCESS MESSAGES #
+                        ####################
+                        # tell a thread to handle the scoring of the current patients so far
+
+                        ##################
+                        # CLOSE MESSAGES #
+                        ##################
                         else:
                             # should be the CLOSE Message
                             # close all files
-                            print("closing instance manager thread...")
+                            print("closing instance loader thread...")
                             if self.__file is not None:
                                 self.__file.close()
                             __running = False
@@ -330,15 +352,6 @@ def load(tokens):
 
                     else:
                         print("\ndownload complete!")
-
-            # with open(SD_DATA_PATH, 'w') as dfile:
-            #     print("wiping SD card data...")
-            #     try:
-            #         dfile.truncate()
-            #         print("process complete!")
-            #
-            #     except OSError:
-            #         print("error: could not clear SD card")
 
 
 def list_items(tokens):

@@ -12,6 +12,7 @@ class RawDataFilter(object):
     OLD_DATASEG_MSG = 3  # previous patient file was not finished, should be continued
     PAYLOAD_MSG = 4      # message containing data to store
     CLOSE_MSG = 5        # wearable telling server to stop
+    PROCESS_MSG = 6      # wearable telling server to process the messages
 
     def __init__(self):
         self.hand_mhf = MahoneyFilter()

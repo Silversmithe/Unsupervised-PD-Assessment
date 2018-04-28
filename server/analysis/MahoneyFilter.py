@@ -33,16 +33,16 @@ class MahoneyFilter(object):
         one instance consists of:
         Hand_Axyz_Gxyz_Mxyz
 
-        :param ax:
-        :param ay:
-        :param az:
-        :param gx:
-        :param gy:
-        :param gz:
-        :param mx:
-        :param my:
-        :param mz:
-        :param dt:
+        :param ax: acceleration in the x-direction
+        :param ay: acceleration in the y-direction
+        :param az: acceleration in the z-direction
+        :param gx: radians/second in the x-direction
+        :param gy: radians/second in the y-direction
+        :param gz: radians/second in the z-direction
+        :param mx: micro tesslas in the x direction
+        :param my: micro tesslas in the y direction
+        :param mz: micro tesslas in the z direction
+        :param dt: time in seconds since the last update
         :return: None
         Information is stored in 'self._q' for future work
         """
@@ -135,8 +135,9 @@ class MahoneyFilter(object):
     def to_roll(self, deg=False):
         """
         Converts the current Q into roll
+
         :param deg: (bool) should it be converted to degrees
-        :return:
+        :return: current estimated roll position in either degrees or radians
         """
         t0 = 2.0 * (self.q[0] * self.q[1] + self.q[2] * self.q[3])
         t1 = self.q[0] * self.q[0] - self.q[1] * self.q[1] - self.q[2] * self.q[2] + self.q[3] * self.q[3]
@@ -152,7 +153,7 @@ class MahoneyFilter(object):
         Converts the current Q into pitch
 
         :param deg: (bool) should it be converted to degrees
-        :return:
+        :return: current estimated pitch position in either degrees or radians
         """
         t0 = 2.0 * (self.q[1] * self.q[3] - self.q[0] * self.q[2])
 
@@ -167,7 +168,7 @@ class MahoneyFilter(object):
         Converts the current Q into yaw
 
         :param deg: (bool) should it be converted to degrees
-        :return:
+        :return: current estimated yaw position in either degrees or radians
         """
         t0 = 2.0 * (self.q[1] * self.q[2] + self.q[0] * self.q[3])
         t1 = self.q[0] * self.q[0] + self.q[1] * self.q[1] - self.q[2] * self.q[2] - self.q[3] * self.q[3]
