@@ -12,10 +12,10 @@ NOTE: use the arg parse library for command-line tools
 import os
 import time
 import serial
-from threading import Thread, ThreadError, Lock
-from Filter import RawDataFilter
-from digi.xbee.devices import XBeeDevice, RemoteXBeeDevice, Raw802Device, RemoteRaw802Device
-from digi.xbee.models.address import XBee16BitAddress, XBee64BitAddress
+from threading import Thread, Lock
+from analysis.RawDataFilter import RawDataFilter
+from digi.xbee.devices import Raw802Device, RemoteRaw802Device
+from digi.xbee.models.address import XBee16BitAddress
 
 # GLOBALS
 VERSION = 1
@@ -104,7 +104,7 @@ class InstanceLoader(Thread):
                 # eventually would be nice: len(MessageBuffer) >= 200
                 if len(MessageBuffer) > 0 and len(self.__raw_instances) <= 1:
                     with BufferLock:
-                        self.__raw_instances = list(MessageBuffer)
+                        self.__raw_instances.extend(MessageBuffer)  # extend, do not overwrite what you already have
                         MessageBuffer.clear()
 
                 elif len(self.__raw_instances) > 0:
@@ -123,6 +123,7 @@ class InstanceLoader(Thread):
 
                         elif instance == self.raw_filter.OLD_DATASEG_MSG:
                             # okay cool, do not need to store FOR NOW
+                            print("msg: continuing previous session")
                             pass
 
                         elif instance == self.raw_filter.NEW_DATASEG_MSG:
