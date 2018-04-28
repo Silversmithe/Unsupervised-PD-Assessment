@@ -69,7 +69,8 @@ class RawDataFilter(object):
 
             # build second half of floats
             # two bytes left over at index 2 and 3
-            for i in range(4, 100, 4):
+            # total 100 bytes
+            for i in range(4, 52, 4):
                 _real = (raw1[i] << 24) + (raw1[i+1] << 16) + (raw1[i+2] << 8) + raw1[i+3]
                 if _real > 0x7fffffff:
                     _real -= 0x100000000

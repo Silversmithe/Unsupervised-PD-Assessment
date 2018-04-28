@@ -24,22 +24,6 @@ class MahoneyFilter(object):
         self.q = [1.0, 0.0, 0.0, 0.0]  # w x y z
         self.eint = [0.0, 0.0, 0.0]
 
-    def update(self, instances):
-        """
-        what units should dt be in? we know that the difference in time is one-hundreth of a second
-
-        :param instances: a list of instances that are used to calculate the mahoney filter
-        :return: None
-        All information is stored into q, which then can be used to calculate roll, pitch
-        and yaw by calling the functions attached to this class accordingly
-        """
-        orientations = list()
-        for i in instances:
-            self.process(ax=i[0], ay=i[1], az=i[2], gx=i[3], gy=i[4], gz=i[5], mx=i[6], my=i[7], mz=i[8], dt=0.01)
-            orientations.append([self.to_pitch(), self.to_yaw(), self.to_roll()])
-
-        return orientations
-
     def process(self, ax, ay, az, gx, gy, gz, mx, my, mz, dt):
         """
         instance:
@@ -121,9 +105,10 @@ class MahoneyFilter(object):
             self.eint[2] += ez
 
         else:
-            self.eint[0] += 0.0
-            self.eint[1] += 0.0
-            self.eint[2] += 0.0
+            # prevent integral windup
+            self.eint[0] = 0.0
+            self.eint[1] = 0.0
+            self.eint[2] = 0.0
 
         # apply feedback terms
         gx = gx + self.Kp * ex + self.Ki * self.eint[0]
@@ -154,13 +139,13 @@ class MahoneyFilter(object):
         :return:
         """
         t0 = 2.0 * (self.q[0] * self.q[1] + self.q[2] * self.q[3])
-        t1 = 1.0 - 2.0 * (self.q[1] * self.q[1] + self.q[2] * self.q[2])
+        t1 = self.q[0] * self.q[0] - self.q[1] * self.q[1] - self.q[2] * self.q[2] + self.q[3] * self.q[3]
 
         if deg:
-            return atan2(t0, t1)
+            return degrees(atan2(t0, t1))
 
         else:
-            return degrees(atan2(t0, t1))
+            return atan2(t0, t1)
 
     def to_pitch(self, deg=False):
         """
@@ -169,15 +154,13 @@ class MahoneyFilter(object):
         :param deg: (bool) should it be converted to degrees
         :return:
         """
-        t0 = 2.0 * (self.q[0] * self.q[3] - self.q[1] * self.q[2])
-        t0 = 1.0 if t0 > 1.0 else t0
-        t0 = -1.0 if t0 < -1.0 else t0
+        t0 = 2.0 * (self.q[1] * self.q[3] - self.q[0] * self.q[2])
 
         if deg:
-            return degrees(asin(t0))
+            return degrees(-1.0 * asin(t0)) - 8.5  # according to sparkfun code. declination angle
 
         else:
-            return asin(t0)
+            return asin(-1.0 * t0)
 
     def to_yaw(self, deg=False):
         """
@@ -186,11 +169,11 @@ class MahoneyFilter(object):
         :param deg: (bool) should it be converted to degrees
         :return:
         """
-        t0 = 2.0 * (self.q[0] * self.q[3] + self.q[1] * self.q[2])
-        t1 = 1.0 - 2.0 * (self.q[2] * self.q[2] + self.q[3] * self.q[3])
+        t0 = 2.0 * (self.q[1] * self.q[2] + self.q[0] * self.q[3])
+        t1 = self.q[0] * self.q[0] + self.q[1] * self.q[1] - self.q[2] * self.q[2] - self.q[3] * self.q[3]
 
         if deg:
-            return degrees(math.atan2(t0, t1))
+            return degrees(atan2(t0, t1))
 
         else:
-            return math.atan2(t0, t1)
+            return atan2(t0, t1)
