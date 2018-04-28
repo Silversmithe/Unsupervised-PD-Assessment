@@ -10,13 +10,12 @@ scoring system what to focus on
 
 class PositionalFilter(object):
 
-    # potential position states
-    FINGER_TAP = 0
-    HAND_TAP = 1
-    NONE = 2
-
     def __init__(self):
         pass
 
     def process(self):
+        """
+        processes and Outputs here
+        :return:
+        """
         pass
