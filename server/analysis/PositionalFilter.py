@@ -13,7 +13,7 @@ class PositionalFilter(object):
     def __init__(self):
         pass
 
-    def process(self):
+    def process(self, filename):
         """
         processes and Outputs here
         :return:
