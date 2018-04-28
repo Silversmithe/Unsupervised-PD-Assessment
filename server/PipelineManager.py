@@ -26,4 +26,25 @@ class PipelineManager(Thread):
         pass
 
     def run(self):
+        """
+        Given a patient profile, pass that patient's profile through all the
+        stages of the UPDA pipeline
+        :return:
+        """
+        #################
+        # Signal Filter #
+        #################
+
+        #####################
+        # Positional Filter #
+        #####################
+
+        ##################
+        # Scoring Filter #
+        ##################
+
+        ##################
+        # Scoring Output #
+        ##################
+
         pass
