@@ -13,6 +13,7 @@ import os
 import time
 import serial
 from threading import Thread, Lock
+from analysis.MahoneyFilter import MahoneyFilter
 from analysis.RawDataFilter import RawDataFilter
 from digi.xbee.devices import Raw802Device, RemoteRaw802Device
 from digi.xbee.models.address import XBee16BitAddress
@@ -22,7 +23,7 @@ VERSION = 1
 RUNNING = True
 # SERVER
 PORT = "/dev/ttyUSB0"
-BAUD_RATE = 57600
+BAUD_RATE = 38400  # 57600
 SERVER_16B_ADDR = "FE2F"
 WEAR_16B_ADDR = "FE31"
 # SD CARD
@@ -94,6 +95,7 @@ class InstanceLoader(Thread):
         :return:
         """
         __running = True
+        __packet_extend = False
         try:
             print("starting instance loader thread...")
             while __running:
@@ -105,12 +107,23 @@ class InstanceLoader(Thread):
                         self.__raw_instances.extend(MessageBuffer)  # extend, do not overwrite what you already have
                         MessageBuffer.clear()
 
-                elif len(self.__raw_instances) > 0:
+                elif len(self.__raw_instances) == 1:
+                    instance = int(str(self.__raw_instances[0][0]), 16)
+                    if instance == self.raw_filter.OLD_DATASEG_MSG:
+                        print("msg: continuing previous session")
+                        self.__raw_instances.pop(0)
+
+                    if instance == self.raw_filter.CLOSE_MSG:
+                        __running = False
+                        self.__raw_instances.pop(0)
+                        continue
+
+                elif len(self.__raw_instances) > 1:
                     # process the values that are in your buffer
                     # instances are byte arrays
                     # payloads are twins
 
-                    while len(self.__raw_instances) > 0:
+                    while len(self.__raw_instances) > 1:
                         # look at opcode
                         instance = int(str(self.__raw_instances[0][0]), 16)
 
@@ -153,6 +166,7 @@ class InstanceLoader(Thread):
                         elif instance == self.raw_filter.PAYLOAD_MSG:
                             # pass data through payload filter
                             if len(self.__raw_instances) > 1:
+                                # check packet id's 
                                 if int(str(self.__raw_instances[0][1]), 16) == int(str(self.__raw_instances[1][1]), 16):
                                     _, _, _data = self.raw_filter.process(self.__raw_instances[0], self.__raw_instances[1])
                                     self.__raw_instances.pop(0)  # pop the first val, the next is popped at end of loop
@@ -164,7 +178,15 @@ class InstanceLoader(Thread):
                                 else:
                                     # second part of packet did not show up, so the packet is not useful
                                     print("warning: unable to find packet pair")
-                                    pass
+                                    print("{} {}".format(int(str(self.__raw_instances[0][1]),16),int(str(self.__raw_instances[1][1]),16)))
+                                    # continue  # see if it shows up later
+
+                            else:
+                                # if there is 1 or zero packets, do not throw them away
+                                # wait for the next batch to come in to see if the 
+                                # twin is there
+                                print("did i get here?")
+                                pass
 
                         ####################
                         # PROCESS MESSAGES #
@@ -183,6 +205,7 @@ class InstanceLoader(Thread):
                             __running = False
                             break
 
+                        # always remove message after using it
                         self.__raw_instances.pop(0)
 
                 else:
@@ -340,11 +363,48 @@ def load(tokens):
 
                     # download files
                     for i in range(1, len(content)):
-                        print('|','%'*(step*i), ' '*(bar_size - (step*i)), '|', end='\r')
+                        # print('|','%'*(step*i), ' '*(bar_size - (step*i)), '|', end='\r')
+                        # mahoney filters for each imu
+                        hand_filter = MahoneyFilter()
+                        thumb_filter = MahoneyFilter()
+                        point_filter = MahoneyFilter()
+                        ring_filter = MahoneyFilter()
+
                         try:
-                            f = open("data/patient-{}.txt".format(str(i+num_patients)), 'w')
-                            f.write(content[i])
+                            lines = content[i].split(sep='\n')
+                            os.mkdir("./data/patient-{}".format(str(i+num_patients)))
+                            f = open("./data/patient-{}/raw.txt".format(str(i+num_patients)), 'w')
+
+                            for line in lines:
+                                row = line.split(sep=' ')
+                                if not len(row) == 38:
+                                    continue
+
+                                # hand IMU
+                                hand_filter.process(float(row[2]), float(row[3]), float(row[4]), float(row[5]), float(row[6]), float(row[7]), float(row[8]), float(row[9]), float(row[10]), 0.01)
+                                row.extend([hand_filter.to_pitch(), hand_filter.to_yaw(), hand_filter.to_roll()])
+
+                                # hand IMU
+                                thumb_filter.process(float(row[11]), float(row[12]), float(row[13]), float(row[14]), float(row[15]), float(row[16]), float(row[17]), float(row[18]), float(row[19]), 0.01)
+                                row.extend([thumb_filter.to_pitch(), thumb_filter.to_yaw(), thumb_filter.to_roll()])
+
+                                # hand IMU
+                                point_filter.process(float(row[20]), float(row[21]), float(row[22]), float(row[23]), float(row[24]), float(row[25]), float(row[26]), float(row[27]), float(row[28]), 0.01)
+                                row.extend([point_filter.to_pitch(), point_filter.to_yaw(), point_filter.to_roll()])
+
+                                # hand IMU
+                                ring_filter.process(float(row[29]), float(row[30]), float(row[31]), float(row[32]), float(row[33]), float(row[34]), float(row[35]), float(row[36]), float(row[37]), 0.01)
+                                row.extend([ring_filter.to_pitch(), ring_filter.to_yaw(), ring_filter.to_roll()])
+
+                                for item in row:
+                                    f.write("{} ".format(str(item)))
+                                f.write('\n')
+
+                            # f.write(content[i])
                             f.close()
+
+                            # calculate the mahoney filter of each
+                            
 
                         except BlockingIOError:
                             print("\nerror: could not open new patient file")
