@@ -10,10 +10,10 @@ scoring system what to focus on
 
 class PositionalFilter(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, filename):
+        self.__filename = filename
 
-    def process(self, filename):
+    def process(self):
         """
         processes and Outputs here
         :return:
