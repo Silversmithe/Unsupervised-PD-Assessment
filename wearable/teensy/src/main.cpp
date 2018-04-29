@@ -18,6 +18,7 @@ static IOBuffer BUFFER(BUFFER_SIZE);
 static Data* temp_data;
 static uint32_t __file_pos, __prev_pos;        // position of the data file
 static bool __new_data;
+uint32_t current;
 
 /* STATE */
 volatile bool __sampling_mode;          // sampling (true), transferring (false)
@@ -53,7 +54,7 @@ void setup(void) {
   bool hardware_success = true;
   bool network_success = false;
   __enable_sampling = false;
-  __new_data = true; // usually false
+  __new_data = false; // usually false
   __file_pos = 0;
   __prev_pos = 0;
   __sampling_mode = false;
@@ -188,13 +189,15 @@ void loop(void) {
   if(__sampling_mode){
     /* allow for sampling BEHAVIOR */
     if(!BUFFER.is_empty()){
+      current = millis();
       noInterrupts();
       temp_data = BUFFER.remove_front();
       interrupts();
 
       /* DATA TRANSFER */
-      // if(SERIAL_SELECT){ __error = write_console(temp_data); }
       __error = log_payload(temp_data);
+      current = millis() - current;
+      Serial.println(current);
     }
   } else {
     /* turn off sensor isr */
@@ -205,14 +208,13 @@ void loop(void) {
 void transfer_mode(void){
   delay(TRANSFER_POLL_TIME);
   if(__enable_sampling) { return; }
-  noInterrupts();
   if(__current_state == OFFLINE){
     /* check for connection */
+    State temp = __current_state;
     __current_state = (XBEE_SELECT && isAnyoneThere())? ONLINE: OFFLINE;
-    if(__current_state == ONLINE){
-      Serial.println("state: online");
-    } else {
-      Serial.println("state: offline");
+    if(temp != __current_state){
+      if(__current_state == ONLINE){ log("state: online"); }
+      else { log("state: offline");}
     }
 
   } else if(__current_state == ONLINE){
@@ -230,7 +232,6 @@ void transfer_mode(void){
       }
     }
   }
-  interrupts();
 }
 
 /*

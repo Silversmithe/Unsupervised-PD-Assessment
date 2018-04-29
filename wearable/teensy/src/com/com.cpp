@@ -478,7 +478,7 @@ bool write_line(unsigned size, uint8_t* buffer){
   while(__missed_messages < MISSED_LIMIT){
     xbee.send(tx_char);
     /* get the tx status response */
-    xbee.readPacket(50);
+    xbee.readPacket(TX_STAT_WAIT);
     if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
       xbee.getResponse().getTxStatusResponse(tx16);
       if(tx16.getStatus() == SUCCESS){
@@ -497,7 +497,7 @@ bool write_line(unsigned size, uint8_t* buffer){
   while(__missed_messages < MISSED_LIMIT){
     xbee.send(tx_char);
     /* get the tx status response */
-    xbee.readPacket(50);
+    xbee.readPacket(TX_STAT_WAIT);
     if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
       xbee.getResponse().getTxStatusResponse(tx16);
       if(tx16.getStatus() == SUCCESS){
@@ -592,9 +592,10 @@ uint32_t write_to_server(uint32_t position){
           Serial.println("error writing to radio");
           break;
         }
-        __packet_id = (__packet_id + 1) % 16; // keep within the size of a file
-        // delay(10); // slight delay is healthy for server
-        transfer_mode_light();
+        __packet_id = (__packet_id + 1) % 200; // keep within the size of a file
+        delay(50); // slight delay is healthy for server
+        // transfer_mode_light();
+        if(__packet_id == 0){ delay(1000); } // give the server some breathing room
       }
 
       current_pos = __file.position();
