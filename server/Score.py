@@ -42,7 +42,7 @@ class Score(object):
         return dataset
 
 
-    def choose_frequency(dataset1, dataset2, dataset3, dataset4, total_instances):
+    def count_taps(dataset1, dataset2, dataset3, dataset4, total_instances):
         sampling_period_1 = 33
         sampling_period_2 = 50
         sampling_period_3 = 100
@@ -86,16 +86,231 @@ class Score(object):
         count = 0
 
         if(frequency_choice == 1):
-            return print("use 3HZ frequency")
+            print("The finger tap count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 3HZ frequency")
         if(frequency_choice == 2):
-            return print("use 2HZ frequency")
+            print("The finger tap count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 2HZ frequency")
         if(frequency_choice == 3):
-            return print("use 1HZ frequency")
+            print("The finger tap count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 1HZ frequency")
         if(frequency_choice == 4):
-            return print("use 1/3HZ frequency")
-        else:
-            return print("use 1HZ frequency by default")
+            print("The finger tap count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 1/3HZ frequency")
+        if(max_count == 0):
+            return print("no taps found, looking for tap interruptions")
+        # else:
+        #     return print("use 1HZ frequency by default")
 
 
 
-    def count_taps(dataset_taps, dataset_interupts):
+    def count_tap_interuptions(dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
+        sampling_period_1 = 33
+        sampling_period_2 = 50
+        sampling_period_3 = 100
+        sampling_period_4 = 300
+
+        frequency_choice = 0
+        max_count = 0
+        temp_count = 0
+
+        for i in range(0, int(total_instances/sampling_period_1)):
+            if(dataset1[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 1
+            max_count = count
+        count = 0
+
+
+        for i in range(0, int(total_instances/sampling_period_2)):
+            if(dataset2[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 2
+            max_count = count
+        count = 0
+
+        for i in range(0, int(total_instances/sampling_period_3)):
+            if(dataset3[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 3
+            max_count = count
+        count = 0
+
+        for i in range(0, int(total_instances/sampling_period_4)):
+            if(dataset4[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 4
+            max_count = count
+        count = 0
+
+        if(frequency_choice == 1):
+            print("The finger tap interrupt count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 3HZ frequency")
+        if(frequency_choice == 2):
+            print("The finger tap interrupt count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 2HZ frequency")
+        if(frequency_choice == 3):
+            print("The finger tap interrupt count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 1HZ frequency")
+        if(frequency_choice == 4):
+            print("The finger tap interrupt count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 1/3HZ frequency")
+        if(max_count == 0):
+            return print("no tap interruptions found, looking for grasps")
+
+
+    def count_grasps(dataset1, dataset2, dataset3, dataset4, total_instances):
+        sampling_period_1 = 33
+        sampling_period_2 = 50
+        sampling_period_3 = 100
+        sampling_period_4 = 300
+
+        frequency_choice = 0
+        max_count = 0
+        temp_count = 0
+
+        for i in range(0, int(total_instances/sampling_period_1)):
+            if(dataset1[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 1
+            max_count = count
+        count = 0
+
+
+        for i in range(0, int(total_instances/sampling_period_2)):
+            if(dataset2[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 2
+            max_count = count
+        count = 0
+
+        for i in range(0, int(total_instances/sampling_period_3)):
+            if(dataset3[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 3
+            max_count = count
+        count = 0
+
+        for i in range(0, int(total_instances/sampling_period_4)):
+            if(dataset4[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 4
+            max_count = count
+        count = 0
+
+        if(frequency_choice == 1):
+            print("The hand grasp count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 3HZ frequency")
+        if(frequency_choice == 2):
+            print("The hand grasp count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 2HZ frequency")
+        if(frequency_choice == 3):
+            print("The hand grasp count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 1HZ frequency")
+        if(frequency_choice == 4):
+            print("The hand grasp count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 1/3HZ frequency")
+        if(max_count == 0):
+            return print("no hand grasps found, looking for grasp interruptions")
+        # else:
+        #     return print("use 1HZ frequency by default")
+
+
+
+    def count_grasp_interuptions(dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
+        sampling_period_1 = 33
+        sampling_period_2 = 50
+        sampling_period_3 = 100
+        sampling_period_4 = 300
+
+        frequency_choice = 0
+        max_count = 0
+        temp_count = 0
+
+        for i in range(0, int(total_instances/sampling_period_1)):
+            if(dataset1[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 1
+            max_count = count
+        count = 0
+
+
+        for i in range(0, int(total_instances/sampling_period_2)):
+            if(dataset2[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 2
+            max_count = count
+        count = 0
+
+        for i in range(0, int(total_instances/sampling_period_3)):
+            if(dataset3[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 3
+            max_count = count
+        count = 0
+
+        for i in range(0, int(total_instances/sampling_period_4)):
+            if(dataset4[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 4
+            max_count = count
+        count = 0
+
+        if(frequency_choice == 1):
+            print("The hand grasp interrupt count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 3HZ frequency")
+        if(frequency_choice == 2):
+            print("The hand grasp interrupt count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 2HZ frequency")
+        if(frequency_choice == 3):
+            print("The hand grasp interrupt count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 1HZ frequency")
+        if(frequency_choice == 4):
+            print("The hand grasp interrupt count is: ")
+            print(max_count)
+            print("\n")
+            return print("using 1/3HZ frequency")
+        if(max_count == 0):
+            return print("no hand grasp interruptions found")
