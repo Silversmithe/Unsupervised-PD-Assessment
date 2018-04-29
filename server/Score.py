@@ -42,7 +42,60 @@ class Score(object):
         return dataset
 
 
-    def choose_frequency(dataset1, dataset2, dataset3, dataset4):
-        
+    def choose_frequency(dataset1, dataset2, dataset3, dataset4, total_instances):
+        sampling_period_1 = 33
+        sampling_period_2 = 50
+        sampling_period_3 = 100
+        sampling_period_4 = 300
+
+        frequency_choice = 0
+        max_count = 0
+        temp_count = 0
+
+        for i in range(0, int(total_instances/sampling_period_1)):
+            if(dataset1[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 1
+            max_count = count
+        count = 0
+
+
+        for i in range(0, int(total_instances/sampling_period_2)):
+            if(dataset2[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 2
+            max_count = count
+        count = 0
+
+        for i in range(0, int(total_instances/sampling_period_3)):
+            if(dataset3[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 3
+            max_count = count
+        count = 0
+
+        for i in range(0, int(total_instances/sampling_period_4)):
+            if(dataset4[i][0] >= 0.5):
+                count = count + 1
+        if(count > max_count):
+            frequency_choice = 4
+            max_count = count
+        count = 0
+
+        if(frequency_choice == 1):
+            return print("use 3HZ frequency")
+        if(frequency_choice == 2):
+            return print("use 2HZ frequency")
+        if(frequency_choice == 3):
+            return print("use 1HZ frequency")
+        if(frequency_choice == 4):
+            return print("use 1/3HZ frequency")
+        else:
+            return print("use 1HZ frequency by default")
+
+
 
     def count_taps(dataset_taps, dataset_interupts):
