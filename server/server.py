@@ -15,6 +15,7 @@ import serial
 from threading import Thread, Lock
 from analysis.MahoneyFilter import MahoneyFilter
 from analysis.RawDataFilter import RawDataFilter
+from PipelineManager import PipelineManager
 from digi.xbee.devices import Raw802Device, RemoteRaw802Device
 from digi.xbee.models.address import XBee16BitAddress
 
@@ -312,7 +313,8 @@ def stats(tokens):
 def start(tokens):
     """
     start run_server
-    start run_server with render
+    start process
+    start process patient-1
     :param tokens:
     :return:
     """
@@ -324,8 +326,38 @@ def start(tokens):
         # start run_server procedure
         run_server()
 
+    # command to explicitly start processing data
+    if tokens[1] == "process":
+
+        if len(tokens) > 2:
+            # specifying an object to process
+            patient_name = tokens[2]
+            print("process {}".format(patient_name))
+            # check if patient exists
+            if not os.path.exists("./data/{}".format(patient_name)):
+                print("error: unable to find ./data/{} to process".format(patient_name))
+
+            # check if patient has been processed
+            # if patient has a pdf score, then it has been processed
+            if os.path.exists("./data/{}/UPDAReport.pdf"):
+                print("{} has already been processed".format(patient_name))
+
+            # process
+            manager = PipelineManager(patient_path="./data/{}".format(patient_name))
+            manager.start()
+
+        else:
+            # FEATURE TO COME
+            # just process the first (or all)
+            print("process all patients")
+            # get all patients
+            # check if patient has been processed
+            # process
+            pass
+
     else:
         print("unknown object to start...")
+        print("options to run:\nstart server\nstart process\nstart process <patient-name>")
 
 
 def load(tokens):
@@ -404,7 +436,6 @@ def load(tokens):
                             f.close()
 
                             # calculate the mahoney filter of each
-                            
 
                         except BlockingIOError:
                             print("\nerror: could not open new patient file")

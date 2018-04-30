@@ -123,7 +123,7 @@ def main():
     console = Console("UPDA Console")
 
     # generate all commands
-    start_cmd = Command(name='start', help_msg='start a subroutine. ex: start server', action=start)
+    start_cmd = Command(name='start', help_msg='start a subroutine (start server|process)', action=start)
     stats_cmd = Command(name='stat', help_msg='produce statistics about the previous server runtime', action=stats)
     load_cmd = Command(name='load', help_msg='load data from the sd card and write to the server', action=load)
     list_cmd = Command(name='list', help_msg='list specified items. ex: list patients', action=list_items)
