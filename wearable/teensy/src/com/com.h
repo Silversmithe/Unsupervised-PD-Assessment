@@ -29,14 +29,14 @@ extern const int SERVER_ADDR;
 extern const int WEAR_ADDR;
 
 /* hardware variables */
-#define HW_TIMEOUT        10000          /* 10000ms : 10 seconds */
+#define HW_TIMEOUT        5000          /* 10000ms : 10 seconds */
 #define XBEE_INIT_TIMEOUT 500
 #define XBEE_COM_TIMEOUT  10
 
 /* serial information */
 #define HWSERIAL     Serial3
 #define USB_BAUD     115200
-#define RADIO_BAUD   57600
+#define RADIO_BAUD   38400  // 57600
 #define MISSED_LIMIT 100
 
 /* buffer variables */

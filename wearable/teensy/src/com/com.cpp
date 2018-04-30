@@ -546,17 +546,17 @@ uint32_t write_to_server(uint32_t position){
 
   if(SD.exists("data.txt")){
 
-    Serial.println();
-    Serial.println("ready to transmit...");
+    //Serial.println();
+    //Serial.println("ready to transmit...");
     delay(5000);
 
     /* should prepare file to be opened */
     if(!__file){
       __file = SD.open("data.txt");
       if(__file.seek(current_pos)){
-        Serial.println("found the current position");
+        //Serial.println("found the current position");
       } else {
-        Serial.println("could not reach position!!");
+        //Serial.println("could not reach position!!");
       }
     }
     digitalWrite(LED_MODE_STAT, LOW);
@@ -589,13 +589,13 @@ uint32_t write_to_server(uint32_t position){
 
         // WRITE TO THE "XBEE"
         if(!write_line(size, buffer)) {
-          Serial.println("error writing to radio");
+          //Serial.println("error writing to radio");
           break;
         }
         __packet_id = (__packet_id + 1) % 200; // keep within the size of a file
         delay(50); // slight delay is healthy for server
         // transfer_mode_light();
-        if(__packet_id == 0){ delay(1000); } // give the server some breathing room
+        if(__packet_id == 0){ delay(5000); } // give the server some breathing room
       }
 
       current_pos = __file.position();

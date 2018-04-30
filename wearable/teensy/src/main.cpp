@@ -18,7 +18,6 @@ static IOBuffer BUFFER(BUFFER_SIZE);
 static Data* temp_data;
 static uint32_t __file_pos, __prev_pos;        // position of the data file
 static bool __new_data;
-uint32_t current;
 
 /* STATE */
 volatile bool __sampling_mode;          // sampling (true), transferring (false)
@@ -70,7 +69,7 @@ void setup(void) {
   pinMode(LED_MODE_STAT, OUTPUT);
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
   hardware_success &= init_com(false);      // setup HWSERIAL & XBEE
-  hardware_success &= imu_setup(true);      // setup IMU
+  hardware_success &= imu_setup(false);      // setup IMU
   if(!hardware_success){
     __current_state = KILL;
     __error = IMU_ERROR;
@@ -189,15 +188,12 @@ void loop(void) {
   if(__sampling_mode){
     /* allow for sampling BEHAVIOR */
     if(!BUFFER.is_empty()){
-      current = millis();
       noInterrupts();
       temp_data = BUFFER.remove_front();
       interrupts();
 
       /* DATA TRANSFER */
       __error = log_payload(temp_data);
-      current = millis() - current;
-      Serial.println(current);
     }
   } else {
     /* turn off sensor isr */
@@ -220,15 +216,15 @@ void transfer_mode(void){
   } else if(__current_state == ONLINE){
     /* start sending data */
     if(__new_data){
-      Serial.println("attempting data transfer...");
+      //Serial.println("attempting data transfer...");
       __prev_pos = __file_pos;
       __file_pos = write_to_server(__file_pos);
-      Serial.println(__file_pos);
+      // Serial.println(__file_pos);
 
       /* prevent device from trying to write */
       if(__prev_pos == __file_pos){
         __new_data = false;
-        Serial.println("no new data to transfer...");
+        // Serial.println("no new data to transfer...");
       }
     }
   }
