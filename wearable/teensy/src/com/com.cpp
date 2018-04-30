@@ -489,6 +489,9 @@ bool write_line(unsigned size, uint8_t* buffer){
     __missed_messages++;
   }
 
+  /* wait before sending another message */
+  delay(50);
+
   /* second segment */
   for(unsigned i=0; i<byte_size-(PAYLOAD_SIZE-offset); i++)
     char_buffer[i+offset] = buffer[i+(PAYLOAD_SIZE-offset)];
@@ -595,7 +598,7 @@ uint32_t write_to_server(uint32_t position){
         __packet_id = (__packet_id + 1) % 200; // keep within the size of a file
         delay(50); // slight delay is healthy for server
         // transfer_mode_light();
-        if(__packet_id == 0){ delay(5000); } // give the server some breathing room
+        if(__packet_id == 0){ delay(5000); } // give the server breathing room
       }
 
       current_pos = __file.position();
