@@ -1,41 +1,65 @@
-%% read raw data
-data=load("fake-tremor-021818.txt");  % read the data
+ %% read raw data
+data=load("sam.txt");  % read the data
 % INPUT FORMAT: 
 % dt EMG_raw EMG_rect Hand_Ax Hand_Ay Hand_Az Hand_Gx Hand_Gy Hand_Gz 
 % Thumb_Ax Thumb_Ay Thumb_Az Thumb_Gx Thumb_Gy Thumb_Gz
 % Point_Ax Point_Ay Point_Az Point_Gx Point_Gy Point_Gz
 % Ring_Ax Ring_Ay Ring_Az Ring_Gx Ring_Gy Ring_Gz
 fs=100;      %sampling frequency in HZ
-[data_length,~]=size(data);
-true_time=(0:1/fs:(data_length-1)/fs)';
-% EMG_raw=data(:,2);    % EMG raw
-% EMG_rect=data(:,3);   % EMG rect
-% Hand_Ax=data(:,4);    % hand a
-% Hand_Ay=data(:,5);
-% Hand_Az=data(:,6);
-% Hand_Gx=data(:,7);    % hand g
-% Hand_Gy=data(:,8);
-% Hand_Gz=data(:,9);
-% Thumb_Ax=data(:,10);  % thumb a
-% Thumb_Ay=data(:,11);  
-% Thumb_Az=data(:,12);
-% Thumb_Gx=data(:,13);  % thumb g
-% Thumb_Gy=data(:,14);  
-% Thumb_Gz=data(:,15);
-% Point_Ax=data(:,16);  % point a
-% Point_Ay=data(:,17);  
-% Point_Az=data(:,18);
-% Point_Gx=data(:,19);  % point g
-% Point_Gy=data(:,20);  
-% Point_Gz=data(:,21);
-% Ring_Ax=data(:,22);   % ring a
-% Ring_Ay=data(:,23);  
-% Ring_Az=data(:,24);
-% Ring_Gx=data(:,25);   % ring g
-% Ring_Gy=data(:,26);  
-% Ring_Gz=data(:,27);
+[data_length,channel_num]=size(data);
+true_time=(1/fs:1/fs:data_length/fs)';
+EMG_raw=data(:,1);    % EMG raw
+EMG_rect=data(:,2);   % EMG rect
+Hand_Ax=data(:,3);    % hand a
+Hand_Ay=data(:,4);
+Hand_Az=data(:,5);
+Hand_Gx=data(:,6);    % hand g
+Hand_Gy=data(:,7);
+Hand_Gz=data(:,8);
+Hand_Mx=data(:,9);    % hand m
+Hand_My=data(:,10);
+Hand_Mz=data(:,11);
+Thumb_Ax=data(:,12);  % thumb a
+Thumb_Ay=data(:,13);  
+Thumb_Az=data(:,14);
+Thumb_Gx=data(:,15);  % thumb g
+Thumb_Gy=data(:,16);  
+Thumb_Gz=data(:,17);
+Thumb_Mx=data(:,18);  % thumb g
+Thumb_My=data(:,19);  
+Thumb_Mz=data(:,20);
+Point_Ax=data(:,21);  % point a
+Point_Ay=data(:,22);  
+Point_Az=data(:,23);
+Point_Gx=data(:,24);  % point g
+Point_Gy=data(:,25);  
+Point_Gz=data(:,26);
+Point_Mx=data(:,27);  % point m
+Point_My=data(:,28);  
+Point_Mz=data(:,29);
+Ring_Ax=data(:,30);   % ring a
+Ring_Ay=data(:,31);  
+Ring_Az=data(:,32);
+Ring_Gx=data(:,33);   % ring g
+Ring_Gy=data(:,34);  
+Ring_Gz=data(:,35);
+Ring_Mx=data(:,36);   % ring m
+Ring_My=data(:,37);  
+Ring_Mz=data(:,38);
+Hand_Pp=data(:,39);   % hand position
+Hand_Py=data(:,40);
+Hand_Pr=data(:,41);
+Thumb_Pp=data(:,42);  % thumb position
+Thumb_Py=data(:,43);
+Thumb_Pr=data(:,44);
+Point_Pp=data(:,45);  % point position
+Point_Py=data(:,46);
+Point_Pr=data(:,47);
+Ring_Pp=data(:,48);   % ring position
+Ring_Py=data(:,49);
+Ring_Pr=data(:,50);
 %% visualize sample data  
-sample_signal=true_data(:,18);    % Hand_Ax
+sample_signal=Hand_Ax;    % Hand_Ax
 sample_signal=sample_signal-mean(sample_signal);   
 nsample_signal=sample_signal/max(abs(sample_signal));
 figure(1)
@@ -162,6 +186,8 @@ amplitude=
 %% Kinetic Tremor of Hands
 
 %% Rest Tremor Amplitude
+%% Calculate Tremor Amplitude
+data_tremor_amplitude=Hand_Pr;
 
 %% Constance of Rest Tremor
 expected_sample_num=10;    % cut the data into at least how many pieces
