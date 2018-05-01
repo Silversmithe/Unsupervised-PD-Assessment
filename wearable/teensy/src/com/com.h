@@ -43,7 +43,7 @@ extern const int WEAR_ADDR;
 #define FILE_BUFFER  300
 
 /* radio information */
-#define PAYLOAD_SIZE 100
+#define PAYLOAD_SIZE 90  // max 100
 #define TX_STAT_WAIT 100
 
 /* communication protocol variables */

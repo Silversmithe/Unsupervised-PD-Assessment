@@ -120,7 +120,7 @@ bool isAnyoneThere(void){
   while(__missed_messages < MISSED_LIMIT){
     xbee.send(tx_bc);
     /* get the tx status response */
-    xbee.readPacket(10);
+    xbee.readPacket(TX_STAT_WAIT);
     if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
       xbee.getResponse().getTxStatusResponse(tx16);
       if(tx16.getStatus() == SUCCESS){ return true; }
@@ -484,7 +484,7 @@ bool write_line(unsigned size, uint8_t* buffer){
       if(tx16.getStatus() == SUCCESS){
         success = true;
         break;
-      }
+      } else { delay(10); }
     }
     __missed_messages++;
   }
@@ -506,7 +506,7 @@ bool write_line(unsigned size, uint8_t* buffer){
       if(tx16.getStatus() == SUCCESS){
         success = true;
         break;
-      }
+      } else { delay(10); }
     }
     __missed_messages++;
   }
