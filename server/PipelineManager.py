@@ -26,6 +26,7 @@ class PipelineManager(Thread):
         self.__low_pass_filter = LowPassFilter(filename=self.__patient_path)
         self.__position_filter = PositionalFilter(filename=self.__patient_path)
         self.__band_pass_filter = BandPassFilter(filename=self.__patient_path)
+        self.__score = Score(filename=self.__patient_path)
         pass
 
     def run(self):
@@ -80,7 +81,12 @@ class PipelineManager(Thread):
         ##################
         # Scoring Filter #
         ##################
+        try:
+            print("score")
+            self.__score.count_grasp_interuptions()
 
+        except:
+            print("warning: uncaught error")
         ##################
         # Scoring Output #
         ##################

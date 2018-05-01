@@ -5,6 +5,11 @@ of
 
 class Score(object):
 
+    SAMPLING_PERIOD_1 = 33
+    SAMPLING_PERIOD_2 = 50
+    SAMPLING_PERIOD_3 = 100
+    SAMPLING_PERIOD_4 = 300
+    
     def __init__(self):
         pass
 
