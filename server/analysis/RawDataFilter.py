@@ -56,22 +56,16 @@ class RawDataFilter(object):
 
             # build first half of floats
             # two bytes leftover here
-            for i in range(6, 98, 4):
+            for i in range(6, 90, 4):
                 _real = (raw0[i] << 24) + (raw0[i+1] << 16) + (raw0[i+2] << 8) + raw0[i+3]
                 if _real > 0x7fffffff:
                     _real -= 0x100000000
                 result.append(float(_real)/100.0)
 
-            # combine middle float that is in both packets
-            _real = (raw0[98] << 24) + (raw0[99] << 16) + (raw1[2] << 8) + raw1[3]
-            if _real > 0x7fffffff:
-                _real -= 0x100000000
-            result.append(float(_real) / 100.0)
-
             # build second half of floats
             # two bytes left over at index 2 and 3
             # total 100 bytes
-            for i in range(4, 52, 4):
+            for i in range(2, 62, 4):
                 _real = (raw1[i] << 24) + (raw1[i+1] << 16) + (raw1[i+2] << 8) + raw1[i+3]
                 if _real > 0x7fffffff:
                     _real -= 0x100000000
