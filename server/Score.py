@@ -15,6 +15,11 @@ class Score(object):
         self.__num_instances = get_num_instances(filename=self.__patient_path)
         pass
 
+
+    def process(self, textfile):
+        """
+        """
+
     def pick_method(self, packet):
         """
             @param: packet: a packet of data we would like
@@ -58,16 +63,12 @@ class Score(object):
 
 
     def count_taps(dataset1, dataset2, dataset3, dataset4, total_instances):
-        sampling_period_1 = 33
-        sampling_period_2 = 50
-        sampling_period_3 = 100
-        sampling_period_4 = 300
 
         frequency_choice = 0
         max_count = 0
         temp_count = 0
 
-        for i in range(0, int(total_instances/sampling_period_1)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_1)):
             if(dataset1[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -76,7 +77,7 @@ class Score(object):
         count = 0
 
 
-        for i in range(0, int(total_instances/sampling_period_2)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -84,7 +85,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/sampling_period_3)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_3)):
             if(dataset3[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -92,7 +93,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/sampling_period_4)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_4)):
             if(dataset4[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -128,16 +129,12 @@ class Score(object):
 
 
     def count_tap_interuptions(dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
-        sampling_period_1 = 33
-        sampling_period_2 = 50
-        sampling_period_3 = 100
-        sampling_period_4 = 300
 
         frequency_choice = 0
         max_count = 0
         temp_count = 0
 
-        for i in range(0, int(total_instances/sampling_period_1)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_1)):
             if(dataset1[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -146,7 +143,7 @@ class Score(object):
         count = 0
 
 
-        for i in range(0, int(total_instances/sampling_period_2)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -154,7 +151,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/sampling_period_3)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_3)):
             if(dataset3[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -162,7 +159,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/sampling_period_4)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_4)):
             if(dataset4[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -195,16 +192,12 @@ class Score(object):
 
 
     def count_grasps(dataset1, dataset2, dataset3, dataset4, total_instances):
-        sampling_period_1 = 33
-        sampling_period_2 = 50
-        sampling_period_3 = 100
-        sampling_period_4 = 300
 
         frequency_choice = 0
         max_count = 0
         temp_count = 0
 
-        for i in range(0, int(total_instances/sampling_period_1)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_1)):
             if(dataset1[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -213,7 +206,7 @@ class Score(object):
         count = 0
 
 
-        for i in range(0, int(total_instances/sampling_period_2)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -221,7 +214,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/sampling_period_3)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_3)):
             if(dataset3[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -229,7 +222,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/sampling_period_4)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_4)):
             if(dataset4[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -265,16 +258,12 @@ class Score(object):
 
 
     def count_grasp_interuptions(dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
-        sampling_period_1 = 33
-        sampling_period_2 = 50
-        sampling_period_3 = 100
-        sampling_period_4 = 300
 
         frequency_choice = 0
         max_count = 0
         temp_count = 0
 
-        for i in range(0, int(total_instances/sampling_period_1)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_1)):
             if(dataset1[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -283,7 +272,7 @@ class Score(object):
         count = 0
 
 
-        for i in range(0, int(total_instances/sampling_period_2)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -291,7 +280,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/sampling_period_3)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_3)):
             if(dataset3[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -299,7 +288,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/sampling_period_4)):
+        for i in range(0, int(total_instances/SAMPLING_PERIOD_4)):
             if(dataset4[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -331,40 +320,7 @@ class Score(object):
             return print("no hand grasp interruptions found")
 
 
-    # %% Constance of Rest Tremor
-    # expected_sample_num=10;    % cut the data into at least how many pieces
-    # sample_size=floor(data_length/expected_sample_num);
-    # sample_num=floor(data_length/sample_size);
-    # tremor_amp=3;   %to determine the if the subject has tremor
-    # tremor_count=0;
-    # for i=1:sample_num
-    #     test_data=true_data((i-1)*sample_size+1:i*sample_size,[3:8,12:17,21:26,30:35]);
-    #     test_data_fft=fft(test_data);
-    #     mag=abs(test_data_fft);
-    #     df=fs/sample_size;
-    #     freq=0:df:fs-df;
-    #     mag_tremor=mag(freq>3&freq<7,:);
-    #     mag_tremor_max=max(mag_tremor);
-    #     for j=1:channel_num
-    #         if mag_tremor_max(j)>tremor_amp
-    #             tremor_count=tremor_count+1;
-    #         end
-    #     end
-    # end
-    # tremor_time=tremor_count/(sample_num*channel_num);
-    # if tremor_time==0
-    #     disp('0: Normal')
-    # elseif tremor_time<=0.25
-    #     disp('1: Slight')
-    # elseif tremor_time<=0.5
-    #     disp('2: Mild')
-    # elseif tremor_time<=0.75
-    #     disp('3: Moderate')
-    # elseif tremor_time<=1
-    #     disp('4: Severe')
-    # else
-    #     disp('Error')
-    # end
+
 
     def score_rest_tremor():
 
