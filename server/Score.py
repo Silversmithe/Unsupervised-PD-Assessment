@@ -197,7 +197,6 @@ class Score(object):
             max_count = count
         count = 0
 
-
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
@@ -258,7 +257,7 @@ class Score(object):
         max_count = 0
         temp_count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_1)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
             if(dataset1[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -266,8 +265,7 @@ class Score(object):
             max_count = count
         count = 0
 
-
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_2)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -275,7 +273,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_3)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
             if(dataset3[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -283,7 +281,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_4)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
             if(dataset4[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):

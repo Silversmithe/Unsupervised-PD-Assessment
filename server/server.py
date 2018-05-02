@@ -414,19 +414,19 @@ def load(tokens):
 
                                 # hand IMU
                                 hand_filter.process(float(row[2]), float(row[3]), float(row[4]), float(row[5]), float(row[6]), float(row[7]), float(row[8]), float(row[9]), float(row[10]), 0.01)
-                                row.extend([hand_filter.to_pitch(), hand_filter.to_yaw(), hand_filter.to_roll()])
+                                row.extend(hand_filter.q)
 
                                 # hand IMU
                                 thumb_filter.process(float(row[11]), float(row[12]), float(row[13]), float(row[14]), float(row[15]), float(row[16]), float(row[17]), float(row[18]), float(row[19]), 0.01)
-                                row.extend([thumb_filter.to_pitch(), thumb_filter.to_yaw(), thumb_filter.to_roll()])
+                                row.extend(thumb_filter.q)
 
                                 # hand IMU
                                 point_filter.process(float(row[20]), float(row[21]), float(row[22]), float(row[23]), float(row[24]), float(row[25]), float(row[26]), float(row[27]), float(row[28]), 0.01)
-                                row.extend([point_filter.to_pitch(), point_filter.to_yaw(), point_filter.to_roll()])
+                                row.extend(point_filter.q)
 
                                 # hand IMU
                                 ring_filter.process(float(row[29]), float(row[30]), float(row[31]), float(row[32]), float(row[33]), float(row[34]), float(row[35]), float(row[36]), float(row[37]), 0.01)
-                                row.extend([ring_filter.to_pitch(), ring_filter.to_yaw(), ring_filter.to_roll()])
+                                row.extend(ring_filter.q)
 
                                 for item in row:
                                     f.write("{} ".format(str(item)))

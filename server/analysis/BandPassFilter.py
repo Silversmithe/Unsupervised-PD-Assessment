@@ -4,6 +4,7 @@ BAND PASS FILTER
 This signal filter will take the raw data and run it all through
 a special band-pass filter.
 """
+import scipy
 
 
 class BandPassFilter(object):
