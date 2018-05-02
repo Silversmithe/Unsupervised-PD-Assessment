@@ -4,6 +4,7 @@ of
 """
 import numpy as np
 
+
 class Score(object):
 
     SAMPLING_PERIOD_1 = 33
@@ -11,36 +12,18 @@ class Score(object):
     SAMPLING_PERIOD_3 = 100
     SAMPLING_PERIOD_4 = 300
 
-    def __init__(self):
-        self.__num_instances = get_num_instances(filename=self.__patient_path)
+    def __init__(self, patient_path):
+        self.__patient_path = patient_path
+        self.variable = None
+        self.__num_instances = self.get_num_instances(textfile=self.__patient_path)
         pass
-
 
     def process(self, textfile):
         """
         """
-
-    def pick_method(self, packet):
-        """
-            @param: packet: a packet of data we would like
-                            to score
-        """
         pass
 
-    # example methods
-    def method1(self):
-        # example method
-        pass
-
-    def method2(self):
-        pass
-
-    # display
-    def display_score(self):
-        pass
-
-
-    def get_input(textfile):
+    def get_input(self, textfile):
         text_file = open(textfile, "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
@@ -48,12 +31,12 @@ class Score(object):
 
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
         for i in range(total_inputs):
-        #split data points of each instance
-            dataset[i] = lines[i]
+            dataset[i] = lines[i]  # split data points of each instance
+
         # print(dataset_ftaps[1][0])
         return dataset
 
-    def get_num_instances(textfile):
+    def get_num_instances(self, textfile):
         text_file = open(textfile, "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
@@ -61,14 +44,13 @@ class Score(object):
 
         return total_inputs
 
-
-    def count_taps(dataset1, dataset2, dataset3, dataset4, total_instances):
+    def count_taps(self, dataset1, dataset2, dataset3, dataset4, total_instances):
 
         frequency_choice = 0
         max_count = 0
         temp_count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_1)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
             if(dataset1[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -77,7 +59,7 @@ class Score(object):
         count = 0
 
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_2)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -85,56 +67,62 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_3)):
-            if(dataset3[i][0] >= 0.5):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
+            if dataset3[i][0] >= 0.5:
                 count = count + 1
-        if(count > max_count):
+
+        if count > max_count:
             frequency_choice = 3
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_4)):
-            if(dataset4[i][0] >= 0.5):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
+
+            if dataset4[i][0] >= 0.5:
                 count = count + 1
-        if(count > max_count):
+
+        if count > max_count:
             frequency_choice = 4
             max_count = count
+
         count = 0
 
-        if(frequency_choice == 1):
+        if frequency_choice == 1:
             print("The finger tap count is: ")
             print(max_count)
             print("\n")
             return print("using 3HZ frequency")
-        if(frequency_choice == 2):
+
+        if frequency_choice == 2:
             print("The finger tap count is: ")
             print(max_count)
             print("\n")
             return print("using 2HZ frequency")
-        if(frequency_choice == 3):
+
+        if frequency_choice == 3:
             print("The finger tap count is: ")
             print(max_count)
             print("\n")
             return print("using 1HZ frequency")
-        if(frequency_choice == 4):
+
+        if frequency_choice == 4:
             print("The finger tap count is: ")
             print(max_count)
             print("\n")
             return print("using 1/3HZ frequency")
-        if(max_count == 0):
+
+        if max_count == 0:
             return print("no taps found, looking for tap interruptions")
         # else:
         #     return print("use 1HZ frequency by default")
 
-
-
-    def count_tap_interuptions(dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
+    def count_tap_interuptions(self, dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
 
         frequency_choice = 0
         max_count = 0
         temp_count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_1)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
             if(dataset1[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -143,7 +131,7 @@ class Score(object):
         count = 0
 
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_2)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -151,7 +139,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_3)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
             if(dataset3[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -159,7 +147,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_4)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
             if(dataset4[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -167,37 +155,41 @@ class Score(object):
             max_count = count
         count = 0
 
-        if(frequency_choice == 1):
+        if frequency_choice == 1:
             print("The finger tap interrupt count is: ")
             print(max_count)
             print("\n")
             return print("using 3HZ frequency")
-        if(frequency_choice == 2):
+
+        if frequency_choice == 2:
             print("The finger tap interrupt count is: ")
             print(max_count)
             print("\n")
             return print("using 2HZ frequency")
-        if(frequency_choice == 3):
+
+        if frequency_choice == 3:
             print("The finger tap interrupt count is: ")
             print(max_count)
             print("\n")
             return print("using 1HZ frequency")
-        if(frequency_choice == 4):
+
+        if frequency_choice == 4:
             print("The finger tap interrupt count is: ")
             print(max_count)
             print("\n")
             return print("using 1/3HZ frequency")
-        if(max_count == 0):
+
+        if max_count == 0:
             return print("no tap interruptions found, looking for grasps")
 
-
-    def count_grasps(dataset1, dataset2, dataset3, dataset4, total_instances):
+    def count_grasps(self, dataset1, dataset2, dataset3, dataset4, total_instances):
 
         frequency_choice = 0
         max_count = 0
         temp_count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_1)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
+
             if(dataset1[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -206,7 +198,7 @@ class Score(object):
         count = 0
 
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_2)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
             if(dataset2[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -214,7 +206,7 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_3)):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
             if(dataset3[i][0] >= 0.5):
                 count = count + 1
         if(count > max_count):
@@ -222,42 +214,45 @@ class Score(object):
             max_count = count
         count = 0
 
-        for i in range(0, int(total_instances/SAMPLING_PERIOD_4)):
-            if(dataset4[i][0] >= 0.5):
+        for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
+            if dataset4[i][0] >= 0.5:
                 count = count + 1
-        if(count > max_count):
+
+        if count > max_count:
             frequency_choice = 4
             max_count = count
         count = 0
 
-        if(frequency_choice == 1):
+        if frequency_choice == 1:
             print("The hand grasp count is: ")
             print(max_count)
             print("\n")
             return print("using 3HZ frequency")
-        if(frequency_choice == 2):
+
+        if frequency_choice == 2:
             print("The hand grasp count is: ")
             print(max_count)
             print("\n")
             return print("using 2HZ frequency")
-        if(frequency_choice == 3):
+
+        if frequency_choice == 3:
             print("The hand grasp count is: ")
             print(max_count)
             print("\n")
             return print("using 1HZ frequency")
-        if(frequency_choice == 4):
+
+        if frequency_choice == 4:
             print("The hand grasp count is: ")
             print(max_count)
             print("\n")
             return print("using 1/3HZ frequency")
-        if(max_count == 0):
+
+        if max_count == 0:
             return print("no hand grasps found, looking for grasp interruptions")
         # else:
         #     return print("use 1HZ frequency by default")
 
-
-
-    def count_grasp_interuptions(dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
+    def count_grasp_interuptions(self, dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
 
         frequency_choice = 0
         max_count = 0
@@ -296,33 +291,34 @@ class Score(object):
             max_count = count
         count = 0
 
-        if(frequency_choice == 1):
+        if frequency_choice == 1:
             print("The hand grasp interrupt count is: ")
             print(max_count)
             print("\n")
             return print("using 3HZ frequency")
-        if(frequency_choice == 2):
+
+        if frequency_choice == 2:
             print("The hand grasp interrupt count is: ")
             print(max_count)
             print("\n")
             return print("using 2HZ frequency")
-        if(frequency_choice == 3):
+
+        if frequency_choice == 3:
             print("The hand grasp interrupt count is: ")
             print(max_count)
             print("\n")
             return print("using 1HZ frequency")
-        if(frequency_choice == 4):
+
+        if frequency_choice == 4:
             print("The hand grasp interrupt count is: ")
             print(max_count)
             print("\n")
             return print("using 1/3HZ frequency")
-        if(max_count == 0):
+
+        if max_count == 0:
             return print("no hand grasp interruptions found")
 
-
-
-
-    def score_rest_tremor():
+    def score_rest_tremor(self):
 
         # higher sample number will give us higher accuracy later
         # may need to change this later
@@ -344,19 +340,19 @@ class Score(object):
         end_index = 0
         end_flag = 0
 
-
         for i in range(fs/df):
             frequency[i] = i * df
-            if(frequency[i] > 3 and beginning_flag == 0):
+
+            if frequency[i] > 3 and beginning_flag == 0:
                 beginning_flag = 1
                 beginning_index = i
-            if(frequency[i] > 7 and beginning_flag == 1):
+
+            if frequency[i] > 7 and beginning_flag == 1:
                 end_index = i - 1
                 end_flag = 1
-            if(end_flag):
+
+            if end_flag:
                 break
-
-
 
         # used to determine if the patient has tremors
         tremor_amp = 3
@@ -372,20 +368,25 @@ class Score(object):
             mag_tremor = mag[beginning_index:end_index [0:]]
             mag_tremor_max = max(mag_tremor)
             for i in range(24):
-                if (mag_tremor_max(j) > tremor_amp):
-                    tremor_count=tremor_count+1
+                if mag_tremor_max(j) > tremor_amp:
+                    tremor_count = tremor_count+1
 
-            tremor_time=tremor_count/(sample_num*channel_num);
+            tremor_time = tremor_count/(sample_num*channel_num)
 
-        if (tremor_time==0):
+        if tremor_time == 0:
             print('0: Normal')
-        elif(tremor_time<=0.25):
+
+        elif tremor_time <= 0.25:
             print('1: Slight')
-        elif(tremor_time<=0.5):
+
+        elif tremor_time<=0.5:
             print('2: Mild')
-        elif(tremor_time<=0.75):
+
+        elif tremor_time<=0.75:
             print('3: Moderate')
+
         elif(tremor_time<=1):
             print('4: Severe')
+
         else:
             print('Error')
