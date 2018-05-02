@@ -11,6 +11,7 @@ from analysis.LowPassFilter import LowPassFilter
 from analysis.BandPassFilter import BandPassFilter
 from analysis.PositionalFilter import PositionalFilter
 from Reporter import Reporter
+from Score import Score
 from threading import Thread, Lock, ThreadError
 
 
@@ -28,8 +29,8 @@ class PipelineManager(Thread):
         self.__position_filter = PositionalFilter(filename=self.__patient_path)
         self.__band_pass_filter = BandPassFilter(filename=self.__patient_path)
         self.__score = Score(filename=self.__patient_path)
-        pass
         self.__reporter = Reporter()
+        pass
 
     def run(self):
         """

@@ -12,8 +12,8 @@ class Score(object):
     SAMPLING_PERIOD_3 = 100
     SAMPLING_PERIOD_4 = 300
 
-    def __init__(self, patient_path):
-        self.__patient_path = patient_path
+    def __init__(self, filename):
+        self.__patient_path = filename
         self.variable = None
         self.__num_instances = self.get_num_instances(textfile=self.__patient_path)
         pass

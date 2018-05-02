@@ -91,10 +91,10 @@ class RawDataFilter(object):
             self.ring_mhf.process(ax=result[29], ay=result[30], az=result[31], gx=result[32], gy=result[33],
                                   gz=result[34], mx=result[35], my=result[36], mz=result[37], dt=0.01)
 
-            result.extend([self.hand_mhf.to_pitch(), self.hand_mhf.to_yaw(), self.hand_mhf.to_roll()])
-            result.extend([self.thumb_mhf.to_pitch(), self.thumb_mhf.to_yaw(), self.thumb_mhf.to_roll()])
-            result.extend([self.point_mhf.to_pitch(), self.point_mhf.to_yaw(), self.point_mhf.to_roll()])
-            result.extend([self.ring_mhf.to_pitch(), self.ring_mhf.to_yaw(), self.ring_mhf.to_roll()])
+            result.extend(self.hand_mhf.q)
+            result.extend(self.thumb_mhf.q)
+            result.extend(self.point_mhf.q)
+            result.extend(self.ring_mhf.q)
             # return all info
             return self.PAYLOAD_MSG, _pid, result
 
