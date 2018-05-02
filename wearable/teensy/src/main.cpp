@@ -42,7 +42,6 @@ MPU9250 __imus[4] = {
   MPU9250(Wire1, IMU_ADDR_HI)   // thumb
 };
 
-// add a comment
 /*
  * @function:     setup
  *
