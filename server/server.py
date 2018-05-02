@@ -179,7 +179,7 @@ class InstanceLoader(Thread):
                                 else:
                                     # second part of packet did not show up, so the packet is not useful
                                     print("warning: unable to find packet pair")
-                                    print("{} {}".format(int(str(self.__raw_instances[0][1]),16),int(str(self.__raw_instances[1][1]),16)))
+                                    print("{} {}".format(int(str(self.__raw_instances[0][1]), 16), int(str(self.__raw_instances[1][1]),16)))
                                     # continue  # see if it shows up later
 
                             else:
