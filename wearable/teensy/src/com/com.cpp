@@ -152,7 +152,10 @@ void open_datastream(void){
  *                written to
  */
 void close_datastream(void){
-  if(__file) { __file.close(); }
+  if(__file) {
+    __file.println();
+    __file.close();
+  }
 }
 
 /*
@@ -484,7 +487,8 @@ bool write_line(unsigned size, uint8_t* buffer){
       if(tx16.getStatus() == SUCCESS){
         success = true;
         break;
-      } else { delay(10); }
+      }
+      delay(1000);
     }
     __missed_messages++;
   }
@@ -506,7 +510,8 @@ bool write_line(unsigned size, uint8_t* buffer){
       if(tx16.getStatus() == SUCCESS){
         success = true;
         break;
-      } else { delay(10); }
+      }
+      delay(1000);
     }
     __missed_messages++;
   }
@@ -524,6 +529,7 @@ bool write_data_radio(bool isnew){
     if(xbee.getResponse().getApiId() == TX_STATUS_RESPONSE){
       xbee.getResponse().getTxStatusResponse(tx16);
       if(tx16.getStatus() == SUCCESS){ return true; }
+      delay(1000);
     }
     __missed_messages = __missed_messages + 1;
   }
@@ -549,17 +555,17 @@ uint32_t write_to_server(uint32_t position){
 
   if(SD.exists("data.txt")){
 
-    //Serial.println();
-    //Serial.println("ready to transmit...");
+    Serial.println();
+    Serial.println("ready to transmit...");
     delay(5000);
 
     /* should prepare file to be opened */
     if(!__file){
       __file = SD.open("data.txt");
       if(__file.seek(current_pos)){
-        //Serial.println("found the current position");
+        Serial.println("found the current position");
       } else {
-        //Serial.println("could not reach position!!");
+        Serial.println("could not reach position!!");
       }
     }
     digitalWrite(LED_MODE_STAT, LOW);
@@ -592,7 +598,7 @@ uint32_t write_to_server(uint32_t position){
 
         // WRITE TO THE "XBEE"
         if(!write_line(size, buffer)) {
-          //Serial.println("error writing to radio");
+          Serial.println("error writing to radio");
           break;
         }
         __packet_id = (__packet_id + 1) % 200; // keep within the size of a file

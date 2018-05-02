@@ -216,15 +216,15 @@ void transfer_mode(void){
   } else if(__current_state == ONLINE){
     /* start sending data */
     if(__new_data){
-      //Serial.println("attempting data transfer...");
+      Serial.println("attempting data transfer...");
       __prev_pos = __file_pos;
       __file_pos = write_to_server(__file_pos);
-      // Serial.println(__file_pos);
+      Serial.println(__file_pos);
 
       /* prevent device from trying to write */
       if(__prev_pos == __file_pos){
         __new_data = false;
-        // Serial.println("no new data to transfer...");
+        Serial.println("no new data to transfer...");
       }
     }
   }
