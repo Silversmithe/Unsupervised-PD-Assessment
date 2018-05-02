@@ -116,7 +116,7 @@ class Score(object):
         # else:
         #     return print("use 1HZ frequency by default")
 
-    def count_tap_interuptions(self, dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
+    def count_tap_interuptions(self, dataset1, dataset2, dataset3, dataset4, total_instances):
 
         frequency_choice = 0
         max_count = 0
@@ -251,7 +251,7 @@ class Score(object):
         # else:
         #     return print("use 1HZ frequency by default")
 
-    def count_grasp_interuptions(self, dataset_interupts1, dataset_interupts2, dataset_interupts3, dataset_interupts4, total_instances):
+    def count_grasp_interuptions(self, dataset1, dataset2, dataset3, dataset4, total_instances):
 
         frequency_choice = 0
         max_count = 0
@@ -316,10 +316,13 @@ class Score(object):
         if max_count == 0:
             return print("no hand grasp interruptions found")
 
-    def score_rest_tremor(self):
+    def score_rest_tremor(self, bandpass_data):
 
         # higher sample number will give us higher accuracy later
         # may need to change this later
+
+        true_data = bandpass_data  # MAKE SURE TO PULL FROM FILE
+
         expected_sample_num = 10
         fs = 100
 
@@ -329,7 +332,7 @@ class Score(object):
 
         sample_num = np.floor(self.__num_instances/sample_size)
 
-        test_data = np.zeros((sample_size,24))
+        test_data = np.zeros((sample_size, 24))
         frequency = np.zeros((fs/df))
 
         beginning_index = 0
@@ -357,6 +360,7 @@ class Score(object):
         tremor_count = 0
 
         for i in range(0, sample_num):
+            # true data should then be raw data
             test_data = true_data[(i-1)*sample_size + 1 : i*sample_size[3:8,12:17,21:26,30:35]]
             test_data_fft = np.fft(test_data)
             mag = np.abs(test_data_fft)
