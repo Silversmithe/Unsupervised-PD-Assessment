@@ -61,9 +61,9 @@ class PipelineManager(Thread):
         except:
             print("warning: uncaught error")
 
-        #####################
-        # Positional Filter #
-        #####################
+        ############################
+        # Action Prediction Filter #
+        ############################
         try:
             print("positional filter")
             self.__position_filter.process()
