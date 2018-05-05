@@ -604,7 +604,7 @@ uint32_t write_to_server(uint32_t position){
         __packet_id = (__packet_id + 1) % 200; // keep within the size of a file
         delay(100); // slight delay is healthy for server (works well at 50)
         // transfer_mode_light();
-        if(__packet_id == 0){ delay(1000); } // give the server breathing room
+        if(__packet_id == 0){ delay(5000); } // give the server breathing room
       }
 
       current_pos = __file.position();
