@@ -25,11 +25,12 @@ class PipelineManager(Thread):
         """
         Thread.__init__(self)
         self.__patient_path = patient_path
-        self.__low_pass_filter = LowPassFilter(filename=self.__patient_path)
-        self.__position_filter = PositionalFilter(filename=self.__patient_path)
-        self.__band_pass_filter = BandPassFilter(filename=self.__patient_path)
-        self.__score = Score(filename=self.__patient_path)
-        self.__reporter = Reporter()
+
+        # self.__low_pass_filter = LowPassFilter(filename=self.__patient_path)
+        # self.__position_filter = PositionalFilter(filename=self.__patient_path)
+        # self.__band_pass_filter = BandPassFilter(filename=self.__patient_path)
+        # self.__score = Score(filename=self.__patient_path)
+        # self.__reporter = Reporter()
         pass
 
     def run(self):
