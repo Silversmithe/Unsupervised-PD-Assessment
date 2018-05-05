@@ -178,3 +178,57 @@ class MahoneyFilter(object):
 
         else:
             return atan2(t0, t1)
+
+
+# calculations outside of the class
+def q_to_roll(q, deg=False):
+    """
+    Converts the current Q into roll
+
+    :param: q: (list) contains quaternion coordinates
+    :param deg: (bool) should it be converted to degrees
+    :return: current estimated roll position in either degrees or radians
+    """
+    t0 = 2.0 * (q[0] * q[1] + q[2] * q[3])
+    t1 = q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3]
+
+    if deg:
+        return degrees(atan2(t0, t1))
+
+    else:
+        return atan2(t0, t1)
+
+
+def q_to_pitch(q, deg=False):
+    """
+    Converts the current Q into pitch
+
+    :param: q: (list) contains quaternion coordinates
+    :param deg: (bool) should it be converted to degrees
+    :return: current estimated pitch position in either degrees or radians
+    """
+    t0 = 2.0 * (q[1] * q[3] - q[0] * q[2])
+
+    if deg:
+        return degrees(-1.0 * asin(t0)) - 8.5  # according to sparkfun code. declination angle
+
+    else:
+        return asin(-1.0 * t0)
+
+
+def q_to_yaw(q, deg=False):
+    """
+    Converts the current Q into yaw
+
+    :param: q: (list) contains quaternion coordinates
+    :param deg: (bool) should it be converted to degrees
+    :return: current estimated yaw position in either degrees or radians
+    """
+    t0 = 2.0 * (q[1] * q[2] + q[0] * q[3])
+    t1 = q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3]
+
+    if deg:
+        return degrees(atan2(t0, t1))
+
+    else:
+        return atan2(t0, t1)

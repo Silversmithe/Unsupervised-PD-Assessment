@@ -13,7 +13,7 @@ import os
 import time
 import serial
 from threading import Thread, Lock
-from analysis.MahoneyFilter import MahoneyFilter
+from analysis.MahonyFilter import MahoneyFilter
 from analysis.RawDataFilter import RawDataFilter
 from PipelineManager import PipelineManager
 from digi.xbee.devices import Raw802Device, RemoteRaw802Device
