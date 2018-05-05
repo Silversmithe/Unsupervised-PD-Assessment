@@ -2,7 +2,7 @@
 Filters that process and use the
 packet data to produce and anlaysis
 """
-from analysis.MahoneyFilter import MahoneyFilter
+from analysis.MahonyFilter import MahoneyFilter
 
 
 class RawDataFilter(object):
