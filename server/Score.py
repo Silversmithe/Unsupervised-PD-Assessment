@@ -2,6 +2,7 @@
 Object responsible for UPDRS scoring
 of
 """
+import scipy as sp
 import numpy as np
 
 
@@ -22,14 +23,11 @@ class Score(object):
         """
         """
         self.get_input(textfile)
-        count_taps( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        count_tap_interuptions( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        count_grasps( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        count_grasp_interuptions( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        self.count_tap_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        self.count_grasps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        self.count_grasp_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         
-
-        pass
-
     def get_input(self, textfile):
         text_file = open(textfile, "r")
         lines = text_file.read().split("\n")
