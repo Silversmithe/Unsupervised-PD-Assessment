@@ -7,11 +7,12 @@ a special band-pass filter.
 import numpy as np
 from scipy.signal import *
 from analysis.MahonyFilter import q_to_roll
+import os
 
 
 class BandPassFilter(object):
 
-    COEFFICIENT = "../resources/bandpass_coef.txt"
+    COEFFICIENT = str(os.getcwd()) + "/resources/bandpass_coef.txt"
     FEATURE_SIZE = 28
 
     def __init__(self, filename):
@@ -30,7 +31,7 @@ class BandPassFilter(object):
         rawfile = open("{}/raw.txt".format(self.__filename), "r")
         coefficients = open(self.COEFFICIENT, "r").read().split(sep='\n')
         coefficients = np.matrix(coefficients)
-        output = open("{}/lowpass.txt".format(self.__filename), "w")
+        output = open("{}/bandpass.txt".format(self.__filename), "w+")
 
         for line in rawfile:
             vals = line.split(sep=' ')
@@ -49,15 +50,20 @@ class BandPassFilter(object):
             self.__rawmat[26].append(q_to_roll(qp))
             self.__rawmat[27].append(q_to_roll(qr))
 
-        raw_mat = np.matrix(self.__rawmat).transpose()
+        raw_mat = np.matrix(self.__rawmat)
 
-        convolution = convolve(raw_mat, coefficients, mode='same')
-        num_cols = len(convolution)
-        num_rows = len(convolution[0])
+        print("!!! BEFORE !!!")
+        convolution = convolve(raw_mat.astype(np.float64), coefficients.astype(np.float64), mode='same').transpose()
+        num_rows, num_cols =convolution.shape
 
-        for r in range(0, num_rows):
-            for c in range(0, num_cols):
-                output.write("{} ".format(convolution[r][c]))
-            output.write('\n')
+        print("!!! AFTER !!!")
 
-        output.close()
+        try:
+            for r in range(0, num_rows):
+                for c in range(0, num_cols):
+                    output.write("{} ".format(convolution[r][c]))
+                output.write('\n')
+
+        finally:
+            output.close()
+

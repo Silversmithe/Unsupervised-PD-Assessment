@@ -6,11 +6,12 @@ a special low-pass filter.
 """
 from scipy.signal import *
 import numpy as np
+import os
 
 
 class LowPassFilter(object):
 
-    COEFFICIENT = "../resources/lowpass_coef.txt"
+    COEFFICIENT = str(os.getcwd()) + "/resources/lowpass_coef.txt"
     NOT_INDICIES = [8, 9, 10, 17, 18, 19, 26, 27, 28, 35, 36, 37]
     FEATURE_SIZE = 40
 
@@ -31,6 +32,7 @@ class LowPassFilter(object):
                 self.__indicies.append(i)
 
     def process(self):
+        print(os.getcwd())
         rawfile = open("{}/raw.txt".format(self.__filename), "r")
         coefficients = open(self.COEFFICIENT, "r").read().split(sep='\n')
         coefficients = np.matrix(coefficients)
@@ -42,15 +44,20 @@ class LowPassFilter(object):
             for i in range(0, self.FEATURE_SIZE):
                 self.__rawmat[i].append(float(vals[i]))
 
-        raw_mat = np.matrix(self.__rawmat).transpose()
+        raw_mat = np.matrix(self.__rawmat)
+        print(raw_mat.shape)
+        print("!!! BEFORE!!!")
 
-        convolution = convolve(raw_mat, coefficients, mode='same')
-        num_cols = len(convolution)
-        num_rows = len(convolution[0])
+        convolution = convolve(raw_mat.astype(np.float64), coefficients.astype(np.float64), mode='same').transpose()
+        print("!!! AFTER!!!")
+        num_rows, num_cols = convolution.shape
+        print(convolution.shape)
 
-        for r in range(0, num_rows):
-            for c in range(0, num_cols):
-                output.write("{} ".format(convolution[r][c]))
-            output.write('\n')
+        try:
+            for r in range(0, num_rows):
+                for c in range(0, num_cols):
+                    output.write("{} ".format(convolution[r][c]))
+                output.write('\n')
 
-        output.close()
+        finally:
+            output.close()
