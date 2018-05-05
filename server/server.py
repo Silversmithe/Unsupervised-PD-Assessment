@@ -345,6 +345,8 @@ def start(tokens):
             # process
             manager = PipelineManager(patient_path="./data/{}".format(patient_name))
             manager.start()
+            manager.join()
+            print("{} processing complete".format(patient_name))
 
         else:
             # FEATURE TO COME
@@ -395,7 +397,7 @@ def load(tokens):
 
                     # download files
                     for i in range(1, len(content)):
-                        # print('|','%'*(step*i), ' '*(bar_size - (step*i)), '|', end='\r')
+                        print('|','%'*(step*i), ' '*(bar_size - (step*i)), '|', end='\r')
                         # mahoney filters for each imu
                         hand_filter = MahoneyFilter()
                         thumb_filter = MahoneyFilter()
