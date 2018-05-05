@@ -51,46 +51,46 @@ class PipelineManager(Thread):
 
         print("processing: {}".format(self.__patient_path))
 
-        ###################
-        # Low Pass Filter #
-        ###################
-        try:
-            print("low pass filter")
-            self.__low_pass_filter.process()
-
-        except:
-            print("warning: uncaught error")
-
-        ############################
-        # Action Prediction Filter #
-        ############################
-        try:
-            print("positional filter")
-            self.__position_filter.process()
-
-        except:
-            print("warning: uncaught error")
-
-        ####################
-        # Band Pass Filter #
-        ####################
-        try:
-            print("band pass filter")
-            self.__band_pass_filter.process()
-
-        except:
-            print("warning: uncaught error")
-
-        ##################
-        # Scoring Filter #
-        ##################
-        try:
-            print("score")
-            self.__score.count_grasp_interuptions()
-
-        except:
-            print("warning: uncaught error")
-        ##################
-        # Scoring Output #
-        ##################
-        pass
+        # ###################
+        # # Low Pass Filter #
+        # ###################
+        # try:
+        #     print("low pass filter")
+        #     self.__low_pass_filter.process()
+        #
+        # except:
+        #     print("warning: uncaught error")
+        #
+        # ############################
+        # # Action Prediction Filter #
+        # ############################
+        # try:
+        #     print("positional filter")
+        #     self.__position_filter.process()
+        #
+        # except:
+        #     print("warning: uncaught error")
+        #
+        # ####################
+        # # Band Pass Filter #
+        # ####################
+        # try:
+        #     print("band pass filter")
+        #     self.__band_pass_filter.process()
+        #
+        # except:
+        #     print("warning: uncaught error")
+        #
+        # ##################
+        # # Scoring Filter #
+        # ##################
+        # try:
+        #     print("score")
+        #     self.__score.count_grasp_interuptions()
+        #
+        # except:
+        #     print("warning: uncaught error")
+        # ##################
+        # # Scoring Output #
+        # ##################
+        # pass
