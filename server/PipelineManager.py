@@ -7,12 +7,12 @@ several filters and ultimately to the scoring stage, where the system
 will produce the UPDRS results
 """
 import os
-import matplotlib.py.plot as plt
+# import matplotlib.pyplot as plt
 from analysis.LowPassFilter import LowPassFilter
 from analysis.BandPassFilter import BandPassFilter
 from analysis.PositionalFilter import PositionalFilter
 from Reporter import Reporter
-from Score import Score
+# from Score import Score
 from threading import Thread, Lock, ThreadError
 
 
@@ -27,19 +27,11 @@ class PipelineManager(Thread):
         Thread.__init__(self)
         self.__patient_path = patient_path
 
-        # self.__low_pass_filter = LowPassFilter(filename=self.__patient_path)
-        # self.__position_filter = PositionalFilter(filename=self.__patient_path)
-        # self.__band_pass_filter = BandPassFilter(filename=self.__patient_path)
+        self.__low_pass_filter = LowPassFilter(filename=self.__patient_path)
+        self.__band_pass_filter = BandPassFilter(filename=self.__patient_path)
         # self.__score = Score(filename=self.__patient_path)
         # self.__reporter = Reporter()
         pass
-
-    def graph(self, array_like):
-        plt.plot(array_like)
-        plt.show()
-        # y = y[(y > 0) & (y < 1)]
-        # y.sort()
-        # x = np.arange(len(y))
 
     def run(self):
         """
@@ -60,36 +52,18 @@ class PipelineManager(Thread):
 
         print("processing: {}".format(self.__patient_path))
 
-        # ###################
-        # # Low Pass Filter #
-        # ###################
-        # try:
-        #     print("low pass filter")
-        #     self.__low_pass_filter.process()
-        #
-        # except:
-        #     print("warning: uncaught error")
-        #
-        # ############################
-        # # Action Prediction Filter #
-        # ############################
-        # try:
-        #     print("positional filter")
-        #     self.__position_filter.process()
-        #
-        # except:
-        #     print("warning: uncaught error")
-        #
-        # ####################
-        # # Band Pass Filter #
-        # ####################
-        # try:
-        #     print("band pass filter")
-        #     self.__band_pass_filter.process()
-        #
-        # except:
-        #     print("warning: uncaught error")
-        #
+        ###################
+        # Low Pass Filter #
+        ###################
+        print("low pass filter")
+        self.__low_pass_filter.process()
+    
+        ####################
+        # Band Pass Filter #
+        ####################
+        print("band pass filter")
+        self.__band_pass_filter.process()
+        
         # ##################
         # # Scoring Filter #
         # ##################
