@@ -7,6 +7,7 @@ several filters and ultimately to the scoring stage, where the system
 will produce the UPDRS results
 """
 import os
+import matplotlib.py.plot as plt
 from analysis.LowPassFilter import LowPassFilter
 from analysis.BandPassFilter import BandPassFilter
 from analysis.PositionalFilter import PositionalFilter
@@ -31,6 +32,13 @@ class PipelineManager(Thread):
         self.__score = Score(filename=self.__patient_path)
         self.__reporter = Reporter()
         pass
+
+    def graph(self, array_like):
+        plt.plot(array_like)
+        plt.show()
+        # y = y[(y > 0) & (y < 1)]
+        # y.sort()
+        # x = np.arange(len(y))
 
     def run(self):
         """

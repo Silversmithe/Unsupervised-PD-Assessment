@@ -26,7 +26,7 @@ class Score(object):
         count_tap_interuptions( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         count_grasps( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         count_grasp_interuptions( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        
+
 
         pass
 
@@ -38,7 +38,7 @@ class Score(object):
 
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
         for i in range(total_inputs):
-            dataset[i] = lines[i]  # split data points of each instance
+            dataset[i] = lines[i].split("\t")  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
         return dataset
@@ -399,3 +399,148 @@ class Score(object):
 
         else:
             print('Error')
+
+    def calc_tremor_amplitude(self, data, testing_time):
+
+        raw_data_tremor_amplitude = data[testing_time]
+
+        r_hand = 5
+        amplitude_upper = np.abs(np.max(raw_data_tremor_amplitude) - np.mean(raw_data_tremor_amplitude))
+        amplitude_lower = np.abs(np.min(raw_data_tremor_amplitude) - np.mean(raw_data_tremor_amplitude))
+
+        amplitude = 2 * r_hand * np.tan(np.max(amplitude_upper, amplitude_lower))
+
+        if amplitude <= 0.1:
+            print("Tremor Score: 0 : Normal")
+        elif amplitude <= 1:
+            print("Tremor Score: 1 : Slight")
+        elif amplitude <= 3:
+            print("Tremor Score: 2 : Mild")
+        elif amplitude <=10:
+            print("Tremor Score: 3 : Moderate")
+        elif amplitude > 10:
+            print("Tremor Score: 4 : Severe")
+        else:
+            print("Tremor amplitude error")
+
+    def postural_tremor(self, data):
+
+        fs = 100
+        data_for_Postural_Ax = data[67] #67 Hand_Ax
+        data_for_Postural_Ay = data[68] #68 Hand_Ay
+        data_for_Postural_Az = data[69] #69 Hand_Az
+
+        data_for_Postural_EMG_rect = data[79] #79 EMG_rect
+        data_length = length(data_for_Postural_Ax)
+
+        data_for_Postural_Vx = np.zeros((data_length,1))
+
+        for i in range(1, data_length):
+            data_for_Postural_Vx[i][0] = data_for_Postural_Vx[i-1][0] + data_for_Postural_Ax[i][0] * (1/fs)
+
+        data_for_Postural_Vy = np.zeros((data_length, 1))
+
+        for i in range(1, data_length):
+            data_for_Postural_Vy[i][0]=data_for_Postural_Vy[i-1][0] + data_for_Postural_Ay[i][0] * (1/fs)
+
+        data_for_Postural_Vz = np.zeros((data_length,1))
+
+        for i in range(1, data_length):
+            data_for_Postural_Vz[i][0]=data_for_Postural_Vz[i-1][0] + data_for_Postural_Az[i][1] * (1/fs)
+
+        sample_period=100
+        sample_num = np.floor(data_length/sample_period)
+        testing_time_post = np.zeros((sample_num*sample_period,1))
+        testing_time_rest = np.zeros((sample_num*sample_period,1))
+        testing_time_kine = np.zeros((sample_num*sample_period,1))
+
+
+        for i in range(0, sample_num):
+            sample_data = [ data_for_Postural_Vx[(i-1)*sample_period:i*sample_period - 1, 0], data_for_Postural_Vy[(i-1)*sample_period:i*sample_period - 1, 0], data_for_Postural_Vz[(i-1)*sample_period:i*sample_period - 1 ,0], data_for_Postural_EMG_rect[(i-1)*sample_period:i*sample_period-1, 0]
+            sample_data_avg = mean(sample_data)
+            EMG_change = np.max(sample_data[3]) - np.min(sample_data[3])
+            if sample_data_avg[0] < 0.05 and sample_data_avg[2] < 0.05 and sample_data_avg[1] < 0.05
+                if EMG_change > 10
+                    testing_time_post[(i-1)*sample_period:i*sample_period, 0] = 1
+                else
+                    testing_time_rest[(i-1)*sample_period:i*sample_period, 0] = 1
+            if sample_data_avg[0] < 0.05 and sample_data_avg[2] < 0.05 and sample_data_avg[1] > 0.2:
+                testing_time_kine[(i-1)*sample_period:i*sample_period, 0] = 1
+
+        # real_testing_time = np.dot(testing_time, true_time[1:sample_num*sample_period, 0])
+        #3 steps does here calling the above function in order to do something
+        real_testing_time_post = np.dot(testing_time_post, data[57]) #57
+        real_testing_time_kine = np.dot(testing_time_kine, data[57]) #57
+        real_testing_time_rest = np.dot(testing_time_rest, data[57]) #57
+
+    # Matlab Code in comments:
+    # %% Postural Tremor of Hands
+    # % stretch the arms out in front of the body with palms down
+    # % rate by roll of hand
+    # data_for_Postural_Ax=Hand_Ax;   % from gravity filter
+    # data_for_Postural_Ay=Hand_Ay;   % from gravity filter
+    # data_for_Postural_Az=Hand_Az;   % from gravity filter
+    # data_for_Postural_EMG_rect=EMG_rect;
+    # data_length=length(data_for_Postural_Ax);    % call data length from self?
+    # data_for_Postural_Vx=zeros(data_length,1);
+    # for i=2:data_length
+    #     data_for_Postural_Vx(i,1)=data_for_Postural_Vx(i-1,1)+data_for_Postural_Ax(i,1)*fs;
+    # end
+    # data_for_Postural_Vy=zeros(data_length,1);
+    # for i=2:data_length
+    #     data_for_Postural_Vy(i,1)=data_for_Postural_Vy(i-1,1)+data_for_Postural_Ay(i,1)*fs;
+    # end
+    # data_for_Postural_Vz=zeros(data_length,1);
+    # for i=2:data_length
+    #     data_for_Postural_Vz(i,1)=data_for_Postural_Vz(i-1,1)+data_for_Postural_Az(i,1)*fs;
+    # end
+    # sample_period=100;   %1 seconds
+    # sample_num=floor(data_length/sample_period);
+    # testing_time_post=zeros(sample_num*sample_period,1);
+    # testing_time_rest=zeros(sample_num*sample_period,1);
+    # for i=1:sample_num
+    #     sample_data=[data_for_Postural_Vx([(i-1)*sample_period+1,i*sample_period],1);...
+    #         data_for_Postural_Vy([(i-1)*sample_period+1,i*sample_period],1);...
+    #         data_for_Postural_Vz([(i-1)*sample_period+1,i*sample_period],1);...
+    #         data_for_Postural_EMG_rect([(i-1)*sample_period+1,i*sample_period],1)];
+    #     sample_data_avg=mean(sample_data);
+    #     EMG_change=max(sample_data)-min(sample_data);
+    #     if sample_data_avg(1)<0.05 && sample_data_avg(3)<0.05 && sample_data_avg(2)>0.2
+    #         if EMG_change>10
+    #             testing_time_post((i-1)*sample_period+1,i*sample_period,1)=1;
+    #         else
+    #             testing_time_rest((i-1)*sample_period+1,i*sample_period,1)=1;
+    #         end
+    #     end
+    # end
+    # real_testing_time=testing_time.*true_time([1:1:sample_num*sample_period],1);  %call from self
+    # %% Kinetic Tremor of Hands
+    # data_for_kinetic_Ax=Hand_Ax;   % from gravity filter
+    # data_for_kinetic_Ay=Hand_Ay;   % from gravity filter
+    # data_for_kinetic_Az=Hand_Az;   % from gravity filter
+    # data_length=length(data_for_kinetic_Ax);    % call data length from self?
+    # data_for_kinetic_Vx=zeros(data_length,1);
+    # for i=2:data_length
+    #     data_for_kinetic_Vx(i,1)=data_for_kinetic_Vx(i-1,1)+data_for_kinetic_Ax(i,1)*fs;
+    # end
+    # data_for_kinetic_Vy=zeros(data_length,1);
+    # for i=2:data_length
+    #     data_for_kinetic_Vy(i,1)=data_for_kinetic_Vy(i-1,1)+data_for_kinetic_Ay(i,1)*fs;
+    # end
+    # data_for_kinetic_Vz=zeros(data_length,1);
+    # for i=2:data_length
+    #     data_for_kinetic_Vz(i,1)=data_for_kinetic_Vz(i-1,1)+data_for_kinetic_Az(i,1)*fs;
+    # end
+    # sample_period=100;   %1 seconds
+    # sample_num=floor(data_length/sample_period);
+    # testing_time=zeros(sample_num*sample_period,1);
+    # for i=1:sample_num
+    #     sample_data=[data_for_kinetic_Vx([(i-1)*sample_period+1,i*sample_period],1);...
+    #         data_for_kinetic_Vy([(i-1)*sample_period+1,i*sample_period],1);...
+    #         data_for_kinetic_Vz([(i-1)*sample_period+1,i*sample_period],1)];
+    #     sample_data_avg=mean(sample_data);
+    #     if sample_data_avg(1)<0.05 && sample_data_avg(3)<0.05 && sample_data_avg(2)>0.2
+    #         testing_time((i-1)*sample_period+1,i*sample_period,1)=1;
+    #     end
+    # end
+    # real_testing_time=testing_time.*true_time;  %call from self
