@@ -494,7 +494,7 @@ bool write_line(unsigned size, uint8_t* buffer){
   }
 
   /* wait before sending another message */
-  delay(10);
+  delay(100);
 
   /* second segment */
   for(unsigned i=0; i<byte_size-(PAYLOAD_SIZE-offset); i++)
@@ -602,9 +602,9 @@ uint32_t write_to_server(uint32_t position){
           break;
         }
         __packet_id = (__packet_id + 1) % 200; // keep within the size of a file
-        delay(10); // slight delay is healthy for server (works well at 50)
+        delay(100); // slight delay is healthy for server (works well at 50)
         // transfer_mode_light();
-        if(__packet_id == 0){ delay(5000); } // give the server breathing room
+        if(__packet_id == 0){ delay(1000); } // give the server breathing room
       }
 
       current_pos = __file.position();

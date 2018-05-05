@@ -68,11 +68,12 @@ void setup(void) {
   pinMode(BTN_MODE, INPUT);
   pinMode(LED_MODE_STAT, OUTPUT);
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
-  hardware_success &= init_com(false);      // setup HWSERIAL & XBEE
-  hardware_success &= imu_setup(false);      // setup IMU
+  hardware_success = init_com(false) && hardware_success;
+  hardware_success = imu_setup(true) && hardware_success;
   if(!hardware_success){
     __current_state = KILL;
     __error = IMU_ERROR;
+    close_datastream();
     kill();
   }
 
@@ -190,10 +191,10 @@ void loop(void) {
     if(!BUFFER.is_empty()){
       noInterrupts();
       temp_data = BUFFER.remove_front();
-      interrupts();
 
       /* DATA TRANSFER */
       __error = log_payload(temp_data);
+      interrupts();
     }
   } else {
     /* turn off sensor isr */
@@ -263,17 +264,15 @@ bool imu_setup(bool trace){
     if(__enabled[i]){
       status[i] =  __imus[i].begin();
       /* initializing components */
-      status[i] &= (__imus[i].setGyroRange(MPU9250::GYRO_RANGE_250DPS) >=0);
+      __imus[i].setGyroRange(MPU9250::GYRO_RANGE_250DPS);
 
-      out = out & !(status[i] < 0);
-      if(trace && !out){
-        while(true){
-          Serial.print("(");
-          Serial.print(i);
-          Serial.print("): hardware error, CODE: ");
-          Serial.println(status[i]);
-          delay(1000);
-        }
+      out = out && !(status[i] < 0);
+      if(trace && (status[i] < 0)){
+        log("imu hardware error!");
+        log("id: ");
+        log(String(i).c_str());
+        log("code: ");
+        log(String(status[i]).c_str());
       }
     }
   }
