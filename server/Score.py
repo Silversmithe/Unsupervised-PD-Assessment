@@ -18,9 +18,16 @@ class Score(object):
         self.__num_instances = self.get_num_instances(textfile=self.__patient_path)
         pass
 
-    def process(self, textfile):
+    def process(self, textfile, dataset1, dataset2, dataset3, dataset4):
         """
         """
+        self.get_input(textfile)
+        count_taps( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        count_tap_interuptions( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        count_grasps( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        count_grasp_interuptions( dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        
+
         pass
 
     def get_input(self, textfile):
