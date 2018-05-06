@@ -332,6 +332,7 @@ class Score(object):
                     try:
                         output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
                     except ValueError:
+                        print("Below values belong to 1hz")
                         print("Line {} is corrupt!".format(i))
                         print("column {} is corrupt!".format(k))
                         break
@@ -368,6 +369,7 @@ class Score(object):
                     try:
                         output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
                     except ValueError:
+                        print("Below values belong to 1_3hz")
                         print("Line {} is corrupt!".format(i))
                         print("column {} is corrupt!".format(k))
                         break
@@ -404,6 +406,7 @@ class Score(object):
                     try:
                         output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
                     except ValueError:
+                        print("Below values belong to 2hz")
                         print("Line {} is corrupt!".format(i))
                         print("column {} is corrupt!".format(k))
                         break
@@ -440,6 +443,7 @@ class Score(object):
                     try:
                         output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
                     except ValueError:
+                        print("Below values belong to 3hz")
                         print("Line {} is corrupt!".format(i))
                         print("column {} is corrupt!".format(k))
                         break
