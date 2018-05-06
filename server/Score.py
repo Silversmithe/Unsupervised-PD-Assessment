@@ -64,7 +64,7 @@ class Score(object):
         # weights15 = self.__weights_hgin_2hz
         # weights16 = self.__weights_hgin_3hz
 
-        inputs2 = self.get_input()
+        inputs2 = self.get_input_1hz()
 
         # print(inputs1)
 
