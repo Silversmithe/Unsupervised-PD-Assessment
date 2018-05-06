@@ -188,7 +188,7 @@ class Score(object):
             print("Hand Movement Score: 3")
 
 
-        self.score_rest_tremor()
+        self.score_time_tremor()
         # inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
         # inputs2 = self.get_input_1hz_test("yousef_5.txt")
         # inputs3 = self.get_input_2hz_test("yousef_9.txt")
@@ -901,7 +901,7 @@ class Score(object):
         if max_count == 0:
             return print("no hand grasp interruptions found")
 
-    def score_rest_tremor(self):
+    def score_time_tremor(self):
 
         # higher sample number will give us higher accuracy later
         # may need to change this later
@@ -969,7 +969,7 @@ class Score(object):
 
             # freq = 0 : df : fs - df
             s2 = slice(beginning_index, end_index, 1)
-            mag_tremor = np.linalg.norm[s2][0:]
+            mag_tremor = np.linalg.norm(true_data[s2][0:])
             mag_tremor_max = max(mag_tremor)
             for i in range(24):
                 if mag_tremor_max(j) > tremor_amp:
