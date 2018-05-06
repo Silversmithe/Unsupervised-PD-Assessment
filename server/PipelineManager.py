@@ -33,8 +33,7 @@ class PipelineManager(Thread):
         self.__hampel_filter = HampelFilter(filename=self.__patient_path)
         self.__gravity_filter = GravityFilter(filename=self.__patient_path)
         self.__score = Score(filename=self.__patient_path)
-        # self.__reporter = Reporter()
-        pass
+        self.__reporter = Reporter(filepath=self.__patient_path)
 
     def run(self):
         """
@@ -58,20 +57,21 @@ class PipelineManager(Thread):
         ###################
         # Low Pass Filter #
         ###################
-        #print("low pass filter")
-        #self.__low_pass_filter.process()
+        # print("low pass filter")
+        # self.__low_pass_filter.process()
 
         ####################
         # Band Pass Filter #
         ####################
-        #print("band pass filter")
-        #self.__band_pass_filter.process()
+        # print("band pass filter")
+        # self.__band_pass_filter.process()
 
         ####################
         # Hampel Filter    #
         ####################
-        #print("hampel filter")
-        #self.__hampel_filter.process()
+        # print("hampel filter")
+        # self.__hampel_filter.process()
+
         ####################
         # Gravity Filter   #
         ####################
@@ -86,6 +86,6 @@ class PipelineManager(Thread):
         self.__score.process()
 
         ##################
-        # Scoring Output #
+        # Report Output  #
         ##################
-        # pass
+        self.__reporter.generate_report()
