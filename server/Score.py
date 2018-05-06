@@ -243,8 +243,8 @@ class Score(object):
         # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
 
         for i in range(int(total_inputs/33)):
-            for k in range(1256):
-                if(k == 1255):
+            for k in range(1255):
+                if(k == 1254):
                     output[i][k] = 1
                 else:
                     try:
