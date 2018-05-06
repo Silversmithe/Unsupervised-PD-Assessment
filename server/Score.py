@@ -93,17 +93,17 @@ class Score(object):
         # print(dataset_ftaps[1][0])
         print(dataset[0])
         print(dataset[0][54])
-        # for i in range(total_inputs):
-        #     for k in range(56):
-        #         if(k == 55):
-        #             output[i][k] = 1
-        #         else:
-        #             try:
-        #                 output[i][k] = float(dataset[i][k])
-        #             except ValueError:
-        #                 print("Line {} is corrupt!".format(i))
-        #                 print("column {} is corrupt!".format(k))
-        #                 break
+        for i in range(total_inputs):
+            for k in range(55):
+                if(k == 54):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[i][k])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
 
 
         return output
