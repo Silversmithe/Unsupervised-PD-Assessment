@@ -925,11 +925,11 @@ class Score(object):
         expected_sample_num = 10
         fs = 100
 
-        sample_size = np.floor(self.__num_instances/expected_sample_num)
+        sample_size = int(self.__num_instances/expected_sample_num)
 
         df = fs/sample_size
 
-        sample_num = np.floor(self.__num_instances/sample_size)
+        sample_num = int(self.__num_instances/sample_size)
 
         test_data = np.zeros((sample_size, 24))
         frequency = np.zeros((fs/df))
