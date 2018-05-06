@@ -295,6 +295,7 @@ class Score(object):
 
 
     def get_input_1hz_test(self, textfile):
+        dir_path = os.getcwd()
         text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
@@ -330,6 +331,7 @@ class Score(object):
         return output
 
     def get_input_1_3hz_test(self, textfile):
+        dir_path = os.getcwd()
         text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
@@ -365,6 +367,7 @@ class Score(object):
         return output
 
     def get_input_2hz_test(self, textfile):
+        dir_path = os.getcwd()
         text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
@@ -400,6 +403,7 @@ class Score(object):
         return output
 
     def get_input_3hz(self, textfile):
+        dir_path = os.getcwd()
         text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
