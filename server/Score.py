@@ -67,7 +67,7 @@ class Score(object):
         return dataset
 
     def get_weights(self, textfile):
-        text_file = open("/resources/weights/" + textfile , "r")
+        text_file = open("server/resources/weights/" + textfile , "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
         text_file.close()
