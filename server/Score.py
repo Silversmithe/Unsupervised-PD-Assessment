@@ -75,6 +75,9 @@ class Score(object):
         # print(dataset1)
 
         self.count_taps(dataset1, dataset1, dataset1, dataset1, self.__num_instances)
+        self.count_tap_interuptions(dataset1, dataset1, dataset1, dataset1, self.__num_instances)
+        self.count_grasps(dataset1, dataset1, dataset1, dataset1, self.__num_instances)
+        self.count_grasp_interuptions(dataset1, dataset1, dataset1, dataset1, self.__num_instances)
         # self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
         # self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
         # self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
