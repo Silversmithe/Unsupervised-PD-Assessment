@@ -932,27 +932,27 @@ class Score(object):
         sample_num = int(self.__num_instances/sample_size)
 
         test_data = np.zeros((sample_size, 24))
-        frequency = np.zeros((int(fs/df)))
+        # frequency = np.zeros((int(fs/df)))
 
-        beginning_index = 0
-        beginning_flag = 0
+        # beginning_index = 0
+        # beginning_flag = 0
+        #
+        # end_index = 0
+        # end_flag = 0
 
-        end_index = 0
-        end_flag = 0
-
-        for i in range(int(fs/df)):
-            frequency[i] = i * df
-
-            if frequency[i] > 3 and beginning_flag == 0:
-                beginning_flag = 1
-                beginning_index = i
-
-            if frequency[i] > 7 and beginning_flag == 1:
-                end_index = i - 1
-                end_flag = 1
-
-            if end_flag:
-                break
+        # for i in range(int(fs/df)):
+        #     frequency[i] = i * df
+        #
+        #     if frequency[i] > 3 and beginning_flag == 0:
+        #         beginning_flag = 1
+        #         beginning_index = i
+        #
+        #     if frequency[i] > 7 and beginning_flag == 1:
+        #         end_index = i - 1
+        #         end_flag = 1
+        #
+        #     if end_flag:
+        #         break
 
         # used to determine if the patient has tremors
         tremor_amp = 3
@@ -964,14 +964,14 @@ class Score(object):
             # true data should then be raw data
             s = slice(((i-1)*sample_size) , (i*sample_size) , 1)
             test_data = true_data[s][0:]
-            test_data_fft = sp.fft(test_data)
+            # test_data_fft = sp.fft(test_data)
             mag = np.abs(test_data_fft)
 
             # freq = 0 : df : fs - df
-            s2 = slice(beginning_index, end_index, 1)
-            mag_tremor = np.linalg.norm(true_data[s2][0:])
+            # s2 = slice(beginning_index, end_index, 1)
+            # mag_tremor = np.linalg.norm(true_data[s2][0:])
             print(mag_tremor)
-            mag_tremor_max = np.max(mag_tremor, axis=0)
+            mag_tremor_max = np.max(mag, axis=0)
             print(mag_tremor_max)
             for j in range(24):
                 if mag_tremor_max[j] > tremor_amp:
