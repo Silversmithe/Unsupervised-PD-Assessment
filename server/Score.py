@@ -124,18 +124,21 @@ class Score(object):
         print(dataset[0])
         print(dataset[0][54])
         temp_count = 0
-        for i in range(int(total_inputs/5500)):
-            for k in range(5500):
-                if(k == 54):
+
+        # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
+
+        for i in range(int(total_inputs/100)):
+            for k in range(3801):
+                if(k == 3800):
                     output[i][k] = 1
                 else:
                     try:
-                        output[i][k] = float(dataset[temp_count][k % 54])
+                        output[i][k] = float(dataset[temp_count][k % 38])
                     except ValueError:
                         print("Line {} is corrupt!".format(i))
                         print("column {} is corrupt!".format(k))
                         break
-                if(k % 54 == 0 ):
+                if(k % 38 == 0 ):
                     temp_count = temp_count + 1
 
 
