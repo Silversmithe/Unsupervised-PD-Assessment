@@ -26,7 +26,6 @@ class GravityFilter(object):
         with open("{}/raw.txt".format(self.__filename), "r") as rawfile:
             for line in rawfile:
                 vals = line.split(sep=' ')
-
                 # HAND
                 Hx = float(vals[2])
                 Hy = float(vals[3])
