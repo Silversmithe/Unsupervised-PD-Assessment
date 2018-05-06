@@ -958,9 +958,11 @@ class Score(object):
         tremor_amp = 3
         tremor_count = 0
 
+        # s = slice(3,4,5,6,7,8,12,13,14,15,16,17,21,22,23,24,25,26,30,31,32,33,34,35)
+
         for i in range(0, sample_num):
             # true data should then be raw data
-            test_data = true_data.iloc[[((i-1)*sample_size): (i*sample_size)], [3:8,12:17,21:26,30:35]]
+            test_data = true_data.[[((i-1)*sample_size):(i*sample_size)], 0: ]
             test_data_fft = sp.fft(test_data)
             mag = np.abs(test_data_fft)
 
