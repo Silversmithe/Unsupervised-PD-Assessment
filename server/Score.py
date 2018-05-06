@@ -88,7 +88,7 @@ class Score(object):
         # dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
         dataset = np.zeros((total_inputs, 38))
         for i in range(total_inputs):
-            dataset[i] = lines[i].split("\t")  # split data points of each instance
+            dataset[i] = lines[i].split(" ")  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
         return dataset
