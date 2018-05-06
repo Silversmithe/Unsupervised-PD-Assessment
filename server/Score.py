@@ -104,6 +104,7 @@ class Score(object):
         # dataset = [[] for y in range(total_inputs)]
         for i in range(total_inputs):
             dataset[i] = lines[i]  # split data points of each instance
+        print(dataset[i])
 
         # print(dataset_ftaps[1][0])
         return dataset
