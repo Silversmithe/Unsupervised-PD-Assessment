@@ -64,7 +64,7 @@ class Score(object):
         weights15 = self.__weights_hgin_2hz
         weights16 = self.__weights_hgin_3hz
 
-        dataset1 = get_predictions(get_input, weights1)
+        dataset1 = get_prediction(get_input, weights1)
 
         self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
@@ -106,7 +106,7 @@ class Score(object):
     sigmoid(x)= ----------
                 1 + e^(-x)
     """
-    def sigmoid(temp_in):
+    def sigmoid(self, temp_in):
         return np.float64(1 / (1 + np.exp( - temp_in)))
 
 
@@ -115,7 +115,7 @@ class Score(object):
     column weights, we generate a column of prediction
     values to determine whether or not an action occured
     """
-    def get_predictions(inputs, weights):
+    def get_predictions(self, inputs, weights):
         return sigmoid(np.matmul(inputs, weights))
 
 
