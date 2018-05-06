@@ -181,7 +181,7 @@ class Score(object):
     values to determine whether or not an action occured
     """
     def get_predictions(self, inputs, weights):
-        return self.sigmoid(np.matmul(inputs, weights.transpose()))
+        return self.sigmoid(np.matmul(inputs, weights))
 
 
     def get_num_instances(self):
