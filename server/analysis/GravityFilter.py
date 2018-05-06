@@ -11,7 +11,7 @@ import numpy as np
 
 class GravityFilter(object):
 
-    GRAVITY = np.matrix([0.0, 0.0, 1.0])
+    GRAVITY = np.matrix([[0.0], [0.0], [-9.81]])
 
     def __init__(self, filename):
         self.__filename = filename
@@ -19,18 +19,25 @@ class GravityFilter(object):
 
     def process(self):
         # go to raw file with quads
+        outfile = open("{}/gravity.txt".format(self.__filename), "w+")
         with open("{}/raw.txt".format(self.__filename), "r") as rawfile:
             for line in rawfile:
                 # extract quads
                 elts = line.split(sep=' ')
-                q = [elts[38], elts[39], elts[40], elts[41]]
+                q = [float(elts[38]), float(elts[39]), float(elts[40]), float(elts[41])]
                 # generate rotation matrix
                 rot = self.generate_rot_mat(q)
-                q = np.matrix(q)
                 # multiply gravity by rotation matrix to get gravity in new reference frame
-                rotated_ref = rot * q
+                rotated_ref = np.matmul(rot, self.GRAVITY)
                 # display or store rotated reference
                 print(rotated_ref)
+                
+                for i in range(0, 3):
+                    outfile.write(str(rotated_ref[i][0]) + ' ')
+
+                outfile.write("\n")
+    
+        outfile.close()
 
     @staticmethod
     def generate_rot_mat(q):

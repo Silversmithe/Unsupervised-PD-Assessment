@@ -32,7 +32,7 @@ class HampelFilter(object):
         print("!!! AFTER !!!")
     
         for i in range(1, len(filtered)-1):
-            if filtered[i] == np.nan:
+            if np.isnan(filtered[i]):
                 filtered[i] = (filtered[i+1] + filtered[i-1])/2.0
 
         try:
