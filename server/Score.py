@@ -87,6 +87,7 @@ class Score(object):
         dataset3 = self.get_predictions(inputs3, weights3)
         dataset4 = self.get_predictions(inputs4, weights4)
 
+        print(dataset1)
         #
         # print(weights1)
         #
