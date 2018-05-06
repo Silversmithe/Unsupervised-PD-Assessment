@@ -16,6 +16,7 @@ class HampelFilter(object):
 
     def process(self):
         """
+
         emg rectified 
         """
         rawfile = open("{}/raw.txt".format(self.__filename), "r")
