@@ -965,7 +965,7 @@ class Score(object):
             s = slice(((i-1)*sample_size) , (i*sample_size) , 1)
             test_data = true_data[s][0:]
             # test_data_fft = sp.fft(test_data)
-            mag = np.abs(test_data_fft)
+            mag = np.abs(test_data)
 
             # freq = 0 : df : fs - df
             # s2 = slice(beginning_index, end_index, 1)
