@@ -124,7 +124,7 @@ class Score(object):
         print(dataset[0])
         print(dataset[0][54])
         temp_count = 0
-        for i in range(total_inputs/5500):
+        for i in range(int(total_inputs/5500)):
             for k in range(5500):
                 if(k == 54):
                     output[i][k] = 1
