@@ -75,8 +75,8 @@ class PipelineManager(Thread):
         ####################
         # Gravity Filter   #
         ####################
-        #print("gravity filter")
-        #self.__gravity_filter.process()
+        # print("gravity filter")
+        # self.__gravity_filter.process()
 
         ##################
         # Scoring Filter #
