@@ -97,7 +97,11 @@ class Score(object):
                 if(k == 55):
                     output[i][k] = 1
                 else:
-                    output[i][k] = float(dataset[i][k])
+                    try:
+                        output[i][k] = float(dataset[i][k])
+                    except ValueError:
+                        print("Line {i} is corrupt!".format(i = index))
+
 
         return output
 
