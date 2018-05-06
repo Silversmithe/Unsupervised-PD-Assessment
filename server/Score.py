@@ -96,7 +96,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
-            if float(dataset3[i][0] >= 0.5:
+            if float(dataset3[i][0] >= 0.5):
                 count = count + 1
 
         if count > max_count:
