@@ -79,15 +79,15 @@ class Score(object):
         weights3 = self.__weights_ft_2hz
         weights4 = self.__weights_ft_3hz
 
-        inputs4 = self.get_input_1_3hz_test("yousef_1.txt")
-        inputs3 = self.get_input_1hz_test("yousef_1.txt")
-        inputs2 = self.get_input_2hz_test("yousef_1.txt")
-        inputs1 = self.get_input_3hz_test("yousef_1.txt")
+        inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
+        inputs2 = self.get_input_1hz_test("yousef_1.txt")
+        inputs3 = self.get_input_2hz_test("yousef_1.txt")
+        inputs4 = self.get_input_3hz_test("yousef_1.txt")
 
-        dataset1 = self.get_predictions(inputs1, weights1)
-        dataset2 = self.get_predictions(inputs2, weights2)
-        dataset3 = self.get_predictions(inputs3, weights3)
-        dataset4 = self.get_predictions(inputs4, weights4)
+        dataset4 = self.get_predictions(inputs1, weights1)
+        dataset3 = self.get_predictions(inputs2, weights2)
+        dataset2 = self.get_predictions(inputs3, weights3)
+        dataset1 = self.get_predictions(inputs4, weights4)
         #
         # print(dataset1)
         # print(dataset2)
@@ -101,15 +101,15 @@ class Score(object):
         weights7 = self.__weights_ftin_2hz
         weights8 = self.__weights_ftin_3hz
 
-        inputs8 = self.get_input_1_3hz_test("yousef_2.txt")
-        inputs7 = self.get_input_1hz_test("yousef_2.txt")
-        inputs6 = self.get_input_2hz_test("yousef_2.txt")
-        inputs5 = self.get_input_3hz_test("yousef_2.txt")
+        inputs5 = self.get_input_1_3hz_test("yousef_2.txt")
+        inputs6 = self.get_input_1hz_test("yousef_2.txt")
+        inputs7 = self.get_input_2hz_test("yousef_2.txt")
+        inputs8 = self.get_input_3hz_test("yousef_2.txt")
 
-        dataset5 = self.get_predictions(inputs5, weights5)
-        dataset6 = self.get_predictions(inputs6, weights6)
-        dataset7 = self.get_predictions(inputs7, weights7)
-        dataset8 = self.get_predictions(inputs8, weights8)
+        dataset8 = self.get_predictions(inputs5, weights5)
+        dataset7 = self.get_predictions(inputs6, weights6)
+        dataset6 = self.get_predictions(inputs7, weights7)
+        dataset5 = self.get_predictions(inputs8, weights8)
 
         # print(dataset5)
         # print(dataset6)
@@ -123,15 +123,15 @@ class Score(object):
         weights11 = self.__weights_hg_2hz
         weights12 = self.__weights_hg_3hz
 
-        inputs12 = self.get_input_1_3hz_test("yousef_3.txt")
-        inputs11 = self.get_input_1hz_test("yousef_3.txt")
-        inputs10 = self.get_input_2hz_test("yousef_3.txt")
-        inputs9 = self.get_input_3hz_test("yousef_3.txt")
+        inputs9 = self.get_input_1_3hz_test("yousef_3.txt")
+        inputs10 = self.get_input_1hz_test("yousef_3.txt")
+        inputs11 = self.get_input_2hz_test("yousef_3.txt")
+        inputs12 = self.get_input_3hz_test("yousef_3.txt")
 
-        dataset9 = self.get_predictions(inputs9, weights9)
-        dataset10 = self.get_predictions(inputs10, weights10)
-        dataset11 = self.get_predictions(inputs11, weights11)
-        dataset12 = self.get_predictions(inputs12, weights12)
+        dataset12 = self.get_predictions(inputs9, weights9)
+        dataset11 = self.get_predictions(inputs10, weights10)
+        dataset10 = self.get_predictions(inputs11, weights11)
+        dataset9 = self.get_predictions(inputs12, weights12)
 
         # print(dataset9)
         # print(dataset10)
@@ -145,15 +145,15 @@ class Score(object):
         weights15 = self.__weights_hgin_2hz
         weights16 = self.__weights_hgin_3hz
 
-        inputs16 = self.get_input_1_3hz_test("yousef_4.txt")
-        inputs15 = self.get_input_1hz_test("yousef_4.txt")
-        inputs14 = self.get_input_2hz_test("yousef_4.txt")
-        inputs13 = self.get_input_3hz_test("yousef_4.txt")
+        inputs13 = self.get_input_1_3hz_test("yousef_4.txt")
+        inputs14 = self.get_input_1hz_test("yousef_4.txt")
+        inputs15 = self.get_input_2hz_test("yousef_4.txt")
+        inputs16 = self.get_input_3hz_test("yousef_4.txt")
 
-        dataset13 = self.get_predictions(inputs13, weights13)
-        dataset14 = self.get_predictions(inputs14, weights14)
-        dataset15 = self.get_predictions(inputs15, weights15)
-        dataset16 = self.get_predictions(inputs16, weights16)
+        dataset16 = self.get_predictions(inputs13, weights13)
+        dataset15 = self.get_predictions(inputs14, weights14)
+        dataset14 = self.get_predictions(inputs15, weights15)
+        dataset13 = self.get_predictions(inputs16, weights16)
 
         # print(dataset9)
         # print(dataset10)
