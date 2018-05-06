@@ -44,15 +44,15 @@ class Score(object):
     def process(self):
         """
         """
-        weights1 = self.__weights_ft_0hz
-        weights2 = self.__weights_ft_1hz
-        weights3 = self.__weights_ft_2hz
-        weights4 = self.__weights_ft_3hz
+        # weights1 = self.__weights_ft_0hz
+        # weights2 = self.__weights_ft_1hz
+        # weights3 = self.__weights_ft_2hz
+        # weights4 = self.__weights_ft_3hz
 
-        weights5 = self.__weights_ftin_0hz
-        weights6 = self.__weights_ftin_1hz
-        weights7 = self.__weights_ftin_2hz
-        weights8 = self.__weights_ftin_3hz
+        # weights5 = self.__weights_ftin_0hz
+        # weights6 = self.__weights_ftin_1hz
+        # weights7 = self.__weights_ftin_2hz
+        # weights8 = self.__weights_ftin_3hz
         #
         # weights5 = self.__weights_ftin_0hz
         # weights6 = self.__weights_ftin_1hz
@@ -74,6 +74,11 @@ class Score(object):
         # inputs3 = self.get_input_2hz()
         # inputs4 = self.get_input_3hz()
 
+        weights1 = self.__weights_ft_0hz
+        weights2 = self.__weights_ft_1hz
+        weights3 = self.__weights_ft_2hz
+        weights4 = self.__weights_ft_3hz
+
         inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
         inputs2 = self.get_input_1hz_test("yousef_1.txt")
         inputs3 = self.get_input_2hz_test("yousef_1.txt")
@@ -83,13 +88,18 @@ class Score(object):
         dataset2 = self.get_predictions(inputs2, weights2)
         dataset3 = self.get_predictions(inputs3, weights3)
         dataset4 = self.get_predictions(inputs4, weights4)
-
-        print(dataset1)
-        print(dataset2)
-        print(dataset3)
-        print(dataset4)
+        #
+        # print(dataset1)
+        # print(dataset2)
+        # print(dataset3)
+        # print(dataset4)
 
         self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
+
+        weights5 = self.__weights_ftin_0hz
+        weights6 = self.__weights_ftin_1hz
+        weights7 = self.__weights_ftin_2hz
+        weights8 = self.__weights_ftin_3hz
 
         inputs5 = self.get_input_1_3hz_test("yousef_2.txt")
         inputs6 = self.get_input_1hz_test("yousef_2.txt")
@@ -101,12 +111,34 @@ class Score(object):
         dataset7 = self.get_predictions(inputs7, weights7)
         dataset8 = self.get_predictions(inputs8, weights8)
 
-        print(dataset5)
-        print(dataset6)
-        print(dataset7)
-        print(dataset8)
+        # print(dataset5)
+        # print(dataset6)
+        # print(dataset7)
+        # print(dataset8)
 
-        self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2950)
+        self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2901)
+
+        weights9 = self.__weights_hg_0hz
+        weights10 = self.__weights_hg_1hz
+        weights11 = self.__weights_hg_2hz
+        weights12 = self.__weights_hg_3hz
+
+        inputs9 = self.get_input_1_3hz_test("yousef_3.txt")
+        inputs10 = self.get_input_1hz_test("yousef_3.txt")
+        inputs11 = self.get_input_2hz_test("yousef_3.txt")
+        inputs12 = self.get_input_3hz_test("yousef_3.txt")
+
+        dataset9 = self.get_predictions(inputs9, weights9)
+        dataset10 = self.get_predictions(inputs10, weights10)
+        dataset11 = self.get_predictions(inputs11, weights11)
+        dataset12 = self.get_predictions(inputs12, weights12)
+
+        # print(dataset9)
+        # print(dataset10)
+        # print(dataset11)
+        # print(dataset12)
+
+        self.count_grasps(dataset9, dataset10, dataset11, dataset12, 2840)
 
 
         # inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
