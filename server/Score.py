@@ -912,7 +912,7 @@ class Score(object):
         text_file.close()
 
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
-        output = np.zeros((total_inputs, 3801))
+        output = np.zeros((total_inputs, 28))
         for i in range(total_inputs):
             dataset[i] = lines[i].split(' ')
 
@@ -960,7 +960,7 @@ class Score(object):
 
         for i in range(0, sample_num):
             # true data should then be raw data
-            test_data = true_data[[(i-1)*sample_size + 1 : i*sample_size] 3:8,12:17,21:26,30:35]
+            test_data = true_data[[(i-1)*sample_size + 1 : i*sample_size], [3:8,12:17,21:26,30:35]]
             test_data_fft = sp.fft(test_data)
             mag = np.abs(test_data_fft)
 
