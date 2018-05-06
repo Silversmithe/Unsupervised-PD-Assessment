@@ -4,6 +4,7 @@ of
 """
 import scipy as sp
 import numpy as np
+import os
 
 
 class Score(object):
