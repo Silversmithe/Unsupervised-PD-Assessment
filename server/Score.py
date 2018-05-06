@@ -116,7 +116,7 @@ class Score(object):
         text_file.close()
 
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
-        output = np.zeros((total_inputs, 5500))
+        output = np.zeros((total_inputs, 3801))
         for i in range(total_inputs):
             dataset[i] = lines[i].split(' ')  # split data points of each instance
 
