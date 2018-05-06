@@ -529,9 +529,9 @@ class Score(object):
                     try:
                         output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
                     except ValueError:
-                        print("Below values belong to 3hz")
-                        print("Line {} is corrupt!".format(i))
-                        print("column {} is corrupt!".format(k))
+                        # print("Below values belong to 3hz")
+                        # print("Line {} is corrupt!".format(i))
+                        # print("column {} is corrupt!".format(k))
                         break
                 if(k % 38 == 0 ):
                     temp_count = temp_count + 1
