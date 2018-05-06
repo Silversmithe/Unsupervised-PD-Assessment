@@ -48,6 +48,11 @@ class Score(object):
         weights2 = self.__weights_ft_1hz
         weights3 = self.__weights_ft_2hz
         weights4 = self.__weights_ft_3hz
+
+        weights5 = self.__weights_ftin_0hz
+        weights6 = self.__weights_ftin_1hz
+        weights7 = self.__weights_ftin_2hz
+        weights8 = self.__weights_ftin_3hz
         #
         # weights5 = self.__weights_ftin_0hz
         # weights6 = self.__weights_ftin_1hz
@@ -74,6 +79,35 @@ class Score(object):
         inputs3 = self.get_input_2hz_test("yousef_1.txt")
         inputs4 = self.get_input_3hz_test("yousef_1.txt")
 
+        dataset1 = self.get_predictions(inputs1, weights1)
+        dataset2 = self.get_predictions(inputs2, weights2)
+        dataset3 = self.get_predictions(inputs3, weights3)
+        dataset4 = self.get_predictions(inputs4, weights4)
+
+        print(dataset1)
+        print(dataset2)
+        print(dataset3)
+        print(dataset4)
+
+        self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
+
+        inputs5 = self.get_input_1_3hz_test("yousef_1.txt")
+        inputs6 = self.get_input_1hz_test("yousef_1.txt")
+        inputs7 = self.get_input_2hz_test("yousef_1.txt")
+        inputs8 = self.get_input_3hz_test("yousef_1.txt")
+
+        dataset5 = self.get_predictions(inputs5, weights5)
+        dataset6 = self.get_predictions(inputs6, weights6)
+        dataset7 = self.get_predictions(inputs7, weights7)
+        dataset8 = self.get_predictions(inputs8, weights8)
+
+        print(dataset5)
+        print(dataset6)
+        print(dataset7)
+        print(dataset8)
+
+        self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2950)
+
 
         # inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
         # inputs2 = self.get_input_1hz_test("yousef_5.txt")
@@ -82,10 +116,7 @@ class Score(object):
 
         # print(inputs1)
 
-        dataset1 = self.get_predictions(inputs1, weights1)
-        dataset2 = self.get_predictions(inputs2, weights2)
-        dataset3 = self.get_predictions(inputs3, weights3)
-        dataset4 = self.get_predictions(inputs4, weights4)
+
 
         print(dataset1)
         print(dataset2)
