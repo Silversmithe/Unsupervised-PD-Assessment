@@ -969,7 +969,7 @@ class Score(object):
 
             # freq = 0 : df : fs - df
 
-            mag_tremor = np.linalg.norm[beginning_index:end_index [0:]]
+            mag_tremor = np.linalg.norm[beginning_index:end_index][0:]
             mag_tremor_max = max(mag_tremor)
             for i in range(24):
                 if mag_tremor_max(j) > tremor_amp:
