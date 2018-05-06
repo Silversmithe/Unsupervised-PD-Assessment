@@ -64,12 +64,12 @@ class Score(object):
         weights15 = self.__weights_hgin_2hz
         weights16 = self.__weights_hgin_3hz
 
-        dataset1 = get_prediction(get_input, weights1)
+        dataset1 = self.get_predictions(self.get_input, weights1)
 
-        self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
-        self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
-        self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
+        # self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        # self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
+        # self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
+        # self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
 
     def get_input(self):
         text_file = open("{}/raw.txt".format(self.__filename), "r")
@@ -116,7 +116,7 @@ class Score(object):
     values to determine whether or not an action occured
     """
     def get_predictions(self, inputs, weights):
-        return sigmoid(np.matmul(inputs, weights))
+        return self.sigmoid(np.matmul(inputs, weights))
 
 
     def get_num_instances(self):
@@ -143,8 +143,8 @@ class Score(object):
     column weights, we generate a column of prediction
     values to determine whether or not an action occured
     """
-    def get_predictions(inputs, weights):
-        return sigmoid(np.matmul(inputs, weights))
+    def get_predictions(self, inputs, weights):
+        return self.sigmoid(np.matmul(inputs, weights))
 
     def count_taps(self, dataset1, dataset2, dataset3, dataset4, total_instances):
 
@@ -464,7 +464,7 @@ class Score(object):
         for i in range(0, sample_num):
             # true data should then be raw data
             test_data = true_data[(i-1)*sample_size + 1 : i*sample_size[3:8,12:17,21:26,30:35]]
-            test_data_fft = np.fft(test_data)
+            test_data_fft = sp.fft(test_data)
             mag = np.abs(test_data_fft)
 
             # freq = 0 : df : fs - df
@@ -475,7 +475,7 @@ class Score(object):
                 if mag_tremor_max(j) > tremor_amp:
                     tremor_count = tremor_count+1
 
-            tremor_time = tremor_count/(sample_num*channel_num)
+            tremor_time = tremor_count/(sample_num * channel_num)
 
         if tremor_time == 0:
             print('0: Normal')
@@ -526,7 +526,7 @@ class Score(object):
         data_for_Postural_Az = data[69] #69 Hand_Az
 
         data_for_Postural_EMG_rect = data[79] #79 EMG_rect
-        data_length = length(data_for_Postural_Ax)
+        data_length = len(data_for_Postural_Ax)
 
         data_for_Postural_Vx = np.zeros((data_length,1))
 

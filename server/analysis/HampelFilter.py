@@ -5,11 +5,12 @@ description...
 """
 import pandas as pd
 import numpy as np
+from math import *
 
 
 class HampelFilter(object):
 
-    AVE_BOUND = 3
+    AVE_BOUND = 2
 
     def __init__(self, filename):
         self.__filename = filename
@@ -40,14 +41,16 @@ class HampelFilter(object):
                 while np.isnan(filtered[i]):
                     count += 1
 
-            for r in range(i, i-self.AVE_BOUND):
-                total += filtered[r]
+                # for r in range(i, i-self.AVE_BOUND):
+                #     total += filtered[r]
+                #
+                # for r in range(count, count+self.AVE_BOUND):
+                #     total += filtered[r]
+                #
+                # for nan in range(i, i+count):
+                #     filtered[nan] = total/(2.0 * self.AVE_BOUND)
 
-            for r in range(count, count+self.AVE_BOUND):
-                total += filtered[r]
-
-            for nan in range(i, i+count):
-                filtered[nan] = total/(2.0 * self.AVE_BOUND)
+                maximum = max(filtered[i-self.AVE_BOUND: i].extend)
 
         try:
             for val in filtered:
