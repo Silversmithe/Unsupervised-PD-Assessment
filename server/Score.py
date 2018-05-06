@@ -139,25 +139,6 @@ class Score(object):
 
         return total_inputs
 
-    """
-    Sigmoid maps a number between 1 and 0
-    Sigmoid function:
-                    1
-    sigmoid(x)= ----------
-                1 + e^(-x)
-    """
-    def sigmoid(temp_in):
-        return np.float64(1 / (1 + np.exp( - temp_in)))
-
-
-    """
-    By multiplying the new inputs with our calculated
-    column weights, we generate a column of prediction
-    values to determine whether or not an action occured
-    """
-    def get_predictions(self, inputs, weights):
-        return self.sigmoid(np.matmul(inputs, weights))
-
     def count_taps(self, dataset1, dataset2, dataset3, dataset4, total_instances):
 
         frequency_choice = 0
