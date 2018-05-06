@@ -402,7 +402,7 @@ class Score(object):
 
         return output
 
-    def get_input_3hz(self, textfile):
+    def get_input_3hz_test(self, textfile):
         dir_path = os.getcwd()
         text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
         lines = text_file.read().split("\n")
