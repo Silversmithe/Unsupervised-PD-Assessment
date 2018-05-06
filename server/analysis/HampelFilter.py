@@ -9,10 +9,10 @@ import numpy as np
 
 class HampelFilter(object):
 
+    AVE_BOUND = 3
 
     def __init__(self, filename):
         self.__filename = filename
-                
 
     def process(self):
         """
@@ -32,8 +32,21 @@ class HampelFilter(object):
         print("!!! AFTER !!!")
     
         for i in range(1, len(filtered)-1):
+            count = 0
+            total = 0
+
             if np.isnan(filtered[i]):
-                filtered[i] = (filtered[i+1] + filtered[i-1])/2.0
+                while np.isnan(filtered[i]):
+                    count += 1
+
+            for r in range(i, i-self.AVE_BOUND):
+                total += filtered[r]
+
+            for r in range(count, count+self.AVE_BOUND):
+                total += filtered[r]
+
+            for nan in range(i, i+count):
+                filtered[nan] = total/(2.0 * self.AVE_BOUND)
 
         try:
             for val in filtered:
