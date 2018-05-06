@@ -64,7 +64,9 @@ class Score(object):
         weights15 = self.__weights_hgin_2hz
         weights16 = self.__weights_hgin_3hz
 
-        dataset1 = self.get_predictions(self.get_input, weights1)
+        inputs1 = self.get_input()
+
+        dataset1 = self.get_predictions(inputs1, weights1)
 
         # self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         # self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
