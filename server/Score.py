@@ -940,7 +940,7 @@ class Score(object):
         end_index = 0
         end_flag = 0
 
-        for i in range(fs/df):
+        for i in range(int(fs/df)):
             frequency[i] = i * df
 
             if frequency[i] > 3 and beginning_flag == 0:
