@@ -8,6 +8,7 @@ in a pdf
 import os
 import datetime
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
+import numpy as np
 from reportlab.pdfgen import canvas
 import matplotlib.pyplot as plot
 
@@ -42,50 +43,31 @@ class Reporter(object):
         self.__generate_score(score=score)
         self.__merge_reports(patient_path=self.__patient_path)
         os.remove("{}/{}".format(self.__patient_path, self.FILENAME))
-        self.__generate_graphs()
+        # self.__generate_graphs()
 
         # combine header and score with graphs
-        merger = PdfFileMerger()
-        head = open("UPDAReport.pdf", "rb")
-        graph = open("graph.pdf", "rb")
-        merger.append(head)
-        head.close()
-        merger.append(graph)
-        graph.close()
+        # merger = PdfFileMerger()
+        # head = open("UPDAReport.pdf", "rb")
+        # graph = open("graph.pdf", "rb")
+        # merger.append(head)
+        # head.close()
+        # merger.append(graph)
+        # graph.close()
 
-        output = open("UPDAReport.pdf", "wb")
-        merger.write(output)
-        output.close()
+        # output = open("UPDAReport.pdf", "wb")
+        # merger.write(output)
+        # output.close()
         # remove excess files
-        os.remove("graph.pdf")
-        os.remove("score.pdf")
+        # os.remove("graph.pdf")
+        # os.remove("score.pdf")
         print("UPDAReport Complete!")
 
     def graph_imu(self, fig_num, filename, datasets, titles, xlabel, ylabel):
         # assuming 3 datasets = [x, y, z]
         # titles = [ main , x, y, z]
-        plot.figure(fig_num)
-        plot.suptitle(titles[0])
-
-        for i in range(0, 3):
-            plot.subplot(2, 2, i + 1)
-            plot.plot(datasets[i])
-            plot.xlabel(xlabel)
-            plot.ylabel(ylabel)
-            plot.title(titles[i + 1])
-
-        # whole thing
-        plot.subplot(2, 2, 4)
-        plot.plot(datasets[0])
-        plot.plot(datasets[1])
-        plot.plot(datasets[2])
-        plot.xlabel(xlabel)
-        plot.ylabel(ylabel)
-        plot.title(titles[4])
-
-        plot.tight_layout(pad=2.0, w_pad=2.0, h_pad=2.0)
-
-        plot.savefig(filename)
+        print(len(datasets[0]))
+        plot.plot([1,2,3,4])
+        plot.show()
         plot.close()
 
     def __generate_graphs(self):
@@ -94,12 +76,16 @@ class Reporter(object):
         :return:
         """
         # generating graph output for the data
-        c = canvas.Canvas(self.GRAPH, pagesize=(8.5 * self.INCH, 11 * self.INCH))
+        c = canvas.Canvas("{}/{}".format(self.__patient_path, self.GRAPH), pagesize=(8.5 * self.INCH, 11 * self.INCH))
         c.setStrokeColorRGB(0, 0, 0)
         c.setFillColorRGB(0, 0, 0)
         c.setFont("Helvetica", 18 * self.POINT)
         c.drawString(3 * self.INCH, 10 * self.INCH, "Raw Data Visualization")
         c.setFont("Helvetica", 12 * self.POINT)
+        
+        c.showPage()
+        c.save()
+
         # generate images and store them in PDF form
         HAx, HAy, HAz = [], [], []
         HGx, HGy, HGz = [], [], []
@@ -145,38 +131,35 @@ class Reporter(object):
         # create images
         # hand graphing
         self.graph_imu(1, "ha.pdf", [HAx, HAy, HAz], ["Dorsum of Hand Acceleration", "X", "Y", "Z", "XYZ"], "Time (ms)", "Acceleration (g)")
-        self.graph_imu(2, "hg.pdf", [HGx, HGy, HGz], ["Dorsum of Hand Gyroscope", "X", "Y", "Z", "XYZ"], "Time (ms)", "Gyroscope (rads/sec)")
+        # self.graph_imu(2, "hg.pdf", [HGx, HGy, HGz], ["Dorsum of Hand Gyroscope", "X", "Y", "Z", "XYZ"], "Time (ms)", "Gyroscope (rads/sec)")
         # thumb graphing
-        self.graph_imu(3, "ta.pdf", [TAx, TAy, TAz], ["Thumb Acceleration", "X", "Y", "Z", "XYZ"], "Time (ms)", "Acceleration (g)")
-        self.graph_imu(4, "tg.pdf", [TGx, TGy, TGz], ["Thumb Gyroscope", "X", "Y", "Z", "XYZ"], "Time (ms)", "Gyroscope (rads/sec)")
+        # self.graph_imu(3, "ta.pdf", [TAx, TAy, TAz], ["Thumb Acceleration", "X", "Y", "Z", "XYZ"], "Time (ms)", "Acceleration (g)")
+        # self.graph_imu(4, "tg.pdf", [TGx, TGy, TGz], ["Thumb Gyroscope", "X", "Y", "Z", "XYZ"], "Time (ms)", "Gyroscope (rads/sec)")
         # point graphing
-        self.graph_imu(1, "pa.pdf", [PAx, PAy, PAz], ["Pointer Acceleration", "X", "Y", "Z", "XYZ"], "Time (ms)", "Acceleration (g)")
-        self.graph_imu(2, "pg.pdf", [PGx, PGy, PGz], ["Pointer Gyroscope", "X", "Y", "Z", "XYZ"], "Time (ms)", "Gyroscope (rads/sec)")
+        # self.graph_imu(1, "pa.pdf", [PAx, PAy, PAz], ["Pointer Acceleration", "X", "Y", "Z", "XYZ"], "Time (ms)", "Acceleration (g)")
+        # self.graph_imu(2, "pg.pdf", [PGx, PGy, PGz], ["Pointer Gyroscope", "X", "Y", "Z", "XYZ"], "Time (ms)", "Gyroscope (rads/sec)")
         # ring graphing
-        self.graph_imu(1, "ra.pdf", [RAx, RAy, RAz], ["Ring Acceleration", "X", "Y", "Z", "XYZ"], "Time (ms)", "Acceleration (g)")
-        self.graph_imu(2, "rg.pdf", [RGx, RGy, RGz], ["Ring Gyroscope", "X", "Y", "Z", "XYZ"], "Time (ms)", "Gyroscope (rads/sec)")
-
-        c.showPage()
-        c.save()
+        # self.graph_imu(1, "ra.pdf", [RAx, RAy, RAz], ["Ring Acceleration", "X", "Y", "Z", "XYZ"], "Time (ms)", "Acceleration (g)")
+        # self.graph_imu(2, "rg.pdf", [RGx, RGy, RGz], ["Ring Gyroscope", "X", "Y", "Z", "XYZ"], "Time (ms)", "Gyroscope (rads/sec)")
 
         # append all images to graph
-        merger = PdfFileMerger()
-        g = open("graph.pdf", "rb")
-        files = ["ha.pdf", "hg.pdf", "ta.pdf", "tg.pdf", "pa.pdf", "pg.pdf", "ra.pdf", "rg.pdf"]
-        merger.append(g)
-        g.close()
+        # merger = PdfFileMerger()
+        # g = open("graph.pdf", "rb")
+        # files = ["ha.pdf", "hg.pdf", "ta.pdf", "tg.pdf", "pa.pdf", "pg.pdf", "ra.pdf", "rg.pdf"]
+        # merger.append(g)
+        # g.close()
 
-        for f in files:
-            pic = open(f, "rb")
-            merger.append(pic)
-            pic.close()
+        # for f in files:
+        #     pic = open(f, "rb")
+        #     merger.append(pic)
+        #     pic.close()
 
-        out = open("graph.pdf", "wb")
-        merger.write(out)
-        out.close()
+        # out = open("graph.pdf", "wb")
+        # merger.write(out)
+        # out.close()
         # remove excess files
-        for f in files:
-            os.remove(f)
+        # for f in files:
+        #     os.remove(f)
 
 
     def __generate_score(self, score):
