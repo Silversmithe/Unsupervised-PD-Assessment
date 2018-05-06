@@ -165,27 +165,27 @@ class Score(object):
         ratio1 = tapin_counter/taps_counter
         ratio2 = graspin_counter/grasp_counter
 
-        if(ratio1 <= 0.05):
+        if(ratio1 < 0.1):
             print("Finger Tap Score: 0")
-        elif(ratio1 <= 0.1):
-            print("Finger Tap Score: 1")
         elif(ratio1 <= 0.3):
-            print("Finger Tap Score: 2")
-        elif(ratio1 <= 0.5):
-            print("Finger Tap Score: 3")
-        else:
-            print("Finger Tap Score: 4")
-
-        if(ratio2 <= 0.05):
-            print("Finger Tap Score: 0")
-        elif(ratio2 <= 0.1):
             print("Finger Tap Score: 1")
-        elif(ratio2 <= 0.3):
+        elif(ratio1 <= 0.5):
             print("Finger Tap Score: 2")
-        elif(ratio2 <= 0.5):
+        elif(ratio1 <= 1):
             print("Finger Tap Score: 3")
         else:
-            print("Finger Tap Score: 4")
+            print("Finger Tap Score: 3")
+
+        if(ratio2 <= 0.1):
+            print("Finger Tap Score: 0")
+        elif(ratio2 <= 0.3):
+            print("Finger Tap Score: 1")
+        elif(ratio2 <= 0.5):
+            print("Finger Tap Score: 2")
+        elif(ratio2 <= 1):
+            print("Finger Tap Score: 3")
+        else:
+            print("Finger Tap Score: 3")
 
         # inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
         # inputs2 = self.get_input_1hz_test("yousef_5.txt")
