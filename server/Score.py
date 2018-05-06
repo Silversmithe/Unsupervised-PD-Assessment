@@ -452,10 +452,8 @@ class Score(object):
         dataset = np.zeros((total_inputs, 1))
         # dataset = [[] for y in range(total_inputs)]
         for i in range(total_inputs):
-            if(i == 0):
-                print(lines[i])
             dataset[i][0] = float(lines[i])  # split data points of each instance
-        print(dataset[0][0])
+        # print(dataset[0][0])
 
         # print(dataset_ftaps[1][0])
         return dataset
