@@ -24,10 +24,10 @@ class Score(object):
         self.__weights_ft_2hz = self.get_weights("W_ft_2hz.txt")
         self.__weights_ft_3hz = self.get_weights("W_ft_3hz.txt")
 
-        # self.__weights_ftin_0hz = self.get_weights("W_ftin_1_3hz.txt")
-        # self.__weights_ftin_1hz = self.get_weights("W_ftin_1hz.txt")
-        # self.__weights_ftin_2hz = self.get_weights("W_ftin_2hz.txt")
-        # self.__weights_ftin_3hz = self.get_weights("W_ftin_3hz.txt")
+        self.__weights_ftin_0hz = self.get_weights("W_ftin_1_3hz.txt")
+        self.__weights_ftin_1hz = self.get_weights("W_ftin_1hz.txt")
+        self.__weights_ftin_2hz = self.get_weights("W_ftin_2hz.txt")
+        self.__weights_ftin_3hz = self.get_weights("W_ftin_3hz.txt")
         #
         # self.__weights_hg_0hz = self.get_weights("W_hg_1_3hz.txt")
         # self.__weights_hg_1hz = self.get_weights("W_hg_1hz.txt")
