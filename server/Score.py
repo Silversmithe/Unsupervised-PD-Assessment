@@ -140,6 +140,29 @@ class Score(object):
 
         self.count_grasps(dataset9, dataset10, dataset11, dataset12, 2840)
 
+        weights13 = self.__weights_hgin_0hz
+        weights14 = self.__weights_hgin_1hz
+        weights15 = self.__weights_hgin_2hz
+        weights16 = self.__weights_hgin_3hz
+
+        inputs13 = self.get_input_1_3hz_test("yousef_4.txt")
+        inputs14 = self.get_input_1hz_test("yousef_4.txt")
+        inputs15 = self.get_input_2hz_test("yousef_4.txt")
+        inputs16 = self.get_input_3hz_test("yousef_4.txt")
+
+        dataset13 = self.get_predictions(inputs13, weights13)
+        dataset14 = self.get_predictions(inputs14, weights14)
+        dataset15 = self.get_predictions(inputs15, weights15)
+        dataset16 = self.get_predictions(inputs16, weights16)
+
+        # print(dataset9)
+        # print(dataset10)
+        # print(dataset11)
+        # print(dataset12)
+
+        self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, 2880)
+
+
 
         # inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
         # inputs2 = self.get_input_1hz_test("yousef_5.txt")
