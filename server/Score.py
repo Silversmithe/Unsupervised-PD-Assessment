@@ -70,9 +70,15 @@ class Score(object):
         # inputs4 = self.get_input_3hz()
 
         inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
-        inputs2 = self.get_input_1hz_test("yousef_5.txt")
-        inputs3 = self.get_input_2hz_test("yousef_9.txt")
-        inputs4 = self.get_input_3hz_test("yousef_13.txt")
+        inputs2 = self.get_input_1hz_test("yousef_1.txt")
+        inputs3 = self.get_input_2hz_test("yousef_1.txt")
+        inputs4 = self.get_input_3hz_test("yousef_1.txt")
+
+
+        # inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
+        # inputs2 = self.get_input_1hz_test("yousef_5.txt")
+        # inputs3 = self.get_input_2hz_test("yousef_9.txt")
+        # inputs4 = self.get_input_3hz_test("yousef_13.txt")
 
         # print(inputs1)
 
@@ -90,7 +96,7 @@ class Score(object):
         # self.count_tap_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         # self.count_grasps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         # self.count_grasp_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        
+
         # self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
         # self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
         # self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
