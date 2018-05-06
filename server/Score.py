@@ -91,10 +91,10 @@ class Score(object):
 
         self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
 
-        inputs5 = self.get_input_1_3hz_test("yousef_1.txt")
-        inputs6 = self.get_input_1hz_test("yousef_1.txt")
-        inputs7 = self.get_input_2hz_test("yousef_1.txt")
-        inputs8 = self.get_input_3hz_test("yousef_1.txt")
+        inputs5 = self.get_input_1_3hz_test("yousef_2.txt")
+        inputs6 = self.get_input_1hz_test("yousef_2.txt")
+        inputs7 = self.get_input_2hz_test("yousef_2.txt")
+        inputs8 = self.get_input_3hz_test("yousef_2.txt")
 
         dataset5 = self.get_predictions(inputs5, weights5)
         dataset6 = self.get_predictions(inputs6, weights6)
