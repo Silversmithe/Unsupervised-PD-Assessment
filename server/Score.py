@@ -100,7 +100,7 @@ class Score(object):
                     try:
                         output[i][k] = float(dataset[i][k])
                     except ValueError:
-                        print("Line {i} is corrupt!".format(i = index))
+                        print("Line {} is corrupt!".format(i))
 
 
         return output
