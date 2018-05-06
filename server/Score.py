@@ -117,17 +117,17 @@ class Score(object):
         # print(inputs1)
 
 
-
-        print(dataset1)
-        print(dataset2)
-        print(dataset3)
-        print(dataset4)
+        # 
+        # print(dataset1)
+        # print(dataset2)
+        # print(dataset3)
+        # print(dataset4)
         #
         # print(weights1)
         #
         # print(dataset1)
 
-        self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
+        # self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
         # self.count_tap_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         # self.count_grasps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         # self.count_grasp_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
