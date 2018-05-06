@@ -39,6 +39,7 @@ class Reporter(object):
         """
         self.__generate_score(score=score)
         self.__merge_reports(patient_path=self.__patient_path)
+        os.remove("{}/{}".format(self.__patient_path, self.FILENAME))
 
     def __generate_score(self, score):
         """
@@ -116,5 +117,5 @@ class Reporter(object):
         head_page.mergePage(score.getPage(0))
 
         output.addPage(head_page)
-        output_stream = open("./data/{}/{}".format(patient_path, self.REPORT), "wb")
+        output_stream = open("{}/{}".format(patient_path, self.REPORT), "wb")
         output.write(output_stream)

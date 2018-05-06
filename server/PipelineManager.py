@@ -88,4 +88,6 @@ class PipelineManager(Thread):
         ##################
         # Report Output  #
         ##################
-        self.__reporter.generate_report()
+        print("reporting")
+        self.__reporter.generate_report(self.__score.get_result())
+    

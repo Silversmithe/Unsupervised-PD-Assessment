@@ -40,7 +40,7 @@ class Score(object):
         self.__weights_hgin_2hz = self.get_weights("W_hgin_2hz.txt")
         self.__weights_hgin_3hz = self.get_weights("W_hgin_3hz.txt")
 
-        self.__score = {
+        self.result = {
             'name': str(filename).split(sep='/')[-1],
             'ftap':  [0.0, 0.0],
             'htap':  [0.0, 0.0],
@@ -49,6 +49,9 @@ class Score(object):
             'rtrem': [0.0, 0.0],
             'crest': [0.0, 0.0]
         }
+
+    def get_result(self):
+        return self.result
 
     def process(self):
         """
@@ -179,46 +182,46 @@ class Score(object):
         ##########################
         if ratio1 < 0.1:
             print("Finger Tap Score: 0")
-            self.__score['ftap'][1] = 0.0
+            self.result['ftap'][1] = 0.0
 
         elif ratio1 <= 0.3:
             print("Finger Tap Score: 1")
-            self.__score['ftap'][1] = 1.0
+            self.result['ftap'][1] = 1.0
 
         elif ratio1 <= 0.5:
             print("Finger Tap Score: 2")
-            self.__score['ftap'][1] = 2.0
+            self.result['ftap'][1] = 2.0
 
         elif ratio1 <= 1:
             print("Finger Tap Score: 3")
-            self.__score['ftap'][1] = 3.0
+            self.result['ftap'][1] = 3.0
 
         else:
             print("Finger Tap Score: 3")
-            self.__score['ftap'][1] = 3.0
+            self.result['ftap'][1] = 3.0
 
         ##########################
         # Hand Movements Scoring #
         ##########################
         if ratio2 <= 0.1:
             print("Hand Movement Score: 0")
-            self.__score['htap'][1] = 0.0
+            self.result['htap'][1] = 0.0
 
         elif ratio2 <= 0.3:
             print("Hand Movement Score: 1")
-            self.__score['htap'][1] = 1.0
+            self.result['htap'][1] = 1.0
 
         elif ratio2 <= 0.5:
             print("Hand Movement Score: 2")
-            self.__score['htap'][1] = 2.0
+            self.result['htap'][1] = 2.0
 
         elif ratio2 <= 1:
             print("Hand Movement Score: 3")
-            self.__score['htap'][1] = 3.0
+            self.result['htap'][1] = 3.0
 
         else:
             print("Hand Movement Score: 3")
-            self.__score['htap'][1] = 3.0
+            self.result['htap'][1] = 3.0
 
         self.score_time_tremor()
 
@@ -1015,23 +1018,23 @@ class Score(object):
 
         if tremor_time == 0:
             print('0: Normal')
-            self.__score['crest'][1] = 0.0
+            self.result['crest'][1] = 0.0
 
         elif tremor_time <= 0.25:
             print('1: Slight')
-            self.__score['crest'][1] = 1.0
+            self.result['crest'][1] = 1.0
 
         elif tremor_time <= 0.5:
             print('2: Mild')
-            self.__score['crest'][1] = 2.0
+            self.result['crest'][1] = 2.0
 
         elif tremor_time <= 0.75:
             print('3: Moderate')
-            self.__score['crest'][1] = 3.0
+            self.result['crest'][1] = 3.0
 
         elif tremor_time <= 1:
             print('4: Severe')
-            self.__score['crest'][1] = 4.0
+            self.result['crest'][1] = 4.0
 
         else:
             print('Error')
@@ -1142,81 +1145,81 @@ class Score(object):
 
         if amplitude <= 0.1:
             print("Postural Tremor Score: 0 : Normal")
-            self.__score['ptrem'][1] = 0.0
+            self.result['ptrem'][1] = 0.0
 
         elif amplitude <= 1:
             print("Postural Tremor Score: 1 : Slight")
-            self.__score['ptrem'][1] = 1.0
+            self.result['ptrem'][1] = 1.0
 
         elif amplitude <= 3:
             print("Postural Tremor Score: 2 : Mild")
-            self.__score['ptrem'][1] = 2.0
+            self.result['ptrem'][1] = 2.0
 
         elif amplitude <=10:
             print("Postural Tremor Score: 3 : Moderate")
-            self.__score['ptrem'][1] = 3.0
+            self.result['ptrem'][1] = 3.0
 
         elif amplitude > 10:
             print("Postural Tremor Score: 4 : Severe")
-            self.__score['ptrem'][1] = 4.0
+            self.result['ptrem'][1] = 4.0
 
         else:
             print("Postural Tremor amplitude error")
-            self.__score['ptrem'][1] = 4.0
+            self.result['ptrem'][1] = 4.0
 
         # kinetic amplitude
         amplitude = r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_kine))) + np.tan(np.max(raw_data_tremor_amplitude_kine)))
 
         if amplitude <= 0.1:
             print("Kinetic Tremor Score: 0 : Normal")
-            self.__score['ktrem'][1] = 0.0
+            self.result['ktrem'][1] = 0.0
 
         elif amplitude <= 1:
             print("Kineti Tcremor Score: 1 : Slight")
-            self.__score['ktrem'][1] = 1.0
+            self.result['ktrem'][1] = 1.0
 
         elif amplitude <= 3:
             print("Kinetic Tremor Score: 2 : Mild")
-            self.__score['ktrem'][1] = 2.0
+            self.result['ktrem'][1] = 2.0
 
         elif amplitude <=10:
             print("Kinetic Tremor Score: 3 : Moderate")
-            self.__score['ktrem'][1] = 3.0
+            self.result['ktrem'][1] = 3.0
 
         elif amplitude > 10:
             print("Kinetic Tremor Score: 4 : Severe")
-            self.__score['ktrem'][1] = 4.0
+            self.result['ktrem'][1] = 4.0
 
         else:
             print("Kinetic Tremor amplitude error")
-            self.__score['ktrem'][1] = 4.0
+            self.result['ktrem'][1] = 4.0
 
         # resting tremor
         amplitude = r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_rest))) + np.tan(np.max(raw_data_tremor_amplitude_rest)))
 
         if amplitude <= 0.1:
             print("Rest Tremor Score: 0 : Normal")
-            self.__score['rtrem'][1] = 0.0
+            self.result['rtrem'][1] = 0.0
 
         elif amplitude <= 1:
             print("Rest Tremor Score: 1 : Slight")
-            self.__score['rtrem'][1] = 1.0
+            self.result['rtrem'][1] = 1.0
 
         elif amplitude <= 3:
             print("Rest Tremor Score: 2 : Mild")
-            self.__score['rtrem'][1] = 2.0
+            self.result['rtrem'][1] = 2.0
 
         elif amplitude <=10:
             print("Rest Tremor Score: 3 : Moderate")
-            self.__score['rtrem'][1] = 3.0
+            self.result['rtrem'][1] = 3.0
 
         elif amplitude > 10:
             print("Rest Tremor Score: 4 : Severe")
-            self.__score['rtrem'][1] = 4.0
+            self.result['rtrem'][1] = 4.0
 
         else:
             print("Rest Tremor amplitude error")
-            self.__score['rtrem'][1] = 4.0
+            self.result['rtrem'][1] = 4.0
 
     def postural_tremor(self, data):
 
