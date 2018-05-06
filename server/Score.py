@@ -187,6 +187,8 @@ class Score(object):
         else:
             print("Hand Movement Score: 3")
 
+
+        self.score_rest_tremor()
         # inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
         # inputs2 = self.get_input_1hz_test("yousef_5.txt")
         # inputs3 = self.get_input_2hz_test("yousef_9.txt")
@@ -899,12 +901,26 @@ class Score(object):
         if max_count == 0:
             return print("no hand grasp interruptions found")
 
-    def score_rest_tremor(self, bandpass_data):
+    def score_rest_tremor(self):
 
         # higher sample number will give us higher accuracy later
         # may need to change this later
 
-        true_data = bandpass_data  # MAKE SURE TO PULL FROM FILE
+        text_file = open("{}/bandpass.txt".format(self.__filename), "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 3801))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')
+
+        for rows in range(total_inputs):
+            for columns in range(28):
+                output[rows][columns] = float(dataset[rows][columns])
+
+        true_data = output  # MAKE SURE TO PULL FROM FILE
 
         expected_sample_num = 10
         fs = 100
