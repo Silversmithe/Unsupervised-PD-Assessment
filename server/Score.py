@@ -14,22 +14,26 @@ class Score(object):
     SAMPLING_PERIOD_4 = 300
 
     def __init__(self, filename):
-        self.__patient_path = filename
+        self.__filename = filename
         self.variable = None
-        self.__num_instances = self.get_num_instances(textfile=self.__patient_path)
+        self.__num_instances = self.get_num_instances()
         pass
 
-    def process(self, textfile, dataset1, dataset2, dataset3, dataset4):
+    def process(self, dataset1, dataset2, dataset3, dataset4):
         """
         """
-        self.get_input(textfile)
+        dataset1 = self.get_input()
+        dataset2 = self.get_input()
+        dataset3 = self.get_input()
+        dataset4 = self.get_input()
+
         self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         self.count_tap_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         self.count_grasps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         self.count_grasp_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
 
-    def get_input(self, textfile):
-        text_file = open(textfile, "r")
+    def get_input(self):
+        text_file = open("{}/raw.txt".format(self.__filename), "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
         text_file.close()
@@ -41,13 +45,32 @@ class Score(object):
         # print(dataset_ftaps[1][0])
         return dataset
 
-    def get_num_instances(self, textfile):
-        text_file = open(textfile, "r")
+    def get_num_instances(self):
+        text_file = open("{}/raw.txt".format(self.__filename), "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
         text_file.close()
 
         return total_inputs
+
+    """
+    Sigmoid maps a number between 1 and 0
+    Sigmoid function:
+                    1
+    sigmoid(x)= ----------
+                1 + e^(-x)
+    """
+    def sigmoid(temp_in):
+        return np.float64(1 / (1 + np.exp( - temp_in)))
+
+
+    """
+    By multiplying the new inputs with our calculated
+    column weights, we generate a column of prediction
+    values to determine whether or not an action occured
+    """
+    def get_predictions(inputs, weights):
+        return sigmoid(np.matmul(inputs, weights))
 
     def count_taps(self, dataset1, dataset2, dataset3, dataset4, total_instances):
 
@@ -451,16 +474,16 @@ class Score(object):
         testing_time_post = np.zeros((sample_num*sample_period,1))
         testing_time_rest = np.zeros((sample_num*sample_period,1))
         testing_time_kine = np.zeros((sample_num*sample_period,1))
-
+        sample_data_avg = np.zeros((1, 4))
 
         for i in range(0, sample_num):
-            sample_data = [ data_for_Postural_Vx[(i-1)*sample_period:i*sample_period - 1, 0], data_for_Postural_Vy[(i-1)*sample_period:i*sample_period - 1, 0], data_for_Postural_Vz[(i-1)*sample_period:i*sample_period - 1 ,0], data_for_Postural_EMG_rect[(i-1)*sample_period:i*sample_period-1, 0]
-            sample_data_avg = mean(sample_data)
+            sample_data = [ data_for_Postural_Vx[(i-1)*sample_period:i*sample_period - 1, 0], data_for_Postural_Vy[(i-1)*sample_period:i*sample_period - 1, 0], data_for_Postural_Vz[(i-1)*sample_period:i*sample_period - 1 ,0], data_for_Postural_EMG_rect[(i-1)*sample_period:i*sample_period-1, 0]]
+            sample_data_avg[0] = np.avg(sample_data)
             EMG_change = np.max(sample_data[3]) - np.min(sample_data[3])
-            if sample_data_avg[0] < 0.05 and sample_data_avg[2] < 0.05 and sample_data_avg[1] < 0.05
-                if EMG_change > 10
+            if sample_data_avg[0] < 0.05 and sample_data_avg[2] < 0.05 and sample_data_avg[1] < 0.05:
+                if EMG_change > 10:
                     testing_time_post[(i-1)*sample_period:i*sample_period, 0] = 1
-                else
+                else:
                     testing_time_rest[(i-1)*sample_period:i*sample_period, 0] = 1
             if sample_data_avg[0] < 0.05 and sample_data_avg[2] < 0.05 and sample_data_avg[1] > 0.2:
                 testing_time_kine[(i-1)*sample_period:i*sample_period, 0] = 1

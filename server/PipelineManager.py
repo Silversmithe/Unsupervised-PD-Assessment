@@ -13,7 +13,7 @@ from analysis.BandPassFilter import BandPassFilter
 from analysis.HampelFilter import HampelFilter
 from analysis.GravityFilter import GravityFilter
 from Reporter import Reporter
-# from Score import Score
+from Score import Score
 from threading import Thread, Lock, ThreadError
 
 
@@ -32,7 +32,7 @@ class PipelineManager(Thread):
         self.__band_pass_filter = BandPassFilter(filename=self.__patient_path)
         self.__hampel_filter = HampelFilter(filename=self.__patient_path)
         self.__gravity_filter = GravityFilter(filename=self.__patient_path)
-        # self.__score = Score(filename=self.__patient_path)
+        self.__score = Score(filename=self.__patient_path)
         # self.__reporter = Reporter()
         pass
 
@@ -58,36 +58,34 @@ class PipelineManager(Thread):
         ###################
         # Low Pass Filter #
         ###################
-        print("low pass filter")
-        self.__low_pass_filter.process()
-    
+        #print("low pass filter")
+        #self.__low_pass_filter.process()
+
         ####################
         # Band Pass Filter #
         ####################
-        print("band pass filter")
-        self.__band_pass_filter.process()
+        #print("band pass filter")
+        #self.__band_pass_filter.process()
 
         ####################
         # Hampel Filter    #
         ####################
-        print("hampel filter")
-        self.__hampel_filter.process()
+        #print("hampel filter")
+        #self.__hampel_filter.process()
         ####################
         # Gravity Filter   #
         ####################
-        print("gravity filter")
-        self.__gravity_filter.process()
+        #print("gravity filter")
+        #self.__gravity_filter.process()
 
-        # ##################
-        # # Scoring Filter #
-        # ##################
-        # try:
-        #     print("score")
-        #     self.__score.count_grasp_interuptions()
-        #
-        # except:
-        #     print("warning: uncaught error")
-        # ##################
-        # # Scoring Output #
-        # ##################
+        ##################
+        # Scoring Filter #
+        ##################
+
+        print("score")
+        self.__score.process()
+
+        ##################
+        # Scoring Output #
+        ##################
         # pass
