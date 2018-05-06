@@ -24,20 +24,20 @@ class Score(object):
         self.__weights_ft_2hz = self.get_weights("W_ft_2hz.txt")
         self.__weights_ft_3hz = self.get_weights("W_ft_3hz.txt")
 
-        self.__weights_ftin_0hz = self.get_weights("W_ftin_1_3hz.txt")
-        self.__weights_ftin_1hz = self.get_weights("W_ftin_1hz.txt")
-        self.__weights_ftin_2hz = self.get_weights("W_ftin_2hz.txt")
-        self.__weights_ftin_3hz = self.get_weights("W_ftin_3hz.txt")
-
-        self.__weights_hg_0hz = self.get_weights("W_hg_1_3hz.txt")
-        self.__weights_hg_1hz = self.get_weights("W_hg_1hz.txt")
-        self.__weights_hg_2hz = self.get_weights("W_hg_2hz.txt")
-        self.__weights_hg_3hz = self.get_weights("W_hg_3hz.txt")
-
-        self.__weights_hgin_0hz = self.get_weights("W_hgin_1_3hz.txt")
-        self.__weights_hgin_1hz = self.get_weights("W_hgin_1hz.txt")
-        self.__weights_hgin_2hz = self.get_weights("W_hgin_2hz.txt")
-        self.__weights_hgin_3hz = self.get_weights("W_hgin_3hz.txt")
+        # self.__weights_ftin_0hz = self.get_weights("W_ftin_1_3hz.txt")
+        # self.__weights_ftin_1hz = self.get_weights("W_ftin_1hz.txt")
+        # self.__weights_ftin_2hz = self.get_weights("W_ftin_2hz.txt")
+        # self.__weights_ftin_3hz = self.get_weights("W_ftin_3hz.txt")
+        #
+        # self.__weights_hg_0hz = self.get_weights("W_hg_1_3hz.txt")
+        # self.__weights_hg_1hz = self.get_weights("W_hg_1hz.txt")
+        # self.__weights_hg_2hz = self.get_weights("W_hg_2hz.txt")
+        # self.__weights_hg_3hz = self.get_weights("W_hg_3hz.txt")
+        #
+        # self.__weights_hgin_0hz = self.get_weights("W_hgin_1_3hz.txt")
+        # self.__weights_hgin_1hz = self.get_weights("W_hgin_1hz.txt")
+        # self.__weights_hgin_2hz = self.get_weights("W_hgin_2hz.txt")
+        # self.__weights_hgin_3hz = self.get_weights("W_hgin_3hz.txt")
 
         pass
 
@@ -87,9 +87,10 @@ class Score(object):
         # print(dataset1)
 
         self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        self.count_tap_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        self.count_grasps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        self.count_grasp_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        # self.count_tap_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        # self.count_grasps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        # self.count_grasp_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        
         # self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
         # self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
         # self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
