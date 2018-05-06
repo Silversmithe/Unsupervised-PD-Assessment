@@ -38,7 +38,7 @@ class HampelFilter(object):
             total = 0
 
             if np.isnan(filtered[i]):
-                while np.isnan(filtered[i]):
+                while np.isnan(filtered[i+count]):
                     count += 1
 
                 # for r in range(i, i-self.AVE_BOUND):
@@ -47,10 +47,13 @@ class HampelFilter(object):
                 # for r in range(count, count+self.AVE_BOUND):
                 #     total += filtered[r]
                 #
-                # for nan in range(i, i+count):
+                # for n in range(i, i+count):
                 #     filtered[nan] = total/(2.0 * self.AVE_BOUND)
 
-                maximum = max(filtered[i-self.AVE_BOUND: i].extend)
+                maximum = max(filtered[i-self.AVE_BOUND: i].extend(filtered[i+count: i+count+self.AVE_BOUND]))
+
+                for n in range(i, i+count):
+                    filtered[nan] = maximum
 
         try:
             for val in filtered:
