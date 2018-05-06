@@ -94,7 +94,7 @@ class Score(object):
         # print(dataset3)
         # print(dataset4)
 
-        self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
+        taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
 
         weights5 = self.__weights_ftin_0hz
         weights6 = self.__weights_ftin_1hz
@@ -116,7 +116,7 @@ class Score(object):
         # print(dataset7)
         # print(dataset8)
 
-        self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2901)
+        tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2901)
 
         weights9 = self.__weights_hg_0hz
         weights10 = self.__weights_hg_1hz
@@ -138,7 +138,7 @@ class Score(object):
         # print(dataset11)
         # print(dataset12)
 
-        self.count_grasps(dataset9, dataset10, dataset11, dataset12, 2840)
+        grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, 2840)
 
         weights13 = self.__weights_hgin_0hz
         weights14 = self.__weights_hgin_1hz
@@ -160,9 +160,32 @@ class Score(object):
         # print(dataset11)
         # print(dataset12)
 
-        self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, 2880)
+        graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, 2880)
 
+        ratio1 = tapin_counter/taps_counter
+        ratio2 = graspin_counter/grasp_counter
 
+        if(ratio1 <= 0.05):
+            print("Finger Tap Score: 0")
+        elif(ratio1 <= 0.1):
+            print("Finger Tap Score: 1")
+        elif(ratio1 <= 0.3):
+            print("Finger Tap Score: 2")
+        elif(ratio1 <= 0.5):
+            print("Finger Tap Score: 3")
+        else:
+            print("Finger Tap Score: 4")
+
+        if(ratio2 <= 0.05):
+            print("Finger Tap Score: 0")
+        elif(ratio2 <= 0.1):
+            print("Finger Tap Score: 1")
+        elif(ratio2 <= 0.3):
+            print("Finger Tap Score: 2")
+        elif(ratio2 <= 0.5):
+            print("Finger Tap Score: 3")
+        else:
+            print("Finger Tap Score: 4")
 
         # inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
         # inputs2 = self.get_input_1hz_test("yousef_5.txt")
@@ -634,25 +657,29 @@ class Score(object):
             print("The finger tap count is: ")
             print(max_count)
             print("\n")
-            return print("using 3HZ frequency")
+            print("using 3HZ frequency")
+            return max_count
 
         if frequency_choice == 2:
             print("The finger tap count is: ")
             print(max_count)
             print("\n")
-            return print("using 2HZ frequency")
+            print("using 2HZ frequency")
+            return max_count
 
         if frequency_choice == 3:
             print("The finger tap count is: ")
             print(max_count)
             print("\n")
-            return print("using 1HZ frequency")
+            print("using 1HZ frequency")
+            return max_count
 
         if frequency_choice == 4:
             print("The finger tap count is: ")
             print(max_count)
             print("\n")
-            return print("using 1/3HZ frequency")
+            print("using 1/3HZ frequency")
+            return max_count
 
         if max_count == 0:
             return print("no taps found, looking for tap interruptions")
@@ -702,28 +729,33 @@ class Score(object):
             print("The finger tap interrupt count is: ")
             print(max_count)
             print("\n")
-            return print("using 3HZ frequency")
+            print("using 3HZ frequency")
+            return max_count
 
         if frequency_choice == 2:
             print("The finger tap interrupt count is: ")
             print(max_count)
             print("\n")
-            return print("using 2HZ frequency")
+            print("using 2HZ frequency")
+            return max_count
 
         if frequency_choice == 3:
             print("The finger tap interrupt count is: ")
             print(max_count)
             print("\n")
-            return print("using 1HZ frequency")
+            print("using 1HZ frequency")
+            return max_count
+
 
         if frequency_choice == 4:
             print("The finger tap interrupt count is: ")
             print(max_count)
             print("\n")
-            return print("using 1/3HZ frequency")
+            print("using 1/3HZ frequency")
+            return max_count
 
         if max_count == 0:
-            return print("no tap interruptions found, looking for grasps")
+            print("no tap interruptions found, looking for grasps")
 
     def count_grasps(self, dataset1, dataset2, dataset3, dataset4, total_instances):
 
@@ -769,25 +801,29 @@ class Score(object):
             print("The hand grasp count is: ")
             print(max_count)
             print("\n")
-            return print("using 3HZ frequency")
+            print("using 3HZ frequency")
+            return max_count
 
         if frequency_choice == 2:
             print("The hand grasp count is: ")
             print(max_count)
             print("\n")
-            return print("using 2HZ frequency")
+            print("using 2HZ frequency")
+            return max_count
 
         if frequency_choice == 3:
             print("The hand grasp count is: ")
             print(max_count)
             print("\n")
-            return print("using 1HZ frequency")
+            print("using 1HZ frequency")
+            return max_count
 
         if frequency_choice == 4:
             print("The hand grasp count is: ")
             print(max_count)
             print("\n")
-            return print("using 1/3HZ frequency")
+            print("using 1/3HZ frequency")
+            return max_count
 
         if max_count == 0:
             return print("no hand grasps found, looking for grasp interruptions")
@@ -836,25 +872,29 @@ class Score(object):
             print("The hand grasp interrupt count is: ")
             print(max_count)
             print("\n")
-            return print("using 3HZ frequency")
+            print("using 3HZ frequency")
+            return max_count
 
         if frequency_choice == 2:
             print("The hand grasp interrupt count is: ")
             print(max_count)
             print("\n")
-            return print("using 2HZ frequency")
+            print("using 2HZ frequency")
+            return max_count
 
         if frequency_choice == 3:
             print("The hand grasp interrupt count is: ")
             print(max_count)
             print("\n")
-            return print("using 1HZ frequency")
+            print("using 1HZ frequency")
+            return max_count
 
         if frequency_choice == 4:
             print("The hand grasp interrupt count is: ")
             print(max_count)
             print("\n")
-            return print("using 1/3HZ frequency")
+            print("using 1/3HZ frequency")
+            return max_count
 
         if max_count == 0:
             return print("no hand grasp interruptions found")
