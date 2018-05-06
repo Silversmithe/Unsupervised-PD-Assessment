@@ -905,7 +905,6 @@ class Score(object):
 
         # higher sample number will give us higher accuracy later
         # may need to change this later
-
         text_file = open("{}/bandpass.txt".format(self.__filename), "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
@@ -921,13 +920,14 @@ class Score(object):
                 output[rows][columns] = float(dataset[rows][columns])
 
         true_data = output  # MAKE SURE TO PULL FROM FILE
+        channel_num = true_data.shape[1]  # explicitly set to 28 by line: 914
 
         expected_sample_num = 10
-        fs = 100
+        # fs = 100
 
         sample_size = int(self.__num_instances/expected_sample_num)
 
-        df = fs/sample_size
+        # df = fs/sample_size
 
         sample_num = int(self.__num_instances/sample_size)
 
@@ -962,7 +962,7 @@ class Score(object):
 
         for i in range(0, sample_num):
             # true data should then be raw data
-            s = slice(((i-1)*sample_size) , (i*sample_size) , 1)
+            s = slice(((i)*sample_size) , ((i+1)*sample_size) , 1)
             test_data = true_data[s][0:]
             # test_data_fft = sp.fft(test_data)
             mag = np.abs(test_data)
@@ -971,7 +971,7 @@ class Score(object):
             # s2 = slice(beginning_index, end_index, 1)
             # mag_tremor = np.linalg.norm(true_data[s2][0:])
             # print(mag_tremor)
-            mag_tremor_max = np.max(mag, axis=0)
+            mag_tremor_max = np.max(mag, axis=0)  # max value of mag
             # print(mag_tremor_max)
             for j in range(24):
                 if mag_tremor_max[j] > tremor_amp:
