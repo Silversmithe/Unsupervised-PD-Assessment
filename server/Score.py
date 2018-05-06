@@ -17,6 +17,27 @@ class Score(object):
         self.__filename = filename
         self.variable = None
         self.__num_instances = self.get_num_instances()
+
+        self.__weights_ft_0hz = self.get_weights(W_ft_1_3hz.txt)
+        self.__weights_ft_1hz = self.get_weights(W_ft_1hz.txt)
+        self.__weights_ft_2hz = self.get_weights(W_ft_1hz.txt)
+        self.__weights_ft_3hz = self.get_weights(W_ft_1hz.txt)
+
+        self.__weights_ftin_0hz = self.get_weights(W_ftin_1_3hz.txt)
+        self.__weights_ftin_1hz = self.get_weights(W_ftin_1hz.txt)
+        self.__weights_ftin_2hz = self.get_weights(W_ftin_1hz.txt)
+        self.__weights_ftin_3hz = self.get_weights(W_ftin_1hz.txt)
+
+        self.__weights_hg_0hz = self.get_weights(W_hg_1_3hz.txt)
+        self.__weights_hg_1hz = self.get_weights(W_hg_1hz.txt)
+        self.__weights_hg_2hz = self.get_weights(W_hg_1hz.txt)
+        self.__weights_hg_3hz = self.get_weights(W_hg_1hz.txt)
+
+        self.__weights_hgin_0hz = self.get_weights(W_hgin_1_3hz.txt)
+        self.__weights_hgin_1hz = self.get_weights(W_hgin_1hz.txt)
+        self.__weights_hgin_2hz = self.get_weights(W_hgin_1hz.txt)
+        self.__weights_hgin_3hz = self.get_weights(W_hgin_1hz.txt)
+
         pass
 
     def process(self):
@@ -41,6 +62,19 @@ class Score(object):
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
         for i in range(total_inputs):
             dataset[i] = lines[i].split("\t")  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        return dataset
+
+    def get_weights(self, textfile):
+        text_file = open("/resources/weights/" + textfile , "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        for i in range(total_inputs):
+            dataset[i] = lines[i]  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
         return dataset
