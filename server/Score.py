@@ -133,7 +133,7 @@ class Score(object):
                     output[i][k] = 1
                 else:
                     try:
-                        output[i][k] = float(dataset[temp_count][k % 38])
+                        output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
                     except ValueError:
                         print("Line {} is corrupt!".format(i))
                         print("column {} is corrupt!".format(k))
