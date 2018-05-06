@@ -932,7 +932,7 @@ class Score(object):
         sample_num = int(self.__num_instances/sample_size)
 
         test_data = np.zeros((sample_size, 24))
-        frequency = np.zeros((int(fs)/int(df))
+        frequency = np.zeros((int(fs)/int(df)))
 
         beginning_index = 0
         beginning_flag = 0
