@@ -271,7 +271,7 @@ class Score(object):
 
         frequency_choice = 0
         max_count = 0
-        temp_count = 0
+        count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
             if(float(dataset1[i][0]) >= 0.5):
@@ -337,7 +337,7 @@ class Score(object):
 
         frequency_choice = 0
         max_count = 0
-        temp_count = 0
+        count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
 
@@ -406,7 +406,7 @@ class Score(object):
 
         frequency_choice = 0
         max_count = 0
-        temp_count = 0
+        count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
             if(float(dataset1[i][0]) >= 0.5):
