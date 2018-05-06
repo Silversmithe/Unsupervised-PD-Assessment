@@ -44,10 +44,10 @@ class Score(object):
     def process(self):
         """
         """
-        # weights1 = self.__weights_ft_0hz
+        weights1 = self.__weights_ft_0hz
         weights2 = self.__weights_ft_1hz
-        # weights3 = self.__weights_ft_2hz
-        # weights4 = self.__weights_ft_3hz
+        weights3 = self.__weights_ft_2hz
+        weights4 = self.__weights_ft_3hz
         #
         # weights5 = self.__weights_ftin_0hz
         # weights6 = self.__weights_ftin_1hz
@@ -64,20 +64,27 @@ class Score(object):
         # weights15 = self.__weights_hgin_2hz
         # weights16 = self.__weights_hgin_3hz
 
+        inputs1 = self.get_input_1_3hz()
         inputs2 = self.get_input_1hz()
+        inputs3 = self.get_input_2hz()
+        inputs4 = self.get_input_3hz()
 
         # print(inputs1)
 
-        dataset1 = self.get_predictions(inputs2, weights2)
+        dataset1 = self.get_predictions(inputs1, weights1)
+        dataset2 = self.get_predictions(inputs2, weights2)
+        dataset3 = self.get_predictions(inputs3, weights3)
+        dataset4 = self.get_predictions(inputs4, weights4)
+
         #
         # print(weights1)
         #
         # print(dataset1)
 
-        self.count_taps(dataset1, dataset1, dataset1, dataset1, self.__num_instances)
-        self.count_tap_interuptions(dataset1, dataset1, dataset1, dataset1, self.__num_instances)
-        self.count_grasps(dataset1, dataset1, dataset1, dataset1, self.__num_instances)
-        self.count_grasp_interuptions(dataset1, dataset1, dataset1, dataset1, self.__num_instances)
+        self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        self.count_tap_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        self.count_grasps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        self.count_grasp_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         # self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
         # self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
         # self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
@@ -133,6 +140,111 @@ class Score(object):
         for i in range(int(total_inputs/100)):
             for k in range(3801):
                 if(k == 3800):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+                if(k % 38 == 0 ):
+                    temp_count = temp_count + 1
+
+
+        return output
+
+    def get_input_1_3hz(self):
+        text_file = open("{}/raw.txt".format(self.__filename), "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 11401))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        # print(dataset[0])
+        # print(dataset[0][54])
+        temp_count = 0
+
+        # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
+
+        for i in range(int(total_inputs/300)):
+            for k in range(11401):
+                if(k == 11400):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+                if(k % 38 == 0 ):
+                    temp_count = temp_count + 1
+
+
+        return output
+
+    def get_input_2hz(self):
+        text_file = open("{}/raw.txt".format(self.__filename), "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 1901))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        # print(dataset[0])
+        # print(dataset[0][54])
+        temp_count = 0
+
+        # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
+
+        for i in range(int(total_inputs/50)):
+            for k in range(1901):
+                if(k == 1900):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+                if(k % 38 == 0 ):
+                    temp_count = temp_count + 1
+
+
+        return output
+
+    def get_input_3hz(self):
+        text_file = open("{}/raw.txt".format(self.__filename), "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 1255))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        # print(dataset[0])
+        # print(dataset[0][54])
+        temp_count = 0
+
+        # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
+
+        for i in range(int(total_inputs/33)):
+            for k in range(1256):
+                if(k == 1255):
                     output[i][k] = 1
                 else:
                     try:
