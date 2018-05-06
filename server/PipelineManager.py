@@ -75,15 +75,15 @@ class PipelineManager(Thread):
         ####################
         # Gravity Filter   #
         ####################
-        print("gravity filter")
-        self.__gravity_filter.process()
+        #print("gravity filter")
+        #self.__gravity_filter.process()
 
         ##################
         # Scoring Filter #
         ##################
 
-        # print("score")
-        # self.__score.process()
+        print("score")
+        self.__score.process()
 
         ##################
         # Scoring Output #

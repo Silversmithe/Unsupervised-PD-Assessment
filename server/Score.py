@@ -19,7 +19,7 @@ class Score(object):
         self.__num_instances = self.get_num_instances()
         pass
 
-    def process(self, dataset1, dataset2, dataset3, dataset4):
+    def process(self):
         """
         """
         dataset1 = self.get_input()
