@@ -91,6 +91,7 @@ class Score(object):
             dataset[i] = lines[i].split(' ')  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
+        print(dataset[0])
         print(dataset[0][54])
         # for i in range(total_inputs):
         #     for k in range(56):
