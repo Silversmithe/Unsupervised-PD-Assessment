@@ -101,6 +101,8 @@ class Score(object):
                         output[i][k] = float(dataset[i][k])
                     except ValueError:
                         print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
 
 
         return output
