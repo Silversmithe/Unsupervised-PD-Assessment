@@ -972,7 +972,7 @@ class Score(object):
             mag_tremor = np.linalg.norm(true_data[s2][0:])
             mag_tremor_max = np.max(mag_tremor)
             for j in range(24):
-                if mag_tremor_max(j) > tremor_amp:
+                if mag_tremor_max[j] > tremor_amp:
                     tremor_count = tremor_count+1
 
             tremor_time = tremor_count/(sample_num * channel_num)
