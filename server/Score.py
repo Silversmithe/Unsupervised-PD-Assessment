@@ -91,18 +91,18 @@ class Score(object):
             dataset[i] = lines[i].split(' ')  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
-        print(dataset[0][0])
-        for i in range(total_inputs):
-            for k in range(56):
-                if(k == 55):
-                    output[i][k] = 1
-                else:
-                    try:
-                        output[i][k] = float(dataset[i][k])
-                    except ValueError:
-                        print("Line {} is corrupt!".format(i))
-                        print("column {} is corrupt!".format(k))
-                        break
+        print(dataset[0][54])
+        # for i in range(total_inputs):
+        #     for k in range(56):
+        #         if(k == 55):
+        #             output[i][k] = 1
+        #         else:
+        #             try:
+        #                 output[i][k] = float(dataset[i][k])
+        #             except ValueError:
+        #                 print("Line {} is corrupt!".format(i))
+        #                 print("column {} is corrupt!".format(k))
+        #                 break
 
 
         return output
