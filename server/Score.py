@@ -962,7 +962,8 @@ class Score(object):
 
         for i in range(0, sample_num):
             # true data should then be raw data
-            test_data = true_data[[((i-1)*sample_size):(i*sample_size)], 0: ]
+            s = slice(((i-1)*sample_size) , (i*sample_size) , 1)
+            test_data = true_data[s][0:]
             test_data_fft = sp.fft(test_data)
             mag = np.abs(test_data_fft)
 
