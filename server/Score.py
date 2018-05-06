@@ -106,7 +106,7 @@ class Score(object):
         for i in range(total_inputs):
             if(i == 0):
                 print(lines[i])
-            dataset[i][0] = lines[i]  # split data points of each instance
+            dataset[i][0] = float(lines[i])  # split data points of each instance
         print(dataset[0][0])
 
         # print(dataset_ftaps[1][0])
