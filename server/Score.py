@@ -70,9 +70,9 @@ class Score(object):
         # inputs4 = self.get_input_3hz()
 
         inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
-        inputs2 = self.get_input_1hz_test("yousef_2.txt")
-        inputs3 = self.get_input_2hz_test("yousef_3.txt")
-        inputs4 = self.get_input_3hz_test("yousef_4.txt")
+        inputs2 = self.get_input_1hz_test("yousef_5.txt")
+        inputs3 = self.get_input_2hz_test("yousef_9.txt")
+        inputs4 = self.get_input_3hz_test("yousef_13.txt")
 
         # print(inputs1)
 
