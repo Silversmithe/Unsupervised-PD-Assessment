@@ -44,31 +44,31 @@ class Score(object):
     def process(self):
         """
         """
-        weights1 = self.__weights_ft_0hz
+        # weights1 = self.__weights_ft_0hz
         weights2 = self.__weights_ft_1hz
-        weights3 = self.__weights_ft_2hz
-        weights4 = self.__weights_ft_3hz
+        # weights3 = self.__weights_ft_2hz
+        # weights4 = self.__weights_ft_3hz
+        #
+        # weights5 = self.__weights_ftin_0hz
+        # weights6 = self.__weights_ftin_1hz
+        # weights7 = self.__weights_ftin_2hz
+        # weights8 = self.__weights_ftin_3hz
+        #
+        # weights9 = self.__weights_hg_0hz
+        # weights10 = self.__weights_hg_1hz
+        # weights11 = self.__weights_hg_2hz
+        # weights12 = self.__weights_hg_3hz
+        #
+        # weights13 = self.__weights_hgin_0hz
+        # weights14 = self.__weights_hgin_1hz
+        # weights15 = self.__weights_hgin_2hz
+        # weights16 = self.__weights_hgin_3hz
 
-        weights5 = self.__weights_ftin_0hz
-        weights6 = self.__weights_ftin_1hz
-        weights7 = self.__weights_ftin_2hz
-        weights8 = self.__weights_ftin_3hz
-
-        weights9 = self.__weights_hg_0hz
-        weights10 = self.__weights_hg_1hz
-        weights11 = self.__weights_hg_2hz
-        weights12 = self.__weights_hg_3hz
-
-        weights13 = self.__weights_hgin_0hz
-        weights14 = self.__weights_hgin_1hz
-        weights15 = self.__weights_hgin_2hz
-        weights16 = self.__weights_hgin_3hz
-
-        inputs1 = self.get_input()
+        inputs2 = self.get_input()
 
         # print(inputs1)
 
-        dataset1 = self.get_predictions(inputs1, weights1)
+        dataset1 = self.get_predictions(inputs2, weights2)
         #
         # print(weights1)
         #
@@ -104,6 +104,39 @@ class Score(object):
                         print("Line {} is corrupt!".format(i))
                         print("column {} is corrupt!".format(k))
                         break
+
+
+        return output
+
+
+    def get_input_1hz(self):
+        text_file = open("{}/raw.txt".format(self.__filename), "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 5500))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        print(dataset[0])
+        print(dataset[0][54])
+        temp_count = 0
+        for i in range(total_inputs/5500):
+            for k in range(5500):
+                if(k == 54):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[temp_count][k % 54])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+                if(k % 54 == 0 ):
+                    temp_count = temp_count + 1
 
 
         return output
