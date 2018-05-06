@@ -66,7 +66,13 @@ class Score(object):
 
         inputs1 = self.get_input()
 
+        print(inputs1)
+
         dataset1 = self.get_predictions(inputs1, weights1)
+
+        print(weights1)
+
+        print(dataset1)
 
         # self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
         # self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
