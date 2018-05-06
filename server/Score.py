@@ -79,10 +79,10 @@ class Score(object):
         weights3 = self.__weights_ft_2hz
         weights4 = self.__weights_ft_3hz
 
-        inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
-        inputs2 = self.get_input_1hz_test("yousef_1.txt")
-        inputs3 = self.get_input_2hz_test("yousef_1.txt")
-        inputs4 = self.get_input_3hz_test("yousef_1.txt")
+        inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
+        inputs2 = self.get_input_1hz_test("yousef_5.txt")
+        inputs3 = self.get_input_2hz_test("yousef_5.txt")
+        inputs4 = self.get_input_3hz_test("yousef_5.txt")
 
         dataset4 = self.get_predictions(inputs1, weights1)
         dataset3 = self.get_predictions(inputs2, weights2)
@@ -101,10 +101,10 @@ class Score(object):
         weights7 = self.__weights_ftin_2hz
         weights8 = self.__weights_ftin_3hz
 
-        inputs5 = self.get_input_1_3hz_test("yousef_2.txt")
-        inputs6 = self.get_input_1hz_test("yousef_2.txt")
-        inputs7 = self.get_input_2hz_test("yousef_2.txt")
-        inputs8 = self.get_input_3hz_test("yousef_2.txt")
+        inputs5 = self.get_input_1_3hz_test("yousef_6.txt")
+        inputs6 = self.get_input_1hz_test("yousef_6.txt")
+        inputs7 = self.get_input_2hz_test("yousef_6.txt")
+        inputs8 = self.get_input_3hz_test("yousef_6.txt")
 
         dataset8 = self.get_predictions(inputs5, weights5)
         dataset7 = self.get_predictions(inputs6, weights6)
@@ -123,10 +123,10 @@ class Score(object):
         weights11 = self.__weights_hg_2hz
         weights12 = self.__weights_hg_3hz
 
-        inputs9 = self.get_input_1_3hz_test("yousef_3.txt")
-        inputs10 = self.get_input_1hz_test("yousef_3.txt")
-        inputs11 = self.get_input_2hz_test("yousef_3.txt")
-        inputs12 = self.get_input_3hz_test("yousef_3.txt")
+        inputs9 = self.get_input_1_3hz_test("yousef_7.txt")
+        inputs10 = self.get_input_1hz_test("yousef_7.txt")
+        inputs11 = self.get_input_2hz_test("yousef_7.txt")
+        inputs12 = self.get_input_3hz_test("yousef_7.txt")
 
         dataset12 = self.get_predictions(inputs9, weights9)
         dataset11 = self.get_predictions(inputs10, weights10)
@@ -145,10 +145,10 @@ class Score(object):
         weights15 = self.__weights_hgin_2hz
         weights16 = self.__weights_hgin_3hz
 
-        inputs13 = self.get_input_1_3hz_test("yousef_4.txt")
-        inputs14 = self.get_input_1hz_test("yousef_4.txt")
-        inputs15 = self.get_input_2hz_test("yousef_4.txt")
-        inputs16 = self.get_input_3hz_test("yousef_4.txt")
+        inputs13 = self.get_input_1_3hz_test("yousef_8.txt")
+        inputs14 = self.get_input_1hz_test("yousef_8.txt")
+        inputs15 = self.get_input_2hz_test("yousef_8.txt")
+        inputs16 = self.get_input_3hz_test("yousef_8.txt")
 
         dataset16 = self.get_predictions(inputs13, weights13)
         dataset15 = self.get_predictions(inputs14, weights14)
@@ -164,7 +164,7 @@ class Score(object):
 
 
 
-        # inputs1 = self.get_input_1_3hz_test("yousef_1.txt")
+        # inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
         # inputs2 = self.get_input_1hz_test("yousef_5.txt")
         # inputs3 = self.get_input_2hz_test("yousef_9.txt")
         # inputs4 = self.get_input_3hz_test("yousef_13.txt")
@@ -594,7 +594,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
-            if(float(dataset1[i][0]) > 0.9999):
+            if(float(dataset1[i][0]) > 0.99999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 1
@@ -603,7 +603,7 @@ class Score(object):
 
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
-            if(float(dataset2[i][0]) > 0.9999):
+            if(float(dataset2[i][0]) > 0.99999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 2
@@ -666,7 +666,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
-            if(float(dataset1[i][0]) > 0.9999):
+            if(float(dataset1[i][0]) > 0.99999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 1
@@ -675,7 +675,7 @@ class Score(object):
 
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
-            if(float(dataset2[i][0]) > 0.9999):
+            if(float(dataset2[i][0]) > 0.99999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 2
@@ -733,7 +733,7 @@ class Score(object):
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
 
-            if(float(dataset1[i][0]) > 0.9999):
+            if(float(dataset1[i][0]) > 0.99999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 1
@@ -741,7 +741,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
-            if(float(dataset2[i][0]) > 0.9999):
+            if(float(dataset2[i][0]) > 0.99999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 2
@@ -801,7 +801,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
-            if(float(dataset1[i][0]) > 0.9999):
+            if(float(dataset1[i][0]) > 0.99999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 1
@@ -809,7 +809,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
-            if(float(dataset2[i][0]) > 0.9999):
+            if(float(dataset2[i][0]) > 0.99999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 2
