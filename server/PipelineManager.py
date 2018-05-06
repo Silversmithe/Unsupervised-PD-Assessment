@@ -57,37 +57,36 @@ class PipelineManager(Thread):
         ###################
         # Low Pass Filter #
         ###################
-        # print("low pass filter")
-        # self.__low_pass_filter.process()
+        print("calling low pass filter...")
+        self.__low_pass_filter.process()
 
         ####################
         # Band Pass Filter #
         ####################
-        # print("band pass filter")
-        # self.__band_pass_filter.process()
+        print("calling band pass filter...")
+        self.__band_pass_filter.process()
 
         ####################
         # Hampel Filter    #
         ####################
-        # print("hampel filter")
-        # self.__hampel_filter.process()
+        print("calling hampel filter...")
+        self.__hampel_filter.process()
 
         ####################
         # Gravity Filter   #
         ####################
-        # print("gravity filter")
-        # self.__gravity_filter.process()
+        print("calling gravity filter...")
+        self.__gravity_filter.process()
 
         ##################
         # Scoring Filter #
         ##################
 
-        print("score")
+        print("calling score...")
         self.__score.process()
 
         ##################
         # Report Output  #
         ##################
-        print("reporting")
+        print("reporting...")
         self.__reporter.generate_report(self.__score.get_result())
-    
