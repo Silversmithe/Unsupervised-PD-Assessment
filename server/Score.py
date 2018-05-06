@@ -85,13 +85,21 @@ class Score(object):
         total_inputs = len(lines) - 1
         text_file.close()
 
-        # dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
-        dataset = np.zeros((total_inputs, 55))
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 56))
         for i in range(total_inputs):
             dataset[i] = lines[i].split(" ")  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
-        return dataset
+
+        for i in range(total_inputs):
+            for k in range(56):
+                if(k == 55):
+                    output[i][k] = 1
+                else:
+                    output[i][k] = float(dataset[i][k])
+
+        return output
 
     def get_weights(self, textfile):
         dir_path = os.getcwd()
