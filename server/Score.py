@@ -611,7 +611,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
-            if float(dataset3[i][0]) > 0.999:
+            if float(dataset3[i][0]) > 0.99:
                 count = count + 1
 
         if count > max_count:
@@ -621,7 +621,7 @@ class Score(object):
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
 
-            if float(dataset4[i][0]) > 0.999:
+            if float(dataset4[i][0]) > 0.75:
                 count = count + 1
 
         if count > max_count:
@@ -683,7 +683,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
-            if(float(dataset3[i][0]) > 0.999):
+            if(float(dataset3[i][0]) > 0.99):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 3
@@ -691,7 +691,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
-            if(float(dataset4[i][0]) > 0.999):
+            if(float(dataset4[i][0]) > 0.75):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 4
@@ -749,7 +749,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
-            if(float(dataset3[i][0]) > 0.999):
+            if(float(dataset3[i][0]) > 0.99):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 3
@@ -757,7 +757,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
-            if float(dataset4[i][0]) > 0.999:
+            if float(dataset4[i][0]) > 0.75:
                 count = count + 1
 
         if count > max_count:
@@ -817,7 +817,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
-            if(float(dataset3[i][0]) > 0.999):
+            if(float(dataset3[i][0]) > 0.99):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 3
@@ -825,7 +825,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
-            if(float(dataset4[i][0]) > 0.999):
+            if(float(dataset4[i][0]) > 0.75):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 4
