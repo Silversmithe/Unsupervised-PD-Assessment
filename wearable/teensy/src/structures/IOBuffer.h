@@ -27,10 +27,10 @@ public:
   bool push_back(Data item);     // producing an item and putting it in back
 
 private:
-  Data** buffer;        // array for storing all the data
-  unsigned SIZE;           // Buffer's static size
-  unsigned pfront, pback;  // Pointers for the program
-  unsigned count;          // how many items are in the buffer currently
+  Data** buffer;   // array for storing all the data
+  unsigned SIZE;              // Buffer's static size
+  unsigned pfront, pback;     // Pointers for the program
+  unsigned count;             // how many items are in the buffer currently
 };
 
 #endif

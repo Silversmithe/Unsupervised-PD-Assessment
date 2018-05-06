@@ -35,12 +35,13 @@ bool __enabled[4] = {
 };
 
 EMG forearm(EMG_RECT_PIN, EMG_RAW_PIN);
-MPU9250 __imus[4] = {
-  MPU9250(Wire, IMU_ADDR_HI),   // hand
-  MPU9250(Wire, IMU_ADDR_LO),   // ring
-  MPU9250(Wire1, IMU_ADDR_LO),   // pointer finger
-  MPU9250(Wire1, IMU_ADDR_HI)   // thumb
-};
+// MPU9250 __imus[4] = {
+//   MPU9250(Wire, IMU_ADDR_HI),   // hand
+//   MPU9250(Wire, IMU_ADDR_LO),   // ring
+//   MPU9250(Wire1, IMU_ADDR_LO),   // pointer finger
+//   MPU9250(Wire1, IMU_ADDR_HI)   // thumb
+// };
+MPU9250 hand, thumb, point, ring;
 
 /*
  * @function:     setup
@@ -68,10 +69,8 @@ void setup(void) {
   pinMode(BTN_MODE, INPUT);
   pinMode(LED_MODE_STAT, OUTPUT);
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
-  delay(1000);
-
   hardware_success = init_com(false) && hardware_success;
-  hardware_success = imu_setup(false) && hardware_success;
+  hardware_success = imu_setup(true) && hardware_success;
   if(!hardware_success){
     __current_state = KILL;
     __error = IMU_ERROR;
@@ -195,10 +194,10 @@ void loop(void) {
       temp_data = BUFFER.remove_front();
       interrupts();
 
-      // write_console(temp_data);
+      write_console(temp_data);
 
       /* DATA TRANSFER */
-      __error = log_payload(temp_data);
+      // __error = log_payload(temp_data);
 
     }
   } else {
@@ -222,15 +221,15 @@ void transfer_mode(void){
   } else if(__current_state == ONLINE){
     /* start sending data */
     if(__new_data){
-      if (SERIAL_SELECT) {Serial.println("attempting data transfer...");}
+      Serial.println("attempting data transfer...");
       __prev_pos = __file_pos;
       __file_pos = write_to_server(__file_pos);
-      if(SERIAL_SELECT) {Serial.println(__file_pos);}
+      Serial.println(__file_pos);
 
       /* prevent device from trying to write */
       if(__prev_pos == __file_pos){
         __new_data = false;
-        if(SERIAL_SELECT) {Serial.println("no new data to transfer...");}
+        Serial.println("no new data to transfer...");
       }
     }
   }
@@ -261,26 +260,91 @@ void kill(void){
  *                Returns true if the initialization was 100% successful.
  */
 bool imu_setup(bool trace){
-  int status[4];
   bool out = true;
   if(trace && !SERIAL_SELECT) { return false; }
 
-  for(int i=0; i<4; i++){
-    if(__enabled[i]){
-      status[i] =  __imus[i].begin();
-      /* initializing components */
-      __imus[i].setAccelRange(MPU9250::ACCEL_RANGE_4G);
+  delay(10000);
+  Serial.println("Start");
+  Wire.begin();
+  Wire1.begin();
 
-      out = out && !(status[i] < 0);
-      if(trace && (status[i] < 0)){
-        log("imu hardware error!");
-        log("id: ");
-        log(String(i).c_str());
-        log("code: ");
-        log(String(status[i]).c_str());
-      }
-    }
+  // initialize imus
+  hand.initMPU9250();
+
+  thumb.initMPU9250();
+  point.initMPU9250();
+  ring.initMPU9250();
+
+  // communicate with reg
+  byte hand_stat = hand.readByte(IMU_ADDR_HI, WHO_AM_I_MPU9250);
+  byte thumb_stat = thumb.readByte(IMU_ADDR_HI, WHO_AM_I_MPU9250);
+  byte point_stat = point.readByte(IMU_ADDR_LO, WHO_AM_I_MPU9250);
+  byte ring_stat = ring.readByte(IMU_ADDR_LO, WHO_AM_I_MPU9250);
+
+  if (hand_stat != IMU_ADDR_HI){
+    log("hand imu hardware error: unrecognized address...");
+    out = out && false;
   }
+  if (thumb_stat != IMU_ADDR_HI){
+    log("thumb imu hardware error: unrecognized address...");
+    out = out && false;
+  }
+  if (point_stat != IMU_ADDR_HI){
+    log("point imu hardware error: unrecognized address...");
+    out = out && false;
+  }
+  if (ring_stat != IMU_ADDR_HI){
+    log("ring imu hardware error: unrecognized address...");
+    out = out && false;
+  }
+  if (!out) { return out; }
+
+  Serial.println("Mid");
+
+  // perform self testing & calibration for MPU
+  hand.MPU9250SelfTest(hand.SelfTest);
+  hand.calibrateMPU9250(hand.gyroBias, hand.accelBias);
+
+  thumb.MPU9250SelfTest(thumb.SelfTest);
+  thumb.calibrateMPU9250(thumb.gyroBias, thumb.accelBias);
+
+  point.MPU9250SelfTest(point.SelfTest);
+  point.calibrateMPU9250(point.gyroBias, point.accelBias);
+
+  ring.MPU9250SelfTest(ring.SelfTest);
+  ring.calibrateMPU9250(ring.gyroBias, ring.accelBias);
+
+  // test and calibrate magnetometer
+  hand_stat = hand.readByte(AK8963_ADDRESS, WHO_AM_I_AK8963);
+  thumb_stat = thumb.readByte(AK8963_ADDRESS, WHO_AM_I_AK8963);
+  point_stat = point.readByte(AK8963_ADDRESS, WHO_AM_I_AK8963);
+  ring_stat = ring.readByte(AK8963_ADDRESS, WHO_AM_I_AK8963);
+
+  if (hand_stat != AK8963_ADDRESS){
+    log("hand mag hardware error: unrecognized address...");
+    out = out && false;
+  }
+  if (thumb_stat != AK8963_ADDRESS){
+    log("thumb mag hardware error: unrecognized address...");
+    out = out && false;
+  }
+  if (point_stat != AK8963_ADDRESS){
+    log("point mag hardware error: unrecognized address...");
+    out = out && false;
+  }
+  if (ring_stat != AK8963_ADDRESS){
+    log("ring mag hardware error: unrecognized address...");
+    out = out && false;
+  }
+  if (!out) { return out; }
+
+  // perform self testing & calibration for MPU
+  hand.initAK8963(hand.magCalibration);
+  thumb.initAK8963(thumb.magCalibration);
+  point.initAK8963(point.magCalibration);
+  ring.initAK8963(ring.magCalibration);
+  Serial.println("End");
+
   return out;
 }
 
@@ -353,68 +417,35 @@ void sensor_isr(void){
     packet.emg[1] = forearm.getRect();
   }
 
+
+  // HAND
   if(HAND_SELECT){
-    __imus[0].readSensor();
-    // accel
-    packet.hand[0] = -1.0 * __imus[0].getAccelY_mss();
-    packet.hand[1] = -1.0 * __imus[0].getAccelX_mss(); // getAccelX_mss
-    packet.hand[2] = __imus[0].getAccelZ_mss();
-    // gyro
-    packet.hand[3] = __imus[0].getGyroY_rads();
-    packet.hand[4] = __imus[0].getGyroX_rads(); // getGyroX_rads
-    packet.hand[5] = -1.0 * __imus[0].getGyroZ_rads();
-    // mag
-    packet.hand[6] = __imus[0].getMagY_uT();
-    packet.hand[7] = __imus[0].getMagX_uT(); // getMagX_uT
-    packet.hand[8] = __imus[0].getMagZ_uT();
-  }
+    // read accel
+    hand.readAccelData(hand.accelCount);
+    hand.getAres();
+    // convert to g's
+    packet.hand[0] = (float)hand.accelCount[0]*hand.aRes;
+    packet.hand[1] = (float)hand.accelCount[1]*hand.aRes;
+    packet.hand[2] = (float)hand.accelCount[2]*hand.aRes;
 
-  if(THUMB_SELECT){
-    __imus[3].readSensor();
-    // accel
-    packet.thumb[0] = -1.0 * __imus[3].getAccelY_mss();
-    packet.thumb[1] = -1.0 * __imus[3].getAccelX_mss(); // getAccelX_mss
-    packet.thumb[2] = __imus[3].getAccelZ_mss();
-    // gyro
-    packet.thumb[3] = __imus[3].getGyroY_rads();
-    packet.thumb[4] = __imus[3].getGyroX_rads(); // getGyroX_rads
-    packet.thumb[5] = -1.0 * __imus[3].getGyroZ_rads();
-    // mag
-    packet.thumb[6] = __imus[3].getMagY_uT();
-    packet.thumb[7] = __imus[3].getMagX_uT(); // getMagX_uT
-    packet.thumb[8] = __imus[3].getMagZ_uT();
-  }
+    // read gyro
+    hand.readGyroData(hand.gyroCount);
+    hand.getGres();
+    // convert to rads/sec
+    packet.hand[3] = (float)hand.gyroCount[0]*hand.gRes;
+    packet.hand[4] = (float)hand.gyroCount[1]*hand.gRes;
+    packet.hand[5] = (float)hand.gyroCount[2]*hand.gRes;
 
-  if(POINT_SELECT){
-    __imus[2].readSensor();
-    // accel
-    packet.point[0] = -1.0 * __imus[2].getAccelY_mss();
-    packet.point[1] = -1.0 * __imus[2].getAccelX_mss(); // getAccelX_mss
-    packet.point[2] = __imus[2].getAccelZ_mss();
-    // gyro
-    packet.point[3] = __imus[2].getGyroY_rads();
-    packet.point[4] = __imus[2].getGyroX_rads(); //getGyroX_rads
-    packet.point[5] = -1.0 * __imus[2].getGyroZ_rads();
-    // mag
-    packet.point[6] = __imus[2].getMagY_uT();
-    packet.point[7] = __imus[2].getMagX_uT(); // getMagX_uT
-    packet.point[8] = __imus[2].getMagZ_uT();
-  }
-
-  if(RING_SELECT){
-    __imus[1].readSensor();
-    // accel
-    packet.ring[0] = -1.0 * __imus[1].getAccelY_mss();
-    packet.ring[1] = -1.0 * __imus[1].getAccelX_mss(); // getAccelX_mss
-    packet.ring[2] = __imus[1].getAccelZ_mss();
-    // gyro
-    packet.ring[3] = __imus[1].getGyroY_rads();
-    packet.ring[4] = __imus[1].getGyroX_rads(); //getGyroX_rads
-    packet.ring[5] = -1.0 * __imus[1].getGyroZ_rads();
-    // mag
-    packet.ring[6] = __imus[1].getMagY_uT();
-    packet.ring[7] = __imus[1].getMagX_uT(); // getMagX_uT
-    packet.ring[8] = __imus[1].getMagZ_uT();
+    // read magnetometer
+    hand.readMagData(hand.magCount);
+    hand.getMres();
+    hand.magbias[0] = +470.0;
+    hand.magbias[1] = +120.0;
+    hand.magbias[2] = +125.0;
+    // calculate militesslas
+    packet.hand[6] = hand.magCount[0]*hand.mRes*hand.magCalibration[0] - hand.magbias[0];
+    packet.hand[7] = hand.magCount[1]*hand.mRes*hand.magCalibration[1] - hand.magbias[1];
+    packet.hand[8] = hand.magCount[2]*hand.mRes*hand.magCalibration[2] - hand.magbias[2];
   }
 
   if(!BUFFER.push_back(packet)){ __isr_buffer_overflow = true; }

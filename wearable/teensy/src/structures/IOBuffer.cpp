@@ -20,12 +20,9 @@
 IOBuffer::IOBuffer(unsigned bsize){
   SIZE = bsize;
   pfront = pback = count = 0;
-  buffer = new Data*[SIZE];
 
-  // initialize all structs here
-  for(unsigned i=0; i<SIZE; i++){
-    buffer[i] = new Data;
-  }
+  buffer = new Data*[SIZE];
+  for(unsigned i=0; i<SIZE; i++) { buffer[i] = new Data; }
 }
 
 /*
@@ -36,9 +33,7 @@ IOBuffer::IOBuffer(unsigned bsize){
  *                     constructur
  */
 IOBuffer::~IOBuffer(void){
-  for(unsigned i=0; i<SIZE; i++)
-    delete buffer[i];
-
+  for(unsigned i=0; i<SIZE; i++) { delete buffer[i]; }
   delete[] buffer;
 }
 
