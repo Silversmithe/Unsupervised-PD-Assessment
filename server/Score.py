@@ -44,15 +44,32 @@ class Score(object):
     def process(self):
         """
         """
-        dataset1 = self.get_input()
-        dataset2 = self.get_input()
-        dataset3 = self.get_input()
-        dataset4 = self.get_input()
+        weights1 = self.__weights_ft_0hz
+        weights2 = self.__weights_ft_1hz
+        weights3 = self.__weights_ft_2hz
+        weights4 = self.__weights_ft_3hz
+
+        weights5 = self.__weights_ftin_0hz
+        weights6 = self.__weights_ftin_1hz
+        weights7 = self.__weights_ftin_2hz
+        weights8 = self.__weights_ftin_3hz
+
+        weights9 = self.__weights_hg_0hz
+        weights10 = self.__weights_hg_1hz
+        weights11 = self.__weights_hg_2hz
+        weights12 = self.__weights_hg_3hz
+
+        weights13 = self.__weights_hgin_0hz
+        weights14 = self.__weights_hgin_1hz
+        weights15 = self.__weights_hgin_2hz
+        weights16 = self.__weights_hgin_3hz
+
+        dataset1 = get_predictions(get_input, weights1)
 
         self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        self.count_tap_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        self.count_grasps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-        self.count_grasp_interuptions(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+        self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
+        self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
+        self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
 
     def get_input(self):
         text_file = open("{}/raw.txt".format(self.__filename), "r")
@@ -81,6 +98,26 @@ class Score(object):
 
         # print(dataset_ftaps[1][0])
         return dataset
+
+    """
+    Sigmoid maps a number between 1 and 0
+    Sigmoid function:
+                    1
+    sigmoid(x)= ----------
+                1 + e^(-x)
+    """
+    def sigmoid(temp_in):
+        return np.float64(1 / (1 + np.exp( - temp_in)))
+
+
+    """
+    By multiplying the new inputs with our calculated
+    column weights, we generate a column of prediction
+    values to determine whether or not an action occured
+    """
+    def get_predictions(inputs, weights):
+        return sigmoid(np.matmul(inputs, weights))
+
 
     def get_num_instances(self):
         text_file = open("{}/raw.txt".format(self.__filename), "r")
