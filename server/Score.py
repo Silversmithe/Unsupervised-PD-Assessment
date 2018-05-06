@@ -307,8 +307,8 @@ class Score(object):
             dataset[i] = lines[i].split(' ')  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
-        print(dataset[0])
-        print(dataset[0][54])
+        # print(dataset[0])
+        # print(dataset[0][54])
         temp_count = 0
 
         # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
