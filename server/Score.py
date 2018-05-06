@@ -64,10 +64,15 @@ class Score(object):
         # weights15 = self.__weights_hgin_2hz
         # weights16 = self.__weights_hgin_3hz
 
-        inputs1 = self.get_input_1_3hz()
-        inputs2 = self.get_input_1hz()
-        inputs3 = self.get_input_2hz()
-        inputs4 = self.get_input_3hz()
+        # inputs1 = self.get_input_1_3hz()
+        # inputs2 = self.get_input_1hz()
+        # inputs3 = self.get_input_2hz()
+        # inputs4 = self.get_input_3hz()
+
+        inputs1 = self.get_input_1_3hz_test()
+        inputs2 = self.get_input_1hz_test()
+        inputs3 = self.get_input_2hz_test()
+        inputs4 = self.get_input_3hz_test()
 
         # print(inputs1)
 
@@ -91,6 +96,35 @@ class Score(object):
 
     def get_input(self):
         text_file = open("{}/raw.txt".format(self.__filename), "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 56))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        print(dataset[0])
+        print(dataset[0][54])
+        for i in range(total_inputs):
+            for k in range(55):
+                if(k == 54):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[i][k])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+
+
+        return output
+
+    def get_input_test(self, textfile):
+        text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
         text_file.close()
@@ -258,6 +292,149 @@ class Score(object):
 
 
         return output
+
+
+    def get_input_1hz_test(self, textfile):
+        text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 3801))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        print(dataset[0])
+        print(dataset[0][54])
+        temp_count = 0
+
+        # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
+
+        for i in range(int(total_inputs/100)):
+            for k in range(3801):
+                if(k == 3800):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+                if(k % 38 == 0 ):
+                    temp_count = temp_count + 1
+
+
+        return output
+
+    def get_input_1_3hz_test(self, textfile):
+        text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 11401))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        # print(dataset[0])
+        # print(dataset[0][54])
+        temp_count = 0
+
+        # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
+
+        for i in range(int(total_inputs/300)):
+            for k in range(11401):
+                if(k == 11400):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+                if(k % 38 == 0 ):
+                    temp_count = temp_count + 1
+
+
+        return output
+
+    def get_input_2hz_test(self, textfile):
+        text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 1901))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        # print(dataset[0])
+        # print(dataset[0][54])
+        temp_count = 0
+
+        # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
+
+        for i in range(int(total_inputs/50)):
+            for k in range(1901):
+                if(k == 1900):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+                if(k % 38 == 0 ):
+                    temp_count = temp_count + 1
+
+
+        return output
+
+    def get_input_3hz(self, textfile):
+        text_file = open(str(dir_path) + "/resources/test_data/" + textfile , "r")
+        lines = text_file.read().split("\n")
+        total_inputs = len(lines) - 1
+        text_file.close()
+
+        dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
+        output = np.zeros((total_inputs, 1255))
+        for i in range(total_inputs):
+            dataset[i] = lines[i].split(' ')  # split data points of each instance
+
+        # print(dataset_ftaps[1][0])
+        # print(dataset[0])
+        # print(dataset[0][54])
+        temp_count = 0
+
+        # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
+
+        for i in range(int(total_inputs/33)):
+            for k in range(1255):
+                if(k == 1254):
+                    output[i][k] = 1
+                else:
+                    try:
+                        output[i][k] = float(dataset[temp_count % total_inputs][k % 38])
+                    except ValueError:
+                        print("Line {} is corrupt!".format(i))
+                        print("column {} is corrupt!".format(k))
+                        break
+                if(k % 38 == 0 ):
+                    temp_count = temp_count + 1
+
+
+        return output
+
+
 
     def get_weights(self, textfile):
         dir_path = os.getcwd()
