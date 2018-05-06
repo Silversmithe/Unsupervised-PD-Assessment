@@ -3,17 +3,45 @@ HAMPEL FILTER
 
 description...
 """
+import pandas as pd
 import numpy as np
-from pandas import *
 
 
 class HampelFilter(object):
 
-    def __init__(self):
-        pass
+
+    def __init__(self, filename):
+        self.__filename = filename
+                
 
     def process(self):
-        pass
+        """
+        emg rectified 
+        """
+        rawfile = open("{}/raw.txt".format(self.__filename), "r")
+        emg_rekt = []
+
+        # storing all emg rect values in list
+        for row in rawfile:
+            emg_rekt.append(float(row.split(sep=' ')[1]))
+
+        print("!!! BEFORE !!!")
+        output = open("{}/hampel.txt".format(self.__filename), "w")
+  
+        filtered = self.hampel(vals_orig=emg_rekt)
+        print("!!! AFTER !!!")
+    
+        for i in range(1, len(filtered)-1):
+            if filtered[i] == np.nan:
+                filtered[i] = (filtered[i+1] + filtered[i-1])/2.0
+
+        try:
+            for val in filtered:
+                output.write(str(val))
+                output.write("\n")
+
+        finally:
+            output.close()
 
     def hampel(self, vals_orig, k=7, t0=3):
         """
@@ -26,13 +54,15 @@ class HampelFilter(object):
         :return:
         """
         # make copy so original not edited
-        vals = vals_orig.copy()
+        vals = pd.Series(vals_orig.copy())
+
         # hampel filter
         L = 1.4826
-        rolling_median = vals_orig.rolling(k).median()
+        rolling_median = vals.rolling(k).median()
         difference = np.abs(rolling_median-vals)
         median_abs_deviation = difference.rolling(k).median()
         threshold = t0 * L * median_abs_deviation
         outlier_idx = difference > threshold
+    
         vals[outlier_idx] = np.nan
         return vals

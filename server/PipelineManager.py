@@ -10,7 +10,7 @@ import os
 # import matplotlib.pyplot as plt
 from analysis.LowPassFilter import LowPassFilter
 from analysis.BandPassFilter import BandPassFilter
-from analysis.PositionalFilter import PositionalFilter
+from analysis.HampelFilter import HampelFilter
 from Reporter import Reporter
 # from Score import Score
 from threading import Thread, Lock, ThreadError
@@ -29,6 +29,7 @@ class PipelineManager(Thread):
 
         self.__low_pass_filter = LowPassFilter(filename=self.__patient_path)
         self.__band_pass_filter = BandPassFilter(filename=self.__patient_path)
+        self.__hampel_filter = HampelFilter(filename=self.__patient_path)
         # self.__score = Score(filename=self.__patient_path)
         # self.__reporter = Reporter()
         pass
@@ -63,7 +64,13 @@ class PipelineManager(Thread):
         ####################
         print("band pass filter")
         self.__band_pass_filter.process()
-        
+
+        ####################
+        # Hampel Filter    #
+        ####################
+        print("hampel filter")
+        self.__hampel_filter.process()
+
         # ##################
         # # Scoring Filter #
         # ##################
