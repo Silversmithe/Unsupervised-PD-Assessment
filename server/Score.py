@@ -349,7 +349,7 @@ class Score(object):
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
         output = np.zeros((total_inputs, 3801))
         for i in range(total_inputs):
-            dataset[i] = lines[i].split(' ')  # split data points of each instance
+            dataset[i] = lines[i]  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
         # print(dataset[0])
@@ -383,7 +383,7 @@ class Score(object):
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
         output = np.zeros((total_inputs, 11401))
         for i in range(total_inputs):
-            dataset[i] = lines[i].split(' ')  # split data points of each instance
+            dataset[i] = lines[i]  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
         # print(dataset[0])
@@ -418,7 +418,7 @@ class Score(object):
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
         output = np.zeros((total_inputs, 1901))
         for i in range(total_inputs):
-            dataset[i] = lines[i].split(' ')  # split data points of each instance
+            dataset[i] = lines[i]  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
         # print(dataset[0])
@@ -453,7 +453,7 @@ class Score(object):
         dataset = [[float(0) for x in range(1)] for y in range(total_inputs)]
         output = np.zeros((total_inputs, 1255))
         for i in range(total_inputs):
-            dataset[i] = lines[i].split(' ')  # split data points of each instance
+            dataset[i] = lines[i]  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
         # print(dataset[0])
