@@ -6,7 +6,7 @@ import scipy as sp
 import numpy as np
 from analysis.MahonyFilter import *
 import os
-np.set_printoptions(threshold='nan')
+# np.set_printoptions(threshold='nan')
 
 
 
