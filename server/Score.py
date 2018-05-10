@@ -108,6 +108,15 @@ class Score(object):
         dataset2 = self.get_predictions(inputs3, weights3)
         dataset1 = self.get_predictions(inputs4, weights4)
         #
+
+
+
+        print(inputs1)
+        print(inputs2)
+        print(inputs3)
+        print(inputs4)
+
+
         print(dataset1)
         print(dataset2)
         print(dataset3)
@@ -683,7 +692,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
-            if(self.sigmoid(float(dataset1[i][0])) > 0.999):
+            if(float(dataset1[i][0]) > 0.999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 1
@@ -692,7 +701,7 @@ class Score(object):
 
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
-            if(self.sigmoid(float(dataset2[i][0])) > 0.999):
+            if(float(dataset2[i][0]) > 0.999):
                 count = count + 1
         if(count > max_count):
             frequency_choice = 2
@@ -700,7 +709,7 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
-            if self.sigmoid(float(dataset3[i][0])) > 0.99:
+            if float(dataset3[i][0]) > 0.99:
                 count = count + 1
 
         if count > max_count:
@@ -710,7 +719,7 @@ class Score(object):
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
 
-            if self.sigmoid(float(dataset4[i][0])) > 0.75:
+            if float(dataset4[i][0]) > 0.75:
                 count = count + 1
 
         if count > max_count:
