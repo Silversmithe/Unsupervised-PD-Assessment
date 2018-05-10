@@ -113,16 +113,16 @@ class Score(object):
 
 
 
-        print(inputs1)
-        print(inputs2)
-        print(inputs3)
-        print(inputs4)
-
-
-        print(dataset1)
-        print(dataset2)
-        print(dataset3)
-        print(dataset4)
+        # print(inputs1)
+        # print(inputs2)
+        # print(inputs3)
+        # print(inputs4)
+        #
+        #
+        # print(dataset1)
+        # print(dataset2)
+        # print(dataset3)
+        # print(dataset4)
 
         # taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
         taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
@@ -148,10 +148,10 @@ class Score(object):
         dataset6 = self.get_predictions(inputs7, weights7)
         dataset5 = self.get_predictions(inputs8, weights8)
 
-        print(dataset5)
-        print(dataset6)
-        print(dataset7)
-        print(dataset8)
+        # print(dataset5)
+        # print(dataset6)
+        # print(dataset7)
+        # print(dataset8)
 
         # tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2901)
         tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
@@ -176,10 +176,10 @@ class Score(object):
         dataset10 = self.get_predictions(inputs11, weights11)
         dataset9 = self.get_predictions(inputs12, weights12)
 
-        print(dataset9)
-        print(dataset10)
-        print(dataset11)
-        print(dataset12)
+        # print(dataset9)
+        # print(dataset10)
+        # print(dataset11)
+        # print(dataset12)
 
         # grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, 2840)
         grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
@@ -204,10 +204,10 @@ class Score(object):
         dataset14 = self.get_predictions(inputs15, weights15)
         dataset13 = self.get_predictions(inputs16, weights16)
 
-        print(dataset9)
-        print(dataset10)
-        print(dataset11)
-        print(dataset12)
+        # print(dataset9)
+        # print(dataset10)
+        # print(dataset11)
+        # print(dataset12)
 
         # graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, 2880)
         graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
