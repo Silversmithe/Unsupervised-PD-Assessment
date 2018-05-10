@@ -410,7 +410,8 @@ def load(tokens):
                             f = open("./data/patient-{}/raw.txt".format(str(i+num_patients)), 'w')
 
                             for line in lines:
-                                row = line.split(sep=' ')
+                                # row = line.split(sep=' ')
+                                row = line.split(sep='\t')
                                 if not len(row) == 38:
                                     continue
 

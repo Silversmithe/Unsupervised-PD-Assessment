@@ -81,7 +81,14 @@ class GravityFilter(object):
         :param q:
         :return:
         """
-        s = pow(sqrt(pow(q[0], 2.0) + pow(q[1], 2.0) + pow(q[2], 2.0) + pow(q[3], 2.0)), -2.0)
+        # get rid of q[0]^2 from value
+        # print("{} {} {}".format(q[1], q[2], q[3]))
+        total = (pow(q[1], 2.0) + pow(q[2], 2.0) + pow(q[3], 2.0))
+
+        if total == 0:
+            s = 0
+        else:
+            s = 1.0/total
 
         r = [
                 [1 - 2 * s * (pow(q[2], 2.0) + pow(q[3], 2.0)), 2 * s * (q[1] * q[2] - q[3] * q[0]), 2 * s * (q[1] * q[3] + q[2] * q[0])],

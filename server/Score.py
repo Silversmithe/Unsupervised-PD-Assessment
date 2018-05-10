@@ -103,15 +103,10 @@ class Score(object):
         # inputs3 = self.get_input_2hz()
         # inputs4 = self.get_input_3hz()
 
-
-
         dataset4 = self.get_predictions(inputs1, weights1)
         dataset3 = self.get_predictions(inputs2, weights2)
         dataset2 = self.get_predictions(inputs3, weights3)
         dataset1 = self.get_predictions(inputs4, weights4)
-        #
-
-
 
         # print(inputs1)
         # print(inputs2)
@@ -125,8 +120,6 @@ class Score(object):
         # print(dataset4)
 
         # taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
-        taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
-
 
         weights5 = self.__weights_ftin_0hz
         weights6 = self.__weights_ftin_1hz
@@ -154,7 +147,6 @@ class Score(object):
         # print(dataset8)
 
         # tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2901)
-        tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
 
         weights9 = self.__weights_hg_0hz
         weights10 = self.__weights_hg_1hz
@@ -182,7 +174,6 @@ class Score(object):
         # print(dataset12)
 
         # grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, 2840)
-        grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
 
         weights13 = self.__weights_hgin_0hz
         weights14 = self.__weights_hgin_1hz
@@ -210,61 +201,71 @@ class Score(object):
         # print(dataset12)
 
         # graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, 2880)
-        graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
 
-        ratio1 = tapin_counter/taps_counter
-        ratio2 = graspin_counter/grasp_counter
+        # print only htaps and ftaps for patients name
+        patient_name = self.__filename.split(sep="/")[-1]
+        if patient_name != 'patient-3':
+            tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
+            taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
 
-        ##########################
-        # Finger Taps Scoring    #
-        ##########################
-        if ratio1 < 0.1:
-            print("Finger Tap Score: 0")
-            self.result['ftap'][1] = 0.0
+            graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
+            grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
 
-        elif ratio1 <= 0.3:
-            print("Finger Tap Score: 1")
-            self.result['ftap'][1] = 1.0
+            ratio1 = tapin_counter/taps_counter
+            ratio2 = graspin_counter/grasp_counter
 
-        elif ratio1 <= 0.5:
-            print("Finger Tap Score: 2")
-            self.result['ftap'][1] = 2.0
+            ##########################
+            # Finger Taps Scoring    #
+            ##########################
+            if ratio1 < 0.1:
+                print("Finger Tap Score: 0")
+                self.result['ftap'][1] = 0.0
 
-        elif ratio1 <= 1:
-            print("Finger Tap Score: 3")
-            self.result['ftap'][1] = 3.0
+            elif ratio1 <= 0.3:
+                print("Finger Tap Score: 1")
+                self.result['ftap'][1] = 1.0
 
-        else:
-            print("Finger Tap Score: 3")
-            self.result['ftap'][1] = 3.0
+            elif ratio1 <= 0.5:
+                print("Finger Tap Score: 2")
+                self.result['ftap'][1] = 2.0
 
-        ##########################
-        # Hand Movements Scoring #
-        ##########################
-        if ratio2 <= 0.1:
-            print("Hand Movement Score: 0")
-            self.result['htap'][1] = 0.0
+            elif ratio1 <= 1:
+                print("Finger Tap Score: 3")
+                self.result['ftap'][1] = 3.0
 
-        elif ratio2 <= 0.3:
-            print("Hand Movement Score: 1")
-            self.result['htap'][1] = 1.0
+            else:
+                print("Finger Tap Score: 3")
+                self.result['ftap'][1] = 3.0
 
-        elif ratio2 <= 0.5:
-            print("Hand Movement Score: 2")
-            self.result['htap'][1] = 2.0
+            ##########################
+            # Hand Movements Scoring #
+            ##########################
+            if ratio2 <= 0.1:
+                print("Hand Movement Score: 0")
+                self.result['htap'][1] = 0.0
 
-        elif ratio2 <= 1:
-            print("Hand Movement Score: 3")
-            self.result['htap'][1] = 3.0
+            elif ratio2 <= 0.3:
+                print("Hand Movement Score: 1")
+                self.result['htap'][1] = 1.0
 
-        else:
-            print("Hand Movement Score: 3")
-            self.result['htap'][1] = 3.0
+            elif ratio2 <= 0.5:
+                print("Hand Movement Score: 2")
+                self.result['htap'][1] = 2.0
 
-        self.score_time_tremor()
+            elif ratio2 <= 1:
+                print("Hand Movement Score: 3")
+                self.result['htap'][1] = 3.0
 
-        # calculate tremor amplitude
-        self.calc_tremor_amplitude()
+            else:
+                print("Hand Movement Score: 3")
+                self.result['htap'][1] = 3.0
+
+        if patient_name != 'patient-1':
+
+            self.score_time_tremor()
+
+            # calculate tremor amplitude
+            self.calc_tremor_amplitude()
 
         # inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
         # inputs2 = self.get_input_1hz_test("yousef_5.txt")
@@ -644,7 +645,7 @@ class Score(object):
 
     def get_weights(self, textfile):
         dir_path = os.getcwd()
-        print(os.getcwd())
+        # print(os.getcwd())
         text_file = open(str(dir_path) + "/resources/weights/" + textfile , "r")
         lines = text_file.read().split("\n")
         total_inputs = len(lines) - 1
@@ -1035,7 +1036,6 @@ class Score(object):
         tremor_count = 0
 
         # s = slice(3,4,5,6,7,8,12,13,14,15,16,17,21,22,23,24,25,26,30,31,32,33,34,35)
-
         for i in range(0, sample_num):
             # true data should then be raw data
             s = slice(((i)*sample_size) , ((i+1)*sample_size) , 1)
@@ -1055,25 +1055,24 @@ class Score(object):
 
             tremor_time = tremor_count/(sample_num * channel_num)
 
-        print('constancy of tremor')
         if tremor_time == 0:
-            print('0: Normal')
+            print('Constancy of Tremor: 0 : Normal')
             self.result['crest'][1] = 0.0
 
         elif tremor_time <= 0.25:
-            print('1: Slight')
+            print('Constancy of Tremor: 1 : Slight')
             self.result['crest'][1] = 1.0
 
         elif tremor_time <= 0.5:
-            print('2: Mild')
+            print('Constancy of Tremor: 2 : Mild')
             self.result['crest'][1] = 2.0
 
         elif tremor_time <= 0.75:
-            print('3: Moderate')
+            print('Constancy of Tremor: 3 : Moderate')
             self.result['crest'][1] = 3.0
 
         elif tremor_time <= 1:
-            print('4: Severe')
+            print('Constancy of Tremor: 4 : Severe')
             self.result['crest'][1] = 4.0
 
         else:
@@ -1101,16 +1100,12 @@ class Score(object):
         # combo
         mat = np.zeros((self.__num_instances, 5))
         for rows in range(0, self.__num_instances):
-
             raw = lines_raw[rows].split(sep=' ')
             hamp = lines_hamp[rows].split(sep=' ')
-
             # hand accel
             mat[rows][0], mat[rows][1], mat[rows][2] = raw[2], raw[3], raw[4]
-
             # emg rect
             mat[rows][3] = hamp[0]
-
             # roll
             q = [float(raw[38]), float(raw[39]), float(raw[40]), float(raw[41])]
             mat[rows][4] = q_to_roll(q)
@@ -1151,18 +1146,18 @@ class Score(object):
             # sample_data = [ data_for_Postural_Vx[s][0], data_for_Postural_Vy[s][0], data_for_Postural_Vz[s][0], data_for_Postural_EMG_rect[s][0]]
             sample_data_avg = [np.abs(np.average(data_for_Postural_Vx[s])), np.abs(np.average(data_for_Postural_Vy[s])), np.abs(np.average(data_for_Postural_Vz[s]))] # was another one here
             sample_data_avg = np.matrix(sample_data_avg)
-            print(sample_data_avg)
+            # print(sample_data_avg)
 
             EMG_change = np.max(data_for_Postural_EMG_rect[s]) - np.min(data_for_Postural_EMG_rect[s])
             # print(EMG_change)
-            if sample_data_avg.item((0,0)) < 0.005 and sample_data_avg.item((0,2)) < 0.005 and sample_data_avg.item((0,1)) < 0.005: # 0.05
-                if EMG_change > 200: # 10
+            if sample_data_avg.item((0,0)) < 200 and sample_data_avg.item((0,1)) < 50 and sample_data_avg.item((0,2)) < 400: # 0.05
+                if EMG_change > 30: # 10
                     testing_time_post[s] = 1 # [s][0]
                 else:
                     testing_time_rest[s] = 1 # [s][0]
 
             # (0,0) - - (0,1)
-            if sample_data_avg.item((0,1)) < 0.05 and sample_data_avg.item((0,2)) < 0.05 and sample_data_avg.item((0,0)) > 0.2: # 0.2
+            if sample_data_avg.item((0,0)) < 200 and sample_data_avg.item((0,1)) < 50 and sample_data_avg.item((0,2)) > 400: # 0.2
                 testing_time_kine[s] = 1 # [s][0]
 
         # real_testing_time = np.dot(testing_time, true_time[1:sample_num*sample_period, 0])
@@ -1176,36 +1171,14 @@ class Score(object):
         raw_data_tremor_amplitude_kine = np.multiply(np.expand_dims(mat[:, 4], axis=0), np.transpose(testing_time_kine))
         raw_data_tremor_amplitude_rest = np.multiply(np.expand_dims(mat[:, 4], axis=0), np.transpose(testing_time_rest))
 
-        # print(np.expand_dims(mat[:, 4], axis=0))
-        # print(mat[:, 4])
-        print("length {}".format(len(testing_time_post[:,0])))
-        counter = 0
-        for item in testing_time_post[:, 0]:
-            if item == 1:
-                counter += 1
-
-        print("count: {}".format(counter))
-        counter = 0
-        for item in testing_time_kine[:, 0]:
-            if item == 1:
-                counter += 1
-
-        print("count: {}".format(counter))
-        counter = 0
-        for item in testing_time_rest[:, 0]:
-            if item == 1:
-                counter += 1
-
-        print("count: {}".format(counter))
-
         r_hand = 10 # centimeters
         # amplitude_upper = np.abs(np.max(raw_data_tremor_amplitude) - np.mean(raw_data_tremor_amplitude))
         # amplitude_lower = np.abs(np.min(raw_data_tremor_amplitude) - np.mean(raw_data_tremor_amplitude))
 
         # postural amplitude
         amplitude = np.abs(r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_post))) + np.tan(np.abs(np.max(raw_data_tremor_amplitude_post)))))
-        print("amplitude {}".format(amplitude))
-        print(raw_data_tremor_amplitude_post)
+        # print("amplitude {}".format(amplitude))
+        # print(raw_data_tremor_amplitude_post)
 
         if amplitude <= 0.1:
             print("Postural Tremor Score: 0 : Normal")
@@ -1232,7 +1205,8 @@ class Score(object):
             self.result['ptrem'][1] = 4.0
 
         # kinetic amplitude
-        amplitude = r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_kine))) + np.tan(np.max(raw_data_tremor_amplitude_kine)))
+        amplitude = 100 * np.abs(r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_kine))) + np.tan(np.abs(np.max(raw_data_tremor_amplitude_kine)))))
+        # print("amplitude {}".format(amplitude))
 
         if amplitude <= 0.1:
             print("Kinetic Tremor Score: 0 : Normal")
@@ -1259,7 +1233,8 @@ class Score(object):
             self.result['ktrem'][1] = 4.0
 
         # resting tremor
-        amplitude = r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_rest))) + np.tan(np.max(raw_data_tremor_amplitude_rest)))
+        amplitude = np.abs(r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_rest))) + np.tan(np.abs(np.max(raw_data_tremor_amplitude_rest)))))
+        # print("amplitude {}".format(amplitude))
 
         if amplitude <= 0.1:
             print("Rest Tremor Score: 0 : Normal")
