@@ -190,32 +190,32 @@ class Reporter(object):
         # generate finger tap scores
         v = 10 * self.INCH
         v -= 12 * 12.5 * self.POINT
-        c.drawString(4.25 * self.INCH, v, "{}%".format(score['ftap'][0]))
+        # c.drawString(4.25 * self.INCH, v, "{}%".format(score['ftap'][0]))
         c.drawString(6.40 * self.INCH, v, "{}".format(score['ftap'][1]))
         # generate hand movement scores
         v = 10 * self.INCH
         v -= 12 * 14.75 * self.POINT
-        c.drawString(4.25 * self.INCH, v, "{}%".format(score['htap'][0]))
+        # c.drawString(4.25 * self.INCH, v, "{}%".format(score['htap'][0]))
         c.drawString(6.40 * self.INCH, v, "{}".format(score['htap'][1]))
         # generate postural tremor scores
         v = 10 * self.INCH
         v -= 12 * 17 * self.POINT
-        c.drawString(4.25 * self.INCH, v, "{}%".format(score['ptrem'][0]))
+        # c.drawString(4.25 * self.INCH, v, "{}%".format(score['ptrem'][0]))
         c.drawString(6.40 * self.INCH, v, "{}".format(score['ptrem'][1]))
         # generate kinetic tremor scores
         v = 10 * self.INCH
         v -= 12 * 19.25 * self.POINT
-        c.drawString(4.25 * self.INCH, v, "{}%".format(score['ktrem'][0]))
+        # c.drawString(4.25 * self.INCH, v, "{}%".format(score['ktrem'][0]))
         c.drawString(6.40 * self.INCH, v, "{}".format(score['ktrem'][1]))
         # generate rest tremor scores
         v = 10 * self.INCH
         v -= 12 * 21.5 * self.POINT
-        c.drawString(4.25 * self.INCH, v, "{}%".format(score['rtrem'][0]))
+        # c.drawString(4.25 * self.INCH, v, "{}%".format(score['rtrem'][0]))
         c.drawString(6.40 * self.INCH, v, "{}".format(score['rtrem'][1]))
         # generate consistency of rest scores
         v = 10 * self.INCH
         v -= 12 * 23.75 * self.POINT
-        c.drawString(4.25 * self.INCH, v, "{}%".format(score['crest'][0]))
+        # c.drawString(4.25 * self.INCH, v, "{}%".format(score['crest'][0]))
         c.drawString(6.40 * self.INCH, v, "{}".format(score['crest'][1]))
 
         c.showPage()
