@@ -32,7 +32,7 @@ class LowPassFilter(object):
                 self.__indicies.append(i)
 
     def process(self):
-        print(os.getcwd())
+        # print(os.getcwd())
         rawfile = open("{}/raw.txt".format(self.__filename), "r")
         coefficients = open(self.COEFFICIENT, "r").read().split(sep='\n')
         coefficients = np.matrix(coefficients)

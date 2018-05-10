@@ -62,7 +62,7 @@ class GravityFilter(object):
 
                 # store scores
                 # HAND
-                print(rr_h.shape)
+                # print(rr_h.shape)
                 outfile.write(str(rr_h.item((0,0)) + Hx) + ' ')
                 outfile.write(str(rr_h.item((1, 0)) + Hy) + ' ')
                 outfile.write(str(rr_h.item((2, 0)) + Hz))

@@ -65,7 +65,7 @@ class Reporter(object):
     def graph_imu(self, fig_num, filename, datasets, titles, xlabel, ylabel):
         # assuming 3 datasets = [x, y, z]
         # titles = [ main , x, y, z]
-        print(len(datasets[0]))
+        # print(len(datasets[0]))
         plot.plot([1,2,3,4])
         plot.show()
         plot.close()
@@ -82,7 +82,7 @@ class Reporter(object):
         c.setFont("Helvetica", 18 * self.POINT)
         c.drawString(3 * self.INCH, 10 * self.INCH, "Raw Data Visualization")
         c.setFont("Helvetica", 12 * self.POINT)
-        
+
         c.showPage()
         c.save()
 
