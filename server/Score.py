@@ -6,6 +6,8 @@ import scipy as sp
 import numpy as np
 from analysis.MahonyFilter import *
 import os
+numpy.set_printoptions(threshold='nan')
+
 
 
 class Score(object):
