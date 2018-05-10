@@ -21,7 +21,7 @@ class GravityFilter(object):
         # go to raw file with quads
         outfile = open("{}/gravity.txt".format(self.__filename), "w")
 
-        print("!!! BEFORE !!!")
+        # print("!!! BEFORE !!!")
         # get all the accelerations
         with open("{}/raw.txt".format(self.__filename), "r") as rawfile:
             for line in rawfile:
@@ -71,7 +71,7 @@ class GravityFilter(object):
                 # POINT
                 # RING
 
-        print("!!! AFTER !!!")
+        # print("!!! AFTER !!!")
         outfile.close()
 
     @staticmethod

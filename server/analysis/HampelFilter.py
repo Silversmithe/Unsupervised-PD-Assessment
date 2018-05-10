@@ -18,7 +18,7 @@ class HampelFilter(object):
     def process(self):
         """
 
-        emg rectified 
+        emg rectified
         """
         rawfile = open("{}/raw.txt".format(self.__filename), "r")
         emg_rekt = []
@@ -27,12 +27,12 @@ class HampelFilter(object):
         for row in rawfile:
             emg_rekt.append(float(row.split(sep=' ')[1]))
 
-        print("!!! BEFORE !!!")
+        # print("!!! BEFORE !!!")
         output = open("{}/hampel.txt".format(self.__filename), "w")
-  
+
         filtered = self.hampel(vals_orig=emg_rekt)
-        print("!!! AFTER !!!")
-    
+        # print("!!! AFTER !!!")
+
         for i in range(1, len(filtered)-1):
             count = 0
             total = 0
@@ -83,6 +83,6 @@ class HampelFilter(object):
         median_abs_deviation = difference.rolling(k).median()
         threshold = t0 * L * median_abs_deviation
         outlier_idx = difference > threshold
-    
+
         vals[outlier_idx] = np.nan
         return vals

@@ -52,11 +52,11 @@ class BandPassFilter(object):
 
         raw_mat = np.matrix(self.__rawmat)
 
-        print("!!! BEFORE !!!")
+        # print("!!! BEFORE !!!")
         convolution = convolve(raw_mat.astype(np.float64), coefficients.astype(np.float64), mode='same').transpose()
         num_rows, num_cols =convolution.shape
 
-        print("!!! AFTER !!!")
+        # print("!!! AFTER !!!")
 
         try:
             for r in range(0, num_rows):
@@ -66,4 +66,3 @@ class BandPassFilter(object):
 
         finally:
             output.close()
-

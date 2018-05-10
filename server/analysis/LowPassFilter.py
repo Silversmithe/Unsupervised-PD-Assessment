@@ -45,13 +45,13 @@ class LowPassFilter(object):
                 self.__rawmat[i].append(float(vals[i]))
 
         raw_mat = np.matrix(self.__rawmat)
-        print(raw_mat.shape)
-        print("!!! BEFORE!!!")
+        # print(raw_mat.shape)
+        # print("!!! BEFORE!!!")
 
         convolution = convolve(raw_mat.astype(np.float64), coefficients.astype(np.float64), mode='same').transpose()
-        print("!!! AFTER!!!")
+        # print("!!! AFTER!!!")
         num_rows, num_cols = convolution.shape
-        print(convolution.shape)
+        # print(convolution.shape)
 
         try:
             for r in range(0, num_rows):
