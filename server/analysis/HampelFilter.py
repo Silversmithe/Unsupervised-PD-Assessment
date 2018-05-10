@@ -10,7 +10,7 @@ from math import *
 
 class HampelFilter(object):
 
-    AVE_BOUND = 2
+    AVE_BOUND = 1 
 
     def __init__(self, filename):
         self.__filename = filename
@@ -41,14 +41,14 @@ class HampelFilter(object):
                 while np.isnan(filtered[i+count]):
                     count += 1
 
-                for r in range(i, i-self.AVE_BOUND):
+                for r in range(i-self.AVE_BOUND, i):
                     total += filtered[r]
                
-                for r in range(count, count+self.AVE_BOUND):
+                for r in range(i+count, i+count+self.AVE_BOUND):
                     total += filtered[r]
                
                 for n in range(i, i+count):
-                    filtered[nan] = total/(2.0 * self.AVE_BOUND)
+                    filtered[n] = total/(2.0 * self.AVE_BOUND)
 
                 # maximum = max(filtered[i-self.AVE_BOUND: i].extend(filtered[i+count: i+count+self.AVE_BOUND]))
 
@@ -63,7 +63,7 @@ class HampelFilter(object):
         finally:
             output.close()
 
-    def hampel(self, vals_orig, k=7, t0=3):
+    def hampel(self, vals_orig, k=17, t0=3):
         """
         credit goes to: https://ocefpaf.github.io/python4oceanographers/blog/2015/03/16/outlier_detection/
         https://stackoverflow.com/questions/46819260/filtering-outliers-how-to-make-median-based-hampel-function-faster

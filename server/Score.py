@@ -1016,6 +1016,7 @@ class Score(object):
 
             tremor_time = tremor_count/(sample_num * channel_num)
 
+        print('constancy of tremor')
         if tremor_time == 0:
             print('0: Normal')
             self.result['crest'][1] = 0.0
@@ -1060,23 +1061,20 @@ class Score(object):
 
         # combo
         mat = np.zeros((self.__num_instances, 5))
-        for cols in range(0, 5):
-            for rows in range(0, self.__num_instances):
-                if 0<= cols <= 2:
-                    # gravity
-                    lines = lines_grav[rows].split(sep=' ')
-                    mat[rows][cols] = float(lines[cols])
+        for rows in range(0, self.__num_instances):
+        
+            raw = lines_raw[rows].split(sep=' ')
+            hamp = lines_hamp[rows].split(sep=' ')
 
-                elif cols == 3:
-                    # hampel
-                    lines = lines_hamp[rows].split(sep=' ')
-                    mat[rows][cols] = float(lines[0])
+            # hand accel
+            mat[rows][0], mat[rows][1], mat[rows][2] = raw[2], raw[3], raw[4]
 
-                else:
-                    # roll
-                    lines = lines_raw[rows].split(sep=' ')
-                    q = [float(lines[38]), float(lines[39]), float(lines[40]), float(lines[41])]
-                    mat[rows][cols] = q_to_roll(q)
+            # emg rect
+            mat[rows][3] = hamp[0]
+
+            # roll
+            q = [float(raw[38]), float(raw[39]), float(raw[40]), float(raw[41])]
+            mat[rows][4] = q_to_roll(q)
 
         fs = 100
         data_for_Postural_Ax = mat[:, 0] #67 Hand_Ax
@@ -1085,7 +1083,6 @@ class Score(object):
 
         data_for_Postural_EMG_rect = mat[:, 3] #79 EMG_rect
         data_length = self.__num_instances
-
         data_for_Postural_Vx = np.zeros((data_length,1))
 
         for i in range(1, data_length):
@@ -1108,22 +1105,26 @@ class Score(object):
         testing_time_post = np.zeros((data_length,1))
         testing_time_rest = np.zeros((data_length,1))
         testing_time_kine = np.zeros((data_length,1))
-        sample_data_avg = np.zeros((1, 4))
+        sample_data_avg = np.zeros((1, 3)) # 1,4
 
         for i in range(1, sample_num+1):
             s = slice((i-1)*sample_period, i*sample_period,1)
             # sample_data = [ data_for_Postural_Vx[s][0], data_for_Postural_Vy[s][0], data_for_Postural_Vz[s][0], data_for_Postural_EMG_rect[s][0]]
-            sample_data_avg = [np.average(data_for_Postural_Vx[s][0]), np.average(data_for_Postural_Vy[s][0]), np.average(data_for_Postural_Vz[s][0]), np.average(data_for_Postural_Vz[s][0])]
+            sample_data_avg = [np.abs(np.average(data_for_Postural_Vx[s])), np.abs(np.average(data_for_Postural_Vy[s])), np.abs(np.average(data_for_Postural_Vz[s]))] # was another one here
             sample_data_avg = np.matrix(sample_data_avg)
+            print(sample_data_avg)
 
             EMG_change = np.max(data_for_Postural_EMG_rect[s]) - np.min(data_for_Postural_EMG_rect[s])
-            if sample_data_avg.item((0,0)) < 0.05 and sample_data_avg.item((0,2)) < 0.05 and sample_data_avg.item((0,1)) < 0.05:
-                if EMG_change > 10:
-                    testing_time_post[s][0] = 1
+            # print(EMG_change)
+            if sample_data_avg.item((0,0)) < 0.005 and sample_data_avg.item((0,2)) < 0.005 and sample_data_avg.item((0,1)) < 0.005: # 0.05
+                if EMG_change > 200: # 10
+                    testing_time_post[s] = 1 # [s][0]
                 else:
-                    testing_time_rest[s][0] = 1
-            if sample_data_avg.item((0,0)) < 0.05 and sample_data_avg.item((0,2)) < 0.05 and sample_data_avg.item((0,1)) > 0.2:
-                testing_time_kine[s][0] = 1
+                    testing_time_rest[s] = 1 # [s][0]
+
+            # (0,0) - - (0,1)
+            if sample_data_avg.item((0,1)) < 0.05 and sample_data_avg.item((0,2)) < 0.05 and sample_data_avg.item((0,0)) > 0.2: # 0.2
+                testing_time_kine[s] = 1 # [s][0]
 
         # real_testing_time = np.dot(testing_time, true_time[1:sample_num*sample_period, 0])
         #3 steps does here calling the above function in order to do something
@@ -1132,16 +1133,40 @@ class Score(object):
         #real_testing_time_rest = np.dot(testing_time_rest, data[57]) #57
 
         # calculating amplitude
-        raw_data_tremor_amplitude_post = np.dot(np.expand_dims(mat[:, 4], axis=0), testing_time_post)
-        raw_data_tremor_amplitude_kine = np.dot(np.expand_dims(mat[:, 4], axis=0), testing_time_kine)
-        raw_data_tremor_amplitude_rest = np.dot(np.expand_dims(mat[:, 4], axis=0), testing_time_rest)
+        raw_data_tremor_amplitude_post = np.multiply(np.expand_dims(mat[:, 4], axis=0), np.transpose(testing_time_post))
+        raw_data_tremor_amplitude_kine = np.multiply(np.expand_dims(mat[:, 4], axis=0), np.transpose(testing_time_kine))
+        raw_data_tremor_amplitude_rest = np.multiply(np.expand_dims(mat[:, 4], axis=0), np.transpose(testing_time_rest))
 
-        r_hand = 5
+        # print(np.expand_dims(mat[:, 4], axis=0))
+        # print(mat[:, 4])
+        print("length {}".format(len(testing_time_post[:,0])))
+        counter = 0
+        for item in testing_time_post[:, 0]:
+            if item == 1:
+                counter += 1
+
+        print("count: {}".format(counter))
+        counter = 0
+        for item in testing_time_kine[:, 0]:
+            if item == 1:
+                counter += 1
+
+        print("count: {}".format(counter))
+        counter = 0
+        for item in testing_time_rest[:, 0]:
+            if item == 1:
+                counter += 1
+
+        print("count: {}".format(counter))
+
+        r_hand = 10 # centimeters
         # amplitude_upper = np.abs(np.max(raw_data_tremor_amplitude) - np.mean(raw_data_tremor_amplitude))
         # amplitude_lower = np.abs(np.min(raw_data_tremor_amplitude) - np.mean(raw_data_tremor_amplitude))
 
         # postural amplitude
-        amplitude = r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_post))) + np.tan(np.max(raw_data_tremor_amplitude_post)))
+        amplitude = np.abs(r_hand * (np.tan(np.abs(np.min(raw_data_tremor_amplitude_post))) + np.tan(np.abs(np.max(raw_data_tremor_amplitude_post)))))
+        print("amplitude {}".format(amplitude))
+        print(raw_data_tremor_amplitude_post)
 
         if amplitude <= 0.1:
             print("Postural Tremor Score: 0 : Normal")
