@@ -297,10 +297,13 @@ bool imu_setup(bool trace){
  */
 void btn_isr(void){
   // pin should be high
-  unsigned value = digitalRead(BTN_MODE);
+  unsigned value;
+  delay(250);
+  value = digitalRead(BTN_MODE);
+  if(value == 0){ return; } // exit if not 1
+
   if(__sampling_mode){Timer1.detachInterrupt(); }
 
-  if(value == 0){ return; } // exit if not 1
   for(unsigned i=0; i < MODE_SW_TO; i+=1000){
     digitalWrite(BUILTIN_LED, HIGH);
     delay(500);
@@ -356,64 +359,64 @@ void sensor_isr(void){
   if(HAND_SELECT){
     __imus[0].readSensor();
     // accel
-    packet.hand[0] = -1.0 * __imus[0].getAccelY_mss();
-    packet.hand[1] = -1.0 * __imus[0].getAccelX_mss(); // getAccelX_mss
+    packet.hand[0] = __imus[0].getAccelX_mss();
+    packet.hand[1] = __imus[0].getAccelY_mss(); // getAccelX_mss
     packet.hand[2] = __imus[0].getAccelZ_mss();
     // gyro
-    packet.hand[3] = __imus[0].getGyroY_rads();
-    packet.hand[4] = __imus[0].getGyroX_rads(); // getGyroX_rads
-    packet.hand[5] = -1.0 * __imus[0].getGyroZ_rads();
+    packet.hand[3] = __imus[0].getGyroX_rads();
+    packet.hand[4] = __imus[0].getGyroY_rads(); // getGyroX_rads
+    packet.hand[5] = __imus[0].getGyroZ_rads();
     // mag
-    packet.hand[6] = __imus[0].getMagY_uT();
-    packet.hand[7] = __imus[0].getMagX_uT(); // getMagX_uT
+    packet.hand[6] = __imus[0].getMagX_uT();
+    packet.hand[7] = __imus[0].getMagY_uT(); // getMagX_uT
     packet.hand[8] = __imus[0].getMagZ_uT();
   }
 
   if(THUMB_SELECT){
     __imus[3].readSensor();
     // accel
-    packet.thumb[0] = -1.0 * __imus[3].getAccelY_mss();
-    packet.thumb[1] = -1.0 * __imus[3].getAccelX_mss(); // getAccelX_mss
+    packet.thumb[0] = __imus[3].getAccelX_mss();
+    packet.thumb[1] = __imus[3].getAccelY_mss(); // getAccelX_mss
     packet.thumb[2] = __imus[3].getAccelZ_mss();
     // gyro
-    packet.thumb[3] = __imus[3].getGyroY_rads();
-    packet.thumb[4] = __imus[3].getGyroX_rads(); // getGyroX_rads
-    packet.thumb[5] = -1.0 * __imus[3].getGyroZ_rads();
+    packet.thumb[3] = __imus[3].getGyroX_rads();
+    packet.thumb[4] = __imus[3].getGyroY_rads(); // getGyroX_rads
+    packet.thumb[5] = __imus[3].getGyroZ_rads();
     // mag
-    packet.thumb[6] = __imus[3].getMagY_uT();
-    packet.thumb[7] = __imus[3].getMagX_uT(); // getMagX_uT
+    packet.thumb[6] = __imus[3].getMagX_uT();
+    packet.thumb[7] = __imus[3].getMagY_uT(); // getMagX_uT
     packet.thumb[8] = __imus[3].getMagZ_uT();
   }
 
   if(POINT_SELECT){
     __imus[2].readSensor();
     // accel
-    packet.point[0] = -1.0 * __imus[2].getAccelY_mss();
-    packet.point[1] = -1.0 * __imus[2].getAccelX_mss(); // getAccelX_mss
+    packet.point[0] = __imus[2].getAccelX_mss();
+    packet.point[1] = __imus[2].getAccelY_mss(); // getAccelX_mss
     packet.point[2] = __imus[2].getAccelZ_mss();
     // gyro
-    packet.point[3] = __imus[2].getGyroY_rads();
-    packet.point[4] = __imus[2].getGyroX_rads(); //getGyroX_rads
-    packet.point[5] = -1.0 * __imus[2].getGyroZ_rads();
+    packet.point[3] = __imus[2].getGyroX_rads();
+    packet.point[4] = __imus[2].getGyroY_rads(); //getGyroX_rads
+    packet.point[5] = __imus[2].getGyroZ_rads();
     // mag
-    packet.point[6] = __imus[2].getMagY_uT();
-    packet.point[7] = __imus[2].getMagX_uT(); // getMagX_uT
+    packet.point[6] = __imus[2].getMagX_uT();
+    packet.point[7] = __imus[2].getMagY_uT(); // getMagX_uT
     packet.point[8] = __imus[2].getMagZ_uT();
   }
 
   if(RING_SELECT){
     __imus[1].readSensor();
     // accel
-    packet.ring[0] = -1.0 * __imus[1].getAccelY_mss();
-    packet.ring[1] = -1.0 * __imus[1].getAccelX_mss(); // getAccelX_mss
+    packet.ring[0] = __imus[1].getAccelX_mss();
+    packet.ring[1] = __imus[1].getAccelY_mss(); // getAccelX_mss
     packet.ring[2] = __imus[1].getAccelZ_mss();
     // gyro
-    packet.ring[3] = __imus[1].getGyroY_rads();
-    packet.ring[4] = __imus[1].getGyroX_rads(); //getGyroX_rads
-    packet.ring[5] = -1.0 * __imus[1].getGyroZ_rads();
+    packet.ring[3] = __imus[1].getGyroX_rads();
+    packet.ring[4] = __imus[1].getGyroY_rads(); //getGyroX_rads
+    packet.ring[5] = __imus[1].getGyroZ_rads();
     // mag
-    packet.ring[6] = __imus[1].getMagY_uT();
-    packet.ring[7] = __imus[1].getMagX_uT(); // getMagX_uT
+    packet.ring[6] = __imus[1].getMagX_uT();
+    packet.ring[7] = __imus[1].getMagY_uT(); // getMagX_uT
     packet.ring[8] = __imus[1].getMagZ_uT();
   }
 
