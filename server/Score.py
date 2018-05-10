@@ -91,10 +91,17 @@ class Score(object):
         weights3 = self.__weights_ft_2hz
         weights4 = self.__weights_ft_3hz
 
-        inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
-        inputs2 = self.get_input_1hz_test("yousef_5.txt")
-        inputs3 = self.get_input_2hz_test("yousef_5.txt")
-        inputs4 = self.get_input_3hz_test("yousef_5.txt")
+        # inputs1 = self.get_input_1_3hz_test("yousef_5.txt")
+        # inputs2 = self.get_input_1hz_test("yousef_5.txt")
+        # inputs3 = self.get_input_2hz_test("yousef_5.txt")
+        # inputs4 = self.get_input_3hz_test("yousef_5.txt")
+
+        inputs1 = self.get_input_1_3hz()
+        inputs2 = self.get_input_1hz()
+        inputs3 = self.get_input_2hz()
+        inputs4 = self.get_input_3hz()
+
+
 
         dataset4 = self.get_predictions(inputs1, weights1)
         dataset3 = self.get_predictions(inputs2, weights2)
@@ -106,17 +113,24 @@ class Score(object):
         # print(dataset3)
         # print(dataset4)
 
-        taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
+        # taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, 2950)
+        taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
+
 
         weights5 = self.__weights_ftin_0hz
         weights6 = self.__weights_ftin_1hz
         weights7 = self.__weights_ftin_2hz
         weights8 = self.__weights_ftin_3hz
 
-        inputs5 = self.get_input_1_3hz_test("yousef_6.txt")
-        inputs6 = self.get_input_1hz_test("yousef_6.txt")
-        inputs7 = self.get_input_2hz_test("yousef_6.txt")
-        inputs8 = self.get_input_3hz_test("yousef_6.txt")
+        # inputs5 = self.get_input_1_3hz_test("yousef_6.txt")
+        # inputs6 = self.get_input_1hz_test("yousef_6.txt")
+        # inputs7 = self.get_input_2hz_test("yousef_6.txt")
+        # inputs8 = self.get_input_3hz_test("yousef_6.txt")
+
+        inputs5 = self.get_input_1_3hz()
+        inputs6 = self.get_input_1hz()
+        inputs7 = self.get_input_2hz()
+        inputs8 = self.get_input_3hz()
 
         dataset8 = self.get_predictions(inputs5, weights5)
         dataset7 = self.get_predictions(inputs6, weights6)
@@ -128,17 +142,23 @@ class Score(object):
         # print(dataset7)
         # print(dataset8)
 
-        tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2901)
+        # tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, 2901)
+        tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
 
         weights9 = self.__weights_hg_0hz
         weights10 = self.__weights_hg_1hz
         weights11 = self.__weights_hg_2hz
         weights12 = self.__weights_hg_3hz
 
-        inputs9 = self.get_input_1_3hz_test("yousef_7.txt")
-        inputs10 = self.get_input_1hz_test("yousef_7.txt")
-        inputs11 = self.get_input_2hz_test("yousef_7.txt")
-        inputs12 = self.get_input_3hz_test("yousef_7.txt")
+        # inputs9 = self.get_input_1_3hz_test("yousef_7.txt")
+        # inputs10 = self.get_input_1hz_test("yousef_7.txt")
+        # inputs11 = self.get_input_2hz_test("yousef_7.txt")
+        # inputs12 = self.get_input_3hz_test("yousef_7.txt")
+
+        inputs9 = self.get_input_1_3hz()
+        inputs10 = self.get_input_1hz()
+        inputs11 = self.get_input_2hz()
+        inputs12 = self.get_input_3hz()
 
         dataset12 = self.get_predictions(inputs9, weights9)
         dataset11 = self.get_predictions(inputs10, weights10)
@@ -150,17 +170,23 @@ class Score(object):
         # print(dataset11)
         # print(dataset12)
 
-        grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, 2840)
+        # grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, 2840)
+        grasp_counter = self.count_grasps(dataset9, dataset10, dataset11, dataset12, self.__num_instances)
 
         weights13 = self.__weights_hgin_0hz
         weights14 = self.__weights_hgin_1hz
         weights15 = self.__weights_hgin_2hz
         weights16 = self.__weights_hgin_3hz
 
-        inputs13 = self.get_input_1_3hz_test("yousef_8.txt")
-        inputs14 = self.get_input_1hz_test("yousef_8.txt")
-        inputs15 = self.get_input_2hz_test("yousef_8.txt")
-        inputs16 = self.get_input_3hz_test("yousef_8.txt")
+        # inputs13 = self.get_input_1_3hz_test("yousef_8.txt")
+        # inputs14 = self.get_input_1hz_test("yousef_8.txt")
+        # inputs15 = self.get_input_2hz_test("yousef_8.txt")
+        # inputs16 = self.get_input_3hz_test("yousef_8.txt")
+
+        inputs13 = self.get_input_1_3hz()
+        inputs14 = self.get_input_1hz()
+        inputs15 = self.get_input_2hz()
+        inputs16 = self.get_input_3hz()
 
         dataset16 = self.get_predictions(inputs13, weights13)
         dataset15 = self.get_predictions(inputs14, weights14)
@@ -172,7 +198,8 @@ class Score(object):
         # print(dataset11)
         # print(dataset12)
 
-        graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, 2880)
+        # graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, 2880)
+        graspin_counter = self.count_grasp_interuptions(dataset13, dataset14, dataset15, dataset16, self.__num_instances)
 
         ratio1 = tapin_counter/taps_counter
         ratio2 = graspin_counter/grasp_counter
@@ -325,8 +352,8 @@ class Score(object):
             dataset[i] = lines[i].split(' ')  # split data points of each instance
 
         # print(dataset_ftaps[1][0])
-        print(dataset[0])
-        print(dataset[0][54])
+        # print(dataset[0])
+        # print(dataset[0][54])
         temp_count = 0
 
         # output = float(dataset[1:2, 6:8, 15:17, 24:26, 33:35])
@@ -1041,7 +1068,7 @@ class Score(object):
             print('Error')
 
     def calc_tremor_amplitude(self):
-        # testing time: (slice) 
+        # testing time: (slice)
         # 3*gravity, 1*hampel, 1*roll
 
         # roll
@@ -1062,7 +1089,7 @@ class Score(object):
         # combo
         mat = np.zeros((self.__num_instances, 5))
         for rows in range(0, self.__num_instances):
-        
+
             raw = lines_raw[rows].split(sep=' ')
             hamp = lines_hamp[rows].split(sep=' ')
 
