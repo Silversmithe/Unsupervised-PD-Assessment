@@ -21,8 +21,8 @@ class PipelineManager(Thread):
 
     def __init__(self, patient_path):
         """
-        :param patient_path: name of the folder containing all the information about the patient
-        example: ./data/patient-1
+        :param patient_path: name of the folder containing all the information about the data
+        example: ./data/data-1
 
         """
         Thread.__init__(self)
@@ -37,7 +37,7 @@ class PipelineManager(Thread):
 
     def run(self):
         """
-        Given a patient profile, pass that patient's profile through all the
+        Given a data profile, pass that data's profile through all the
         stages of the UPDA pipeline
         :return:
         """
@@ -45,11 +45,11 @@ class PipelineManager(Thread):
         # Checks #
         ##########
         if not os.path.exists("{}".format(self.__patient_path)):
-            print("error: patient does not exist")
+            print("error: data does not exist")
             return
 
         if not os.path.exists("{}/raw.txt".format(self.__patient_path)):
-            print("error: patient does not exist")
+            print("error: data does not exist")
             return
 
         print("processing: {}".format(self.__patient_path))

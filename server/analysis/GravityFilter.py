@@ -2,7 +2,7 @@
 GRAVITY FILTER
 
 A filter that can find the direction of gravity given the orientation of the hand. This
-direction can be used to discern when a patient is resting their hand or they are
+direction can be used to discern when a data is resting their hand or they are
 using their hand
 """
 from math import *

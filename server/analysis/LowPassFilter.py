@@ -21,7 +21,7 @@ class LowPassFilter(object):
         2* emg  12 * accelerometer, 12 * gyroscope, 16 * positional
 
         [1 x 341] matrix
-        :param filename: patient name
+        :param filename: data name
         """
         self.__filename = filename
         self.__indicies = []

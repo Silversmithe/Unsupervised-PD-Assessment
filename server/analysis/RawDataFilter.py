@@ -8,8 +8,8 @@ from analysis.MahonyFilter import MahoneyFilter
 class RawDataFilter(object):
 
     BROADCAST_MSG = 1    # initializing communication
-    NEW_DATASEG_MSG = 2  # new patient file should be made
-    OLD_DATASEG_MSG = 3  # previous patient file was not finished, should be continued
+    NEW_DATASEG_MSG = 2  # new data file should be made
+    OLD_DATASEG_MSG = 3  # previous data file was not finished, should be continued
     PAYLOAD_MSG = 4      # message containing data to store
     CLOSE_MSG = 5        # wearable telling server to stop
     PROCESS_MSG = 6      # wearable telling server to process the messages

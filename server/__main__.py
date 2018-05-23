@@ -127,12 +127,14 @@ def main():
     stats_cmd = Command(name='stat', help_msg='produce statistics about the previous server runtime', action=stats)
     load_cmd = Command(name='load', help_msg='load data from the sd card and write to the server', action=load)
     list_cmd = Command(name='list', help_msg='list specified items. ex: list patients', action=list_items)
+    test_cmd = Command(name='test', help_msg='command to easily test new code features', action=test_module)
 
     # add commands
     console.add_command(start_cmd)
     console.add_command(stats_cmd)
     console.add_command(load_cmd)
     console.add_command(list_cmd)
+    console.add_command(test_cmd)
 
     # console.run()
     console.run()

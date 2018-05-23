@@ -204,7 +204,7 @@ class Score(object):
 
         # print only htaps and ftaps for patients name
         patient_name = self.__filename.split(sep="/")[-1]
-        if patient_name != 'patient-3':
+        if patient_name != 'data-3':
             tapin_counter = self.count_tap_interuptions(dataset5, dataset6, dataset7, dataset8, self.__num_instances)
             taps_counter = self.count_taps(dataset1, dataset2, dataset3, dataset4, self.__num_instances)
 
@@ -260,7 +260,7 @@ class Score(object):
                 print("Hand Movement Score: 3")
                 self.result['htap'][1] = 3.0
 
-        if patient_name != 'patient-1':
+        if patient_name != 'data-1':
 
             self.score_time_tremor()
 
@@ -1031,7 +1031,7 @@ class Score(object):
         #     if end_flag:
         #         break
 
-        # used to determine if the patient has tremors
+        # used to determine if the data has tremors
         tremor_amp = 3
         tremor_count = 0
 

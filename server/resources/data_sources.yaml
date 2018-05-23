@@ -1,0 +1,50 @@
+# data data organization
+
+##################
+# EMG UNFILTERED #
+##################
+E:
+    file_path: 'raw.txt'
+    range:  [0, 2]
+    W:      { range: [0] }              # RAW
+    C:      { range: [1] }              # RECT
+
+###################
+# HAND UNFILTERED #
+###################
+H:
+    file_path: 'raw.txt'
+    range:  [2, 11]
+    A: { range: [2, 5], x: [2], y: [3], z: [4]}   # ACCELERATION
+    G: { range: [5, 8], x: [5], y: [6], z: [7]}   # GYROSCOPE
+    M: { range: [8, 11], x: [8], y: [9], z: [10]}   # MAGNETOMETER
+
+####################
+# THUMB UNFILTERED #
+####################
+T:
+    file_path: 'raw.txt'
+    range:  [11, 20]
+    A: { range: [11, 14], x: [11], y: [12], z: [13]}   # ACCELERATION
+    G: { range: [14, 17], x: [14], y: [15], z: [16]}   # GYROSCOPE
+    M: { range: [17, 20], x: [17], y: [18], z: [19]}   # MAGNETOMETER
+
+####################
+# POINT UNFILTERED #
+####################
+P:
+    file_path: 'raw.txt'
+    range:  [20, 29]
+    A: { range: [20, 23], x: [20], y: [21], z: [22]}   # ACCELERATION
+    G: { range: [22, 25], x: [22], y: [23], z: [24]}   # GYROSCOPE
+    M: { range: [25, 28], x: [25], y: [26], z: [27]}   # MAGNETOMETER
+
+###################
+# RING UNFILTERED #
+###################
+R:
+    file_path: 'raw.txt'
+    range:  [29, 39]
+    A: { range: [29, 32], x: [29], y: [30], z: [31]}   # ACCELERATION
+    G: { range: [32, 35], x: [32], y: [33], z: [34]}   # GYROSCOPE
+    M: { range: [35, 38], x: [35], y: [36], z: [37]}   # MAGNETOMETER

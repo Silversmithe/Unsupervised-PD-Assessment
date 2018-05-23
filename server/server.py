@@ -13,6 +13,7 @@ import os
 import time
 import serial
 from threading import Thread, Lock
+from MatrixBuilder import extract
 from analysis.MahonyFilter import MahoneyFilter
 from analysis.RawDataFilter import RawDataFilter
 from PipelineManager import PipelineManager
@@ -154,12 +155,12 @@ class InstanceLoader(Thread):
                                 self.__file.close()
 
                             # create a new folder for raw file
-                            if not os.path.exists("./data/patient-{}".format(self.__file_count)):
-                                os.mkdir("./data/patient-{}".format(self.__file_count))
+                            if not os.path.exists("./data/data-{}".format(self.__file_count)):
+                                os.mkdir("./data/data-{}".format(self.__file_count))
 
                             # create a new file to write to
-                            self.__file = open("./data/patient-{}/raw.txt".format(self.__file_count), "w")
-                            print("msg: created new patient session")
+                            self.__file = open("./data/data-{}/raw.txt".format(self.__file_count), "w")
+                            print("msg: created new data session")
 
                         ####################
                         # PAYLOAD MESSAGES #
@@ -249,7 +250,7 @@ def run_server():
             print("unable to find './data' to store information")
             raise KeyboardInterrupt
 
-        # get patient count to make a new file
+        # get data count to make a new file
         num_patients = len([name for name in os.listdir('./data')])
 
         instance_manager = InstanceLoader(num_patients)
@@ -314,7 +315,7 @@ def start(tokens):
     """
     start run_server
     start process
-    start process patient-1
+    start process data-1
     :param tokens:
     :return:
     """
@@ -333,12 +334,12 @@ def start(tokens):
             # specifying an object to process
             patient_name = tokens[2]
             print("process {}".format(patient_name))
-            # check if patient exists
+            # check if data exists
             if not os.path.exists("./data/{}".format(patient_name)):
                 print("error: unable to find ./data/{} to process".format(patient_name))
 
-            # check if patient has been processed
-            # if patient has a pdf score, then it has been processed
+            # check if data has been processed
+            # if data has a pdf score, then it has been processed
             if os.path.exists("./data/{}/UPDAReport.pdf"):
                 print("{} has already been processed".format(patient_name))
 
@@ -353,13 +354,13 @@ def start(tokens):
             # just process the first (or all)
             print("process all patients")
             # get all patients
-            # check if patient has been processed
+            # check if data has been processed
             # process
             pass
 
     else:
         print("unknown object to start...")
-        print("options to run:\nstart server\nstart process\nstart process <patient-name>")
+        print("options to run:\nstart server\nstart process\nstart process <data-name>")
 
 
 def load(tokens):
@@ -367,7 +368,7 @@ def load(tokens):
     :param tokens:
     :return:
     """
-    print("downloading patient information from sd...")
+    print("downloading data information from sd...")
     if not os.path.isdir(SD_PATH):
         # cannot find the SD card
         print("SD card {} does not exist".format(SD_PATH))
@@ -384,15 +385,15 @@ def load(tokens):
                 content = dfile.read()
                 content = content.split(sep='----- datafile -----')
 
-                print("{} sets of patient data found".format(len(content)-1))
-                print("downloading patient data")
+                print("{} sets of data data found".format(len(content)-1))
+                print("downloading data data")
 
                 bar_size = 50
 
                 if not (len(content)-1 <= 0):
                     step = int(bar_size/(len(content)-1))
 
-                    # how many patient files exist so far
+                    # how many data files exist so far
                     num_patients = len([name for name in os.listdir('./data')]) 
 
                     # download files
@@ -406,8 +407,8 @@ def load(tokens):
 
                         try:
                             lines = content[i].split(sep='\n')
-                            os.mkdir("./data/patient-{}".format(str(i+num_patients)))
-                            f = open("./data/patient-{}/raw.txt".format(str(i+num_patients)), 'w')
+                            os.mkdir("./data/data-{}".format(str(i+num_patients)))
+                            f = open("./data/data-{}/raw.txt".format(str(i+num_patients)), 'w')
 
                             for line in lines:
                                 # row = line.split(sep=' ')
@@ -441,7 +442,7 @@ def load(tokens):
                             # calculate the mahoney filter of each
 
                         except BlockingIOError:
-                            print("\nerror: could not open new patient file")
+                            print("\nerror: could not open new data file")
                             break
 
                     else:
@@ -461,7 +462,7 @@ def list_items(tokens):
     if tokens[1] == 'patients':
         if os.path.exists('./data'):
             patients = [name for name in os.listdir('./data')]
-            print("number of patient records on disk: {}".format(len(patients)))
+            print("number of data records on disk: {}".format(len(patients)))
             # list all the files
             print("./data:")
             for i in patients:
@@ -471,3 +472,14 @@ def list_items(tokens):
 
     else:
         print("unknown object to list...")
+
+
+def test_module(tokens):
+    """
+
+    :param tokens:
+    :return:
+    """
+    print("Testing Module")
+    matrix = extract('./data/patient-4', 'HAx', 'TAx', 'PAx', 'RAx')
+    print(matrix)

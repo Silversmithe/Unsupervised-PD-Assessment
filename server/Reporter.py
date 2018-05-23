@@ -14,7 +14,7 @@ import matplotlib.pyplot as plot
 
 #
 # PATIENT_SCORE = {
-#     'name': 'patient-1',
+#     'name': 'data-1',
 #     'ftap':  [0.0, 0.0],
 #     'htap':  [0.0, 0.0],
 #     'ptrem': [0.0, 0.0],
@@ -166,7 +166,7 @@ class Reporter(object):
         """
 
         :param patient_path:
-        ex: ./data/patient-1
+        ex: ./data/data-1
 
         :return:
         """
@@ -180,7 +180,7 @@ class Reporter(object):
         c.setFillColorRGB(0, 0, 0)
         c.setFont("Helvetica", 12 * self.POINT)
 
-        # generate patient name
+        # generate data name
         v = 10 * self.INCH
         c.drawString(7 * self.INCH, v, score['name'])
         # generate datetime
@@ -225,7 +225,7 @@ class Reporter(object):
         """
 
         :param patient_path:
-        ex: ./data/patient-1
+        ex: ./data/data-1
 
         :return:
         """
