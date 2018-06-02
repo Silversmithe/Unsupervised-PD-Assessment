@@ -12,7 +12,7 @@ from MatrixBuilder import extract
 
 class GravityFilter(object):
 
-    GRAVITY = np.matrix([[0.0], [0.0], [9.81]])
+    GRAVITY = np.matrix([[0.0], [0.0], [-9.81]])
 
     def __init__(self, filename):
         self.__filename = filename

@@ -54,12 +54,23 @@ R:
 # QUATERNION #
 ##############
 Q:
-    file_path: 'raw.txt'
-    range: [38, 54]
-    H: { range: [38, 42], w: [38], x: [39], y: [40], z: [41]}  # HAND
-    T: { range: [42, 46], w: [42], x: [43], y: [44], z: [45]}  # THUMB
-    P: { range: [46, 50], w: [46], x: [47], y: [48], z: [49]}  # POINTER
-    R: { range: [50, 54], w: [50], x: [51], y: [52], z: [53]}  # RING
+    file_path: 'pos.txt'
+    range: [0, 16]
+    H: { range: [0, 4], w: [0], x: [1], y: [2], z: [3]}  # HAND
+    T: { range: [4, 8], w: [4], x: [5], y: [6], z: [7]}  # THUMB
+    P: { range: [8, 12], w: [8], x: [9], y: [10], z: [11]}  # POINTER
+    R: { range: [12, 16], w: [12], x: [13], y: [14], z: [15]}  # RING
+
+################
+# EULER ANGLES #
+################
+O:
+    file_path: 'pos.txt'
+    range: [16, 28]
+    H: { range: [16, 19], p: [16], r: [17], y: [18]}  # HAND
+    T: { range: [19, 22], p: [19], r: [20], y: [21]}  # THUMB
+    P: { range: [22, 25], p: [22], r: [23], y: [24]}  # POINTER
+    R: { range: [25, 28], p: [25], r: [26], y: [27]}  # RING
 
 
 ##################
