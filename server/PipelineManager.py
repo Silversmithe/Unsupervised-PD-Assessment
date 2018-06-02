@@ -69,14 +69,14 @@ class PipelineManager(Thread):
         ####################
         # Hampel Filter    #
         ####################
-        print("calling hampel filter...")
-        self.__hampel_filter.process()
+        # print("calling hampel filter...")
+        # self.__hampel_filter.process()
 
         # ####################
         # # Gravity Filter   #
         # ####################
-        # print("calling gravity filter...")
-        # self.__gravity_filter.process()
+        print("calling gravity filter...")
+        self.__gravity_filter.process()
         #
         # ##################
         # # Scoring Filter #
