@@ -47,7 +47,8 @@ File __file;
 bool init_com(bool erase){
   unsigned long start_time, current_time;
   bool hardware_success = true;
-  /* ------------------------------- SERIAL ------------------------------ */
+
+  /* SERIAL TESTING */
   if(SERIAL_SELECT){
     start_time = millis();
     Serial.begin(USB_BAUD);
@@ -60,7 +61,8 @@ bool init_com(bool erase){
       }
     }
   }
-  /* ------------------------------- XBEE ------------------------------- */
+
+  /* XBEE TESTING */
   if (XBEE_SELECT){
     start_time = millis();
     HWSERIAL.begin(RADIO_BAUD);
@@ -74,30 +76,28 @@ bool init_com(bool erase){
     }
     xbee.setSerial(HWSERIAL);
   }
-  /* ------------------------------- SD ------------------------------- */
-  if (!SD.begin(chip_select)){
+
+  /* SD TESTING */
+  SD.begin(chip_select);
+  /* initialize logger */
+  __file = SD.open("log.txt", FILE_WRITE);
+  if(__file){ /* file created successfully */
+    __file.println("----- logfile -----");
+    __file.close();
+  } else { /* error creating file */
     hardware_success = false;
   }
-  else {
-    /* initialize logger */
-    __file = SD.open("log.txt", FILE_WRITE);
-    if(__file){ /* file created successfully */
-      __file.println("----- logfile -----");
-      __file.close();
-    } else { /* error creating file */
-      hardware_success = false;
-    }
 
-    /* clean slate with each new run */
-    if(erase && SD.exists("data.txt")){ SD.remove("data.txt"); }
+  /* clean slate with each new run */
+  if(erase && SD.exists("data.txt")){ SD.remove("data.txt"); }
 
-    __file = SD.open("data.txt", FILE_WRITE);
-    if(__file){ /* file created successfully */
-      __file.close();
-    } else { /* error creating file */
-      hardware_success = false;
-    }
+  __file = SD.open("data.txt", FILE_WRITE);
+  if(__file){ /* file created successfully */
+    __file.close();
+  } else { /* error creating file */
+    hardware_success = false;
   }
+
 
   /* initialize missed messages */
   __missed_messages = 0;

@@ -24,7 +24,9 @@ volatile bool __sampling_mode;          // sampling (true), transferring (false)
 volatile State __current_state;         // what peripherals can device use
 volatile ERROR __error;                 // any complications
 volatile bool __isr_buffer_overflow;    // isr-triggered error
-volatile bool __enable_sampling;           // the button has been pushed
+volatile bool __enable_sampling;        // the button has been pushed
+volatile bool __radio_sleeping;         // is the radio asleep?
+volatile bool __imu_sleeping;           // are the imus sleeping
 
 /* DEVICE INITIALIZATION */
 bool __enabled[4] = {
@@ -70,6 +72,9 @@ void setup(void) {
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
   delay(1000);
 
+  digitalWrite(XBEE_SLEEP_PIN, LOW); // set radio low
+  __radio_sleeping = false;
+
   hardware_success = init_com(false) && hardware_success;
   hardware_success = imu_setup(false) && hardware_success;
   if(!hardware_success){
@@ -84,10 +89,10 @@ void setup(void) {
   //    STATE <- YES: ONLINE, NO: OFFLINE
   if(XBEE_SELECT){
     log("checking network status...");
-    digitalWrite(XBEE_SLEEP_PIN, HIGH);
+    wakeRadio();
     delay(100);
     network_success = isAnyoneThere();
-    digitalWrite(XBEE_SLEEP_PIN, LOW);
+    sleepRadio();
   }
 
   __current_state = (network_success)? ONLINE : OFFLINE;
@@ -101,7 +106,7 @@ void setup(void) {
   }
 
   /* turn the radio off */
-  digitalWrite(XBEE_SLEEP_PIN, LOW);
+  wakeRadio();
   digitalWrite(LED_MODE_STAT, HIGH);
 
   /* delay and signal before running */
@@ -195,10 +200,10 @@ void loop(void) {
       temp_data = BUFFER.remove_front();
       interrupts();
 
-      // write_console(temp_data);
+      write_console(temp_data);
 
       /* DATA TRANSFER */
-      __error = log_payload(temp_data);
+      // __error = log_payload(temp_data);
 
     }
   } else {
@@ -208,9 +213,9 @@ void loop(void) {
 }
 
 void transfer_mode(void){
+  // turn off the device
   delay(TRANSFER_POLL_TIME);
-  if(__enable_sampling) { return; }
-  if(__current_state == OFFLINE){
+  if(__current_state == OFFLINE && !__enable_sampling){
     /* check for connection */
     State temp = __current_state;
     __current_state = (XBEE_SELECT && isAnyoneThere())? ONLINE: OFFLINE;
@@ -219,7 +224,7 @@ void transfer_mode(void){
       else { log("state: offline");}
     }
 
-  } else if(__current_state == ONLINE){
+  } else if(__current_state == ONLINE && !__enable_sampling){
     /* start sending data */
     if(__new_data){
       if (SERIAL_SELECT) {Serial.println("attempting data transfer...");}
@@ -283,6 +288,40 @@ bool imu_setup(bool trace){
   }
   return out;
 }
+
+/*
+ * @function:     sleepRadio
+ *
+ * @description:  Turn off the 802.15.4 radio
+ */
+void sleepRadio(void){
+  if(!__radio_sleeping){ digitalWrite(XBEE_SLEEP_PIN, HIGH); }
+}
+
+/*
+ * @function:     wakeRadio
+ *
+ * @description:  Turn on the 802.15.4 radio
+ */
+void wakeRadio(void){
+  if(__radio_sleeping){ digitalWrite(XBEE_SLEEP_PIN, LOW); }
+}
+
+/*
+  Set to sleep:
+  PWR_MGMNT_1
+  PWR_MGMNT_2
+*/
+void sleepIMU(void){
+
+}
+
+/*
+  Set to wake:
+  PWR_MGMNT_1
+  PWR_MGMNT_2
+*/
+void wakeIMU(void){}
 
 /*
  * @function:     btn_isr

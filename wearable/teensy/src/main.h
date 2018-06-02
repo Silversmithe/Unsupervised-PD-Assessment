@@ -80,4 +80,11 @@ bool imu_setup(bool trace);                // initialize all imus accordingly
 void sensor_isr(void);                     // called whenever the device samples
 void kill(void);                           // load the bootloader state
 
+/* SLEEP FUNCTIONALITY */
+inline void sleepRadio(void);
+inline void wakeRadio(void);
+void sleepIMU(void);
+void wakeIMU(void);
+
+
 #endif
