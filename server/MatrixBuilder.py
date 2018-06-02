@@ -46,29 +46,29 @@ def extract(filename, *argv):
         # load file
         indices = []  # all items to retrieve
 
-        print('class: {}'.format(arg[0]))
-        print('file path: {}'.format(yamlfile[arg[0]]['file_path']))
+        # print('class: {}'.format(arg[0]))
+        # print('file path: {}'.format(yamlfile[arg[0]]['file_path']))
 
         if len(arg) == 1:
             # select the entire range
-            print('range: {}'.format(yamlfile[arg[0]]['range']))
+            # print('range: {}'.format(yamlfile[arg[0]]['range']))
             indices = yamlfile[arg[0]]['range']
 
         if len(arg) == 2:
             # select the subclass range
-            print('subclass: {}'.format(arg[1]))
-            print('range: {}'.format(yamlfile[arg[0]][arg[1]]['range']))
+            # print('subclass: {}'.format(arg[1]))
+            # print('range: {}'.format(yamlfile[arg[0]][arg[1]]['range']))
             indices = yamlfile[arg[0]][arg[1]]['range']
 
         if len(arg) == 3:
             # select selector location
-            print('subclass: {}'.format(arg[1]))
-            print('selector: {}'.format(arg[2]))
-            print('location: {}'.format(yamlfile[arg[0]][arg[1]][arg[2]]))
+            # print('subclass: {}'.format(arg[1]))
+            # print('selector: {}'.format(arg[2]))
+            # print('location: {}'.format(yamlfile[arg[0]][arg[1]][arg[2]]))
             indices = yamlfile[arg[0]][arg[1]][arg[2]]
 
-        print()
-        print(indices)
+        # print()
+        # print(indices)
 
         # initializing result values
         if len(indices) == 1:
@@ -78,8 +78,8 @@ def extract(filename, *argv):
             # a range of values
             values = [[] for i in range(indices[0], indices[1])]
 
-        print(values)
-        print()
+        # print(values)
+        # print()
 
         #################
         # Enter in Data #
@@ -109,4 +109,5 @@ def extract(filename, *argv):
             datafile.close()
 
     # print(np.matrix(result))
-    return np.matrix(result)
+    # return np.matrix(result)
+    return result

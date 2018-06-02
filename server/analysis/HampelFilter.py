@@ -5,6 +5,7 @@ description...
 """
 import pandas as pd
 import numpy as np
+from MatrixBuilder import extract
 from math import *
 
 
@@ -20,17 +21,19 @@ class HampelFilter(object):
 
         emg rectified
         """
-        rawfile = open("{}/raw.txt".format(self.__filename), "r")
-        emg_rekt = []
+        # rawfile = open("{}/raw.txt".format(self.__filename), "r")
+        # emg_rekt = []
+        #
+        # # storing all emg rect values in list
+        # for row in rawfile:
+        #     emg_rekt.append(float(row.split(sep=' ')[1]))
 
-        # storing all emg rect values in list
-        for row in rawfile:
-            emg_rekt.append(float(row.split(sep=' ')[1]))
+        emg_rekt = extract(self.__filename, 'EC')
 
         # print("!!! BEFORE !!!")
         output = open("{}/hampel.txt".format(self.__filename), "w")
 
-        filtered = self.hampel(vals_orig=emg_rekt)
+        filtered = self.hampel(vals_orig=emg_rekt[0])
         # print("!!! AFTER !!!")
 
         for i in range(1, len(filtered)-1):

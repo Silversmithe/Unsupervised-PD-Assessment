@@ -9,7 +9,6 @@ import os
 # np.set_printoptions(threshold='nan')
 
 
-
 class Score(object):
 
     SAMPLING_PERIOD_1 = 33

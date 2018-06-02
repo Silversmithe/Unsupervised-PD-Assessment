@@ -54,17 +54,17 @@ class PipelineManager(Thread):
 
         print("processing: {}".format(self.__patient_path))
 
-        ###################
-        # Low Pass Filter #
-        ###################
-        print("calling low pass filter...")
-        self.__low_pass_filter.process()
-
-        ####################
-        # Band Pass Filter #
-        ####################
-        print("calling band pass filter...")
-        self.__band_pass_filter.process()
+        # ###################
+        # # Low Pass Filter #
+        # ###################
+        # print("calling low pass filter...")
+        # self.__low_pass_filter.process()
+        #
+        # ####################
+        # # Band Pass Filter #
+        # ####################
+        # print("calling band pass filter...")
+        # self.__band_pass_filter.process()
 
         ####################
         # Hampel Filter    #
@@ -72,21 +72,21 @@ class PipelineManager(Thread):
         print("calling hampel filter...")
         self.__hampel_filter.process()
 
-        ####################
-        # Gravity Filter   #
-        ####################
-        print("calling gravity filter...")
-        self.__gravity_filter.process()
-
-        ##################
-        # Scoring Filter #
-        ##################
-
-        print("calling score...")
-        self.__score.process()
-
-        ##################
-        # Report Output  #
-        ##################
-        print("reporting...")
-        self.__reporter.generate_report(self.__score.get_result())
+        # ####################
+        # # Gravity Filter   #
+        # ####################
+        # print("calling gravity filter...")
+        # self.__gravity_filter.process()
+        #
+        # ##################
+        # # Scoring Filter #
+        # ##################
+        #
+        # print("calling score...")
+        # self.__score.process()
+        #
+        # ##################
+        # # Report Output  #
+        # ##################
+        # print("reporting...")
+        # self.__reporter.generate_report(self.__score.get_result())

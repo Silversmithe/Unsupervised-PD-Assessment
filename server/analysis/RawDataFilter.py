@@ -41,6 +41,7 @@ class RawDataFilter(object):
         # process command
         if _command == self.PAYLOAD_MSG:
             result = list()
+
             # process the payload
             # 1. extract all information
             # 2. calculate quaternion coordinates and roll, pitch, and yaw --> add to payload

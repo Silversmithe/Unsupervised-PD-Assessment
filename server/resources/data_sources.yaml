@@ -1,17 +1,17 @@
 # data data organization
 
-##################
-# EMG UNFILTERED #
-##################
+#######
+# EMG #
+#######
 E:
     file_path: 'raw.txt'
     range:  [0, 2]
     W:      { range: [0] }              # RAW
     C:      { range: [1] }              # RECT
 
-###################
-# HAND UNFILTERED #
-###################
+########
+# HAND #
+########
 H:
     file_path: 'raw.txt'
     range:  [2, 11]
@@ -19,9 +19,9 @@ H:
     G: { range: [5, 8], x: [5], y: [6], z: [7]}   # GYROSCOPE
     M: { range: [8, 11], x: [8], y: [9], z: [10]}   # MAGNETOMETER
 
-####################
-# THUMB UNFILTERED #
-####################
+#########
+# THUMB #
+#########
 T:
     file_path: 'raw.txt'
     range:  [11, 20]
@@ -29,9 +29,9 @@ T:
     G: { range: [14, 17], x: [14], y: [15], z: [16]}   # GYROSCOPE
     M: { range: [17, 20], x: [17], y: [18], z: [19]}   # MAGNETOMETER
 
-####################
-# POINT UNFILTERED #
-####################
+#########
+# POINT #
+#########
 P:
     file_path: 'raw.txt'
     range:  [20, 29]
@@ -39,12 +39,49 @@ P:
     G: { range: [22, 25], x: [22], y: [23], z: [24]}   # GYROSCOPE
     M: { range: [25, 28], x: [25], y: [26], z: [27]}   # MAGNETOMETER
 
-###################
-# RING UNFILTERED #
-###################
+########
+# RING #
+########
 R:
     file_path: 'raw.txt'
-    range:  [29, 39]
+    range:  [29, 38]
     A: { range: [29, 32], x: [29], y: [30], z: [31]}   # ACCELERATION
     G: { range: [32, 35], x: [32], y: [33], z: [34]}   # GYROSCOPE
     M: { range: [35, 38], x: [35], y: [36], z: [37]}   # MAGNETOMETER
+
+
+##############
+# QUATERNION #
+##############
+Q:
+    file_path: 'raw.txt'
+    range: [39, 55]
+    H: { range: [39, 43], w: [39], x: [40], y: [41], z: [42]}  # HAND
+    T: { range: [43, 47], w: [43], x: [44], y: [45], z: [46]}  # THUMB
+    P: { range: [47, 51], w: [47], x: [48], y: [49], z: [50]}  # POINTER
+    R: { range: [51, 55], w: [51], x: [52], y: [53], z: [54]}  # RING
+
+
+##################
+# LOWPASS FILTER #
+##################
+L:
+    file_path: 'lowpass.txt'
+
+###################
+# BANDPASS FILTER #
+###################
+B:
+    file_path: 'bandpass.txt'
+
+#################
+# HAMPEL FILTER #
+#################
+M:
+    file_path: 'hampel.txt'
+
+##################
+# GRAVITY FILTER #
+##################
+G:
+    file_path: 'gravity.txt'
