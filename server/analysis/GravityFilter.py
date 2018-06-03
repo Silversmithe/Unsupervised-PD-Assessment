@@ -120,10 +120,11 @@ class GravityFilter(object):
         # print("{} {} {}".format(q[1], q[2], q[3]))
         total = (pow(q[0, 1], 2.0) + pow(q[0, 2], 2.0) + pow(q[0, 3], 2.0))
 
-        if total == 0:
-            s = 0
-        else:
-            s = 1.0/total
+        # if total == 0:
+        #     s = 0
+        # else:
+        #     s = 1.0/total
+        s = 1
 
         r = [
                 [1 - 2 * s * (pow(q[0, 2], 2.0) + pow(q[0, 3], 2.0)), 2 * s * (q[0, 1] * q[0, 2] - q[0, 3] * q[0, 0]), 2 * s * (q[0, 1] * q[0, 3] + q[0, 2] * q[0, 0])],
