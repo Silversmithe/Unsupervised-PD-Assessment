@@ -37,12 +37,10 @@ bool __enabled[4] = {
 };
 
 EMG forearm(EMG_RECT_PIN, EMG_RAW_PIN);
-MPU9250 __imus[4] = {
-  MPU9250(Wire, IMU_ADDR_HI),   // hand
-  MPU9250(Wire, IMU_ADDR_LO),   // ring
-  MPU9250(Wire1, IMU_ADDR_LO),   // pointer finger
-  MPU9250(Wire1, IMU_ADDR_HI)   // thumb
-};
+MPU9250 Hand(Wire, MPU9250_AD1);
+MPU9250 Ring(Wire, MPU9250_AD0);
+MPU9250 Point(Wire1, MPU9250_AD0);
+MPU9250 Thumb(Wire1, MPU9250_AD1);
 
 /*
  * @function:     setup
