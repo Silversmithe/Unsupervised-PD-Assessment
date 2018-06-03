@@ -5,6 +5,14 @@
 //====== and temperature data
 //==============================================================================
 
+MPU9250::MPU9250(TwoWire &bus, uint8_t address){
+  _i2c = &bus;
+  _i2c->begin();
+  _i2c->setClock(_i2cRate);
+
+  _address = address;
+}
+
 void MPU9250::getMres() {
   switch (Mscale)
   {
@@ -145,13 +153,8 @@ void MPU9250::initAK8963(float * destination)
   delay(10);
 }
 
-void MPU9250::initMPU9250(TwoWire &bus,uint8_t address)
+void MPU9250::initMPU9250()
 {
-  _i2c = &bus;
-  _i2c->begin();
-  _i2c->setClock(_i2cRate);
-
-  _address = address;
  // wake up device
   writeByte(_address, PWR_MGMT_1, 0x00); // Clear sleep mode bit (6), enable all sensors
   delay(100); // Wait for all registers to reset

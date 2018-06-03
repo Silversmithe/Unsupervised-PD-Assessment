@@ -242,6 +242,7 @@ class MPU9250
     int16_t accelCount[3];
 
   public:
+    MPU9250(TwoWire &bus, uint8_t address);
     void getMres();
     void getGres();
     void getAres();
@@ -251,7 +252,7 @@ class MPU9250
     int16_t readTempData();
     void updateTime();
     void initAK8963(float *);
-    void initMPU9250(TwoWire &bus,uint8_t address);
+    void initMPU9250();
     void calibrateMPU9250(float * gyroBias, float * accelBias);
     void MPU9250SelfTest(float * destination);
     void writeByte(uint8_t, uint8_t, uint8_t);
