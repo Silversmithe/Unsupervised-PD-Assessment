@@ -74,6 +74,7 @@ void setup(void) {
 
   digitalWrite(XBEE_SLEEP_PIN, LOW); // set radio low
   __radio_sleeping = false;
+  __imu_sleeping = false;            // imus on
 
   hardware_success = init_com(false) && hardware_success;
   hardware_success = imu_setup(true) && hardware_success;
@@ -311,17 +312,33 @@ void wakeRadio(void){
   Set to sleep:
   PWR_MGMNT_1
   PWR_MGMNT_2
+
+  gyro: off
+  acel: off
+  mag: off
+  dmp: off
 */
 void sleepIMU(void){
+  if(!__imu_sleeping) {
+    // turn imus off
 
+    __imu_sleeping = true;
+  }
 }
 
 /*
   Set to wake:
-  PWR_MGMNT_1
   PWR_MGMNT_2
 */
-void wakeIMU(void){}
+void wakeIMU(void){
+  if(__imu_sleeping) {
+    // turn imus on
+    // for(unsigned i=0; i<4; i++){
+    //   __imus[i].writeRegister(PWR_MGMNT_2, );
+    // }
+    __imu_sleeping = false;
+  }
+}
 
 /*
  * @function:     btn_isr
