@@ -54,7 +54,7 @@ const int WEAR_ADDR = 0xFE31; // 0xFE31
 #define TRANSFER_POLL_TIME 5000    // time between each check
 
 /* COMMUNICATION CONSTANTS */
-const bool SERIAL_SELECT = false;       // Serial communication toggle
+const bool SERIAL_SELECT = true;       // Serial communication toggle
 const bool XBEE_SELECT = true;         // Xbee (Radio) communication toggle
 
 /* PINS */

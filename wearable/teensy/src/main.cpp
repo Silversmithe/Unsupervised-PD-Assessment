@@ -29,11 +29,20 @@ volatile bool __radio_sleeping;         // is the radio asleep?
 volatile bool __imu_sleeping;           // are the imus sleeping
 
 /* DEVICE INITIALIZATION */
+bool __enabled[4] = {
+  HAND_SELECT,
+  RING_SELECT,
+  POINT_SELECT,
+  THUMB_SELECT
+};
+
 EMG forearm(EMG_RECT_PIN, EMG_RAW_PIN);
-MPU9250 Hand(Wire, MPU9250_AD1);
-MPU9250 Ring(Wire, MPU9250_AD0);
-MPU9250 Point(Wire1, MPU9250_AD0);
-MPU9250 Thumb(Wire1, MPU9250_AD1);
+MPU9250 __imus[4] = {
+  MPU9250(Wire, IMU_ADDR_HI),   // hand
+  MPU9250(Wire, IMU_ADDR_LO),   // ring
+  MPU9250(Wire1, IMU_ADDR_LO),   // pointer finger
+  MPU9250(Wire1, IMU_ADDR_HI)   // thumb
+};
 
 /*
  * @function:     setup
@@ -67,7 +76,7 @@ void setup(void) {
   __radio_sleeping = false;
 
   hardware_success = init_com(false) && hardware_success;
-  hardware_success = imu_setup(false) && hardware_success;
+  hardware_success = imu_setup(true) && hardware_success;
   if(!hardware_success){
     __current_state = KILL;
     __error = IMU_ERROR;
@@ -257,31 +266,27 @@ void kill(void){
  *                Returns true if the initialization was 100% successful.
  */
 bool imu_setup(bool trace){
-  if(HAND_SELECT){
-    Hand.MPU9250SelfTest(Hand.SelfTest);
-    Hand.calibrateMPU9250(Hand.gyroBias, Hand.accelBias);
-    Hand.initAK8963(Hand.magCalibration);
-  }
+  int status[4];
+  bool out = true;
+  if(trace && !SERIAL_SELECT) { return false; }
 
-  if(THUMB_SELECT){
-    Thumb.MPU9250SelfTest(Thumb.SelfTest);
-    Thumb.calibrateMPU9250(Thumb.gyroBias, Thumb.accelBias);
-    Thumb.initAK8963(Thumb.magCalibration);
-  }
+  for(int i=0; i<4; i++){
+    if(__enabled[i]){
+      status[i] =  __imus[i].begin();
+      /* initializing components */
+      __imus[i].setAccelRange(MPU9250::ACCEL_RANGE_4G);
 
-  if(POINT_SELECT){
-    Point.MPU9250SelfTest(Point.SelfTest);
-    Point.calibrateMPU9250(Point.gyroBias, Point.accelBias);
-    Point.initAK8963(Point.magCalibration);
+      out = out && !(status[i] < 0);
+      if(trace && (status[i] < 0)){
+        log("imu hardware error!");
+        log("id: ");
+        log(String(i).c_str());
+        log("code: ");
+        log(String(status[i]).c_str());
+      }
+    }
   }
-
-  if(RING_SELECT){
-    Ring.MPU9250SelfTest(Ring.SelfTest);
-    Ring.calibrateMPU9250(Ring.gyroBias, Ring.accelBias);
-    Ring.initAK8963(Ring.magCalibration);
-  }
-
-  return true;
+  return out;
 }
 
 /*
@@ -391,231 +396,67 @@ void sensor_isr(void){
   }
 
   if(HAND_SELECT){
-    Hand.readAccelData(Hand.accelCount);  // Read the x/y/z adc values
-    Hand.getAres();
-    Hand.readAccelData(Hand.accelCount);  // Read the x/y/z adc values
-
-    Hand.getAres();
-
-    // Now we'll calculate the accleration value into actual g's
-    // This depends on scale being set
-    Hand.ax = (float)Hand.accelCount[0]*Hand.aRes; // - accelBias[0];
-    Hand.ay = (float)Hand.accelCount[1]*Hand.aRes; // - accelBias[1];
-    Hand.az = (float)Hand.accelCount[2]*Hand.aRes; // - accelBias[2];
-
-    Hand.readGyroData(Hand.gyroCount);  // Read the x/y/z adc values
-    Hand.getGres();
-
-    // Calculate the gyro value into actual degrees per second
-    // This depends on scale being set
-    Hand.gx = (float)Hand.gyroCount[0]*Hand.gRes;
-    Hand.gy = (float)Hand.gyroCount[1]*Hand.gRes;
-    Hand.gz = (float)Hand.gyroCount[2]*Hand.gRes;
-
-    Hand.readMagData(Hand.magCount);  // Read the x/y/z adc values
-    Hand.getMres();
-    // User environmental x-axis correction in milliGauss, should be
-    // automatically calculated
-    Hand.magbias[0] = +470.;
-    // User environmental x-axis correction in milliGauss TODO axis??
-    Hand.magbias[1] = +120.;
-    // User environmental x-axis correction in milliGauss
-    Hand.magbias[2] = +125.;
-
-    // Calculate the magnetometer values in milliGauss
-    // Include factory calibration per data sheet and user environmental
-    // corrections
-    // Get actual magnetometer value, this depends on scale being set
-    Hand.mx = (float)Hand.magCount[0]*Hand.mRes*Hand.magCalibration[0] -
-               Hand.magbias[0];
-    Hand.my = (float)Hand.magCount[1]*Hand.mRes*Hand.magCalibration[1] -
-               Hand.magbias[1];
-    Hand.mz = (float)Hand.magCount[2]*Hand.mRes*Hand.magCalibration[2] -
-    Hand.magbias[2];
-
+    __imus[0].readSensor();
     // accel
-    packet.hand[0] = Hand.ax;
-    packet.hand[1] = Hand.ay; // getAccelX_mss
-    packet.hand[2] = Hand.az;
+    packet.hand[0] = __imus[0].getAccelX_mss();
+    packet.hand[1] = __imus[0].getAccelY_mss(); // getAccelX_mss
+    packet.hand[2] = __imus[0].getAccelZ_mss();
     // gyro
-    packet.hand[3] = Hand.gx;
-    packet.hand[4] = Hand.gy; // getGyroX_rads
-    packet.hand[5] = Hand.gz;
+    packet.hand[3] = __imus[0].getGyroX_rads();
+    packet.hand[4] = __imus[0].getGyroY_rads(); // getGyroX_rads
+    packet.hand[5] = __imus[0].getGyroZ_rads();
     // mag
-    packet.hand[6] = Hand.mx;
-    packet.hand[7] = Hand.my; // getMagX_uT
-    packet.hand[8] = Hand.mz;
+    packet.hand[6] = __imus[0].getMagX_uT();
+    packet.hand[7] = __imus[0].getMagY_uT(); // getMagX_uT
+    packet.hand[8] = __imus[0].getMagZ_uT();
   }
 
   if(THUMB_SELECT){
-    Thumb.readAccelData(Thumb.accelCount);  // Read the x/y/z adc values
-    Thumb.getAres();
-    Thumb.readAccelData(Thumb.accelCount);  // Read the x/y/z adc values
-
-    Thumb.getAres();
-
-    // Now we'll calculate the accleration value into actual g's
-    // This depends on scale being set
-    Thumb.ax = (float)Thumb.accelCount[0]*Thumb.aRes; // - accelBias[0];
-    Thumb.ay = (float)Thumb.accelCount[1]*Thumb.aRes; // - accelBias[1];
-    Thumb.az = (float)Thumb.accelCount[2]*Thumb.aRes; // - accelBias[2];
-
-    Thumb.readGyroData(Thumb.gyroCount);  // Read the x/y/z adc values
-    Thumb.getGres();
-
-    // Calculate the gyro value into actual degrees per second
-    // This depends on scale being set
-    Thumb.gx = (float)Thumb.gyroCount[0]*Thumb.gRes;
-    Thumb.gy = (float)Thumb.gyroCount[1]*Thumb.gRes;
-    Thumb.gz = (float)Thumb.gyroCount[2]*Thumb.gRes;
-
-    Thumb.readMagData(Thumb.magCount);  // Read the x/y/z adc values
-    Thumb.getMres();
-    // User environmental x-axis correction in milliGauss, should be
-    // automatically calculated
-    Thumb.magbias[0] = +470.;
-    // User environmental x-axis correction in milliGauss TODO axis??
-    Thumb.magbias[1] = +120.;
-    // User environmental x-axis correction in milliGauss
-    Thumb.magbias[2] = +125.;
-
-    // Calculate the magnetometer values in milliGauss
-    // Include factory calibration per data sheet and user environmental
-    // corrections
-    // Get actual magnetometer value, this depends on scale being set
-    Thumb.mx = (float)Thumb.magCount[0]*Thumb.mRes*Thumb.magCalibration[0] -
-               Thumb.magbias[0];
-    Thumb.my = (float)Thumb.magCount[1]*Thumb.mRes*Thumb.magCalibration[1] -
-               Thumb.magbias[1];
-    Thumb.mz = (float)Thumb.magCount[2]*Thumb.mRes*Thumb.magCalibration[2] -
-    Thumb.magbias[2];
-
+    __imus[3].readSensor();
     // accel
-    packet.thumb[0] = Thumb.ax;
-    packet.thumb[1] = Thumb.ay; // getAccelX_mss
-    packet.thumb[2] = Thumb.az;
+    packet.thumb[0] = __imus[3].getAccelX_mss();
+    packet.thumb[1] = __imus[3].getAccelY_mss(); // getAccelX_mss
+    packet.thumb[2] = __imus[3].getAccelZ_mss();
     // gyro
-    packet.thumb[3] = Thumb.gx;
-    packet.thumb[4] = Thumb.gy; // getGyroX_rads
-    packet.thumb[5] = Thumb.gz;
+    packet.thumb[3] = __imus[3].getGyroX_rads();
+    packet.thumb[4] = __imus[3].getGyroY_rads(); // getGyroX_rads
+    packet.thumb[5] = __imus[3].getGyroZ_rads();
     // mag
-    packet.thumb[6] = Thumb.mx;
-    packet.thumb[7] = Thumb.my; // getMagX_uT
-    packet.thumb[8] = Thumb.mz;
+    packet.thumb[6] = __imus[3].getMagX_uT();
+    packet.thumb[7] = __imus[3].getMagY_uT(); // getMagX_uT
+    packet.thumb[8] = __imus[3].getMagZ_uT();
   }
 
   if(POINT_SELECT){
-    Point.readAccelData(Point.accelCount);  // Read the x/y/z adc values
-    Point.getAres();
-    Point.readAccelData(Point.accelCount);  // Read the x/y/z adc values
-
-    Point.getAres();
-
-    // Now we'll calculate the accleration value into actual g's
-    // This depends on scale being set
-    Point.ax = (float)Point.accelCount[0]*Point.aRes; // - accelBias[0];
-    Point.ay = (float)Point.accelCount[1]*Point.aRes; // - accelBias[1];
-    Point.az = (float)Point.accelCount[2]*Point.aRes; // - accelBias[2];
-
-    Point.readGyroData(Point.gyroCount);  // Read the x/y/z adc values
-    Point.getGres();
-
-    // Calculate the gyro value into actual degrees per second
-    // This depends on scale being set
-    Point.gx = (float)Point.gyroCount[0]*Point.gRes;
-    Point.gy = (float)Point.gyroCount[1]*Point.gRes;
-    Point.gz = (float)Point.gyroCount[2]*Point.gRes;
-
-    Point.readMagData(Point.magCount);  // Read the x/y/z adc values
-    Point.getMres();
-    // User environmental x-axis correction in milliGauss, should be
-    // automatically calculated
-    Point.magbias[0] = +470.;
-    // User environmental x-axis correction in milliGauss TODO axis??
-    Point.magbias[1] = +120.;
-    // User environmental x-axis correction in milliGauss
-    Point.magbias[2] = +125.;
-
-    // Calculate the magnetometer values in milliGauss
-    // Include factory calibration per data sheet and user environmental
-    // corrections
-    // Get actual magnetometer value, this depends on scale being set
-    Point.mx = (float)Point.magCount[0]*Point.mRes*Point.magCalibration[0] -
-               Point.magbias[0];
-    Point.my = (float)Point.magCount[1]*Point.mRes*Point.magCalibration[1] -
-               Point.magbias[1];
-    Point.mz = (float)Point.magCount[2]*Point.mRes*Point.magCalibration[2] -
-    Point.magbias[2];
-
+    __imus[2].readSensor();
     // accel
-    packet.point[0] = Point.ax;
-    packet.point[1] = Point.ay; // getAccelX_mss
-    packet.point[2] = Point.az;
+    packet.point[0] = __imus[2].getAccelX_mss();
+    packet.point[1] = __imus[2].getAccelY_mss(); // getAccelX_mss
+    packet.point[2] = __imus[2].getAccelZ_mss();
     // gyro
-    packet.point[3] = Point.gx;
-    packet.point[4] = Point.gy; // getGyroX_rads
-    packet.point[5] = Point.gz;
+    packet.point[3] = __imus[2].getGyroX_rads();
+    packet.point[4] = __imus[2].getGyroY_rads(); //getGyroX_rads
+    packet.point[5] = __imus[2].getGyroZ_rads();
     // mag
-    packet.point[6] = Point.mx;
-    packet.point[7] = Point.my; // getMagX_uT
-    packet.point[8] = Point.mz;
+    packet.point[6] = __imus[2].getMagX_uT();
+    packet.point[7] = __imus[2].getMagY_uT(); // getMagX_uT
+    packet.point[8] = __imus[2].getMagZ_uT();
   }
 
   if(RING_SELECT){
-    Ring.readAccelData(Ring.accelCount);  // Read the x/y/z adc values
-    Ring.getAres();
-    Ring.readAccelData(Ring.accelCount);  // Read the x/y/z adc values
-
-    Ring.getAres();
-
-    // Now we'll calculate the accleration value into actual g's
-    // This depends on scale being set
-    Ring.ax = (float)Ring.accelCount[0]*Ring.aRes; // - accelBias[0];
-    Ring.ay = (float)Ring.accelCount[1]*Ring.aRes; // - accelBias[1];
-    Ring.az = (float)Ring.accelCount[2]*Ring.aRes; // - accelBias[2];
-
-    Ring.readGyroData(Ring.gyroCount);  // Read the x/y/z adc values
-    Ring.getGres();
-
-    // Calculate the gyro value into actual degrees per second
-    // This depends on scale being set
-    Ring.gx = (float)Ring.gyroCount[0]*Ring.gRes;
-    Ring.gy = (float)Ring.gyroCount[1]*Ring.gRes;
-    Ring.gz = (float)Ring.gyroCount[2]*Ring.gRes;
-
-    Ring.readMagData(Ring.magCount);  // Read the x/y/z adc values
-    Ring.getMres();
-    // User environmental x-axis correction in milliGauss, should be
-    // automatically calculated
-    Ring.magbias[0] = +470.;
-    // User environmental x-axis correction in milliGauss TODO axis??
-    Ring.magbias[1] = +120.;
-    // User environmental x-axis correction in milliGauss
-    Ring.magbias[2] = +125.;
-
-    // Calculate the magnetometer values in milliGauss
-    // Include factory calibration per data sheet and user environmental
-    // corrections
-    // Get actual magnetometer value, this depends on scale being set
-    Ring.mx = (float)Ring.magCount[0]*Ring.mRes*Ring.magCalibration[0] -
-               Ring.magbias[0];
-    Ring.my = (float)Ring.magCount[1]*Ring.mRes*Ring.magCalibration[1] -
-               Ring.magbias[1];
-    Ring.mz = (float)Ring.magCount[2]*Ring.mRes*Ring.magCalibration[2] -
-    Ring.magbias[2];
-
+    __imus[1].readSensor();
     // accel
-    packet.ring[0] = Ring.ax;
-    packet.ring[1] = Ring.ay; // getAccelX_mss
-    packet.ring[2] = Ring.az;
+    packet.ring[0] = __imus[1].getAccelX_mss();
+    packet.ring[1] = __imus[1].getAccelY_mss(); // getAccelX_mss
+    packet.ring[2] = __imus[1].getAccelZ_mss();
     // gyro
-    packet.ring[3] = Ring.gx;
-    packet.ring[4] = Ring.gy; // getGyroX_rads
-    packet.ring[5] = Ring.gz;
+    packet.ring[3] = __imus[1].getGyroX_rads();
+    packet.ring[4] = __imus[1].getGyroY_rads(); //getGyroX_rads
+    packet.ring[5] = __imus[1].getGyroZ_rads();
     // mag
-    packet.ring[6] = Ring.mx;
-    packet.ring[7] = Ring.my; // getMagX_uT
-    packet.ring[8] = Ring.mz;
+    packet.ring[6] = __imus[1].getMagX_uT();
+    packet.ring[7] = __imus[1].getMagY_uT(); // getMagX_uT
+    packet.ring[8] = __imus[1].getMagZ_uT();
   }
 
   if(!BUFFER.push_back(packet)){ __isr_buffer_overflow = true; }
