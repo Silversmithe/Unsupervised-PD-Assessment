@@ -5,6 +5,7 @@ Our goal is to create a device that will utilize patient’s daily actions inste
 * https://github.com/sparkfun/MPU-9250_Breakout
 * https://github.com/bolderflight/MPU9250
 * https://github.com/andrewrapp/xbee-arduino
+* https://github.com/duff2013/Snooze
 * https://github.com/digidotcom/python-xbee
 * https://github.com/PaulStoffregen/SD
 * https://github.com/mstamy2/PyPDF2
