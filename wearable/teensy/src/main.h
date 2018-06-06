@@ -65,6 +65,9 @@ const unsigned EMG_RAW_PIN = 9;     // A9 analog pin for emg sampling
 const unsigned EMG_RECT_PIN = 8;    // A8 analog pin for emg rectified sampling
 const unsigned XBEE_SLEEP_PIN = 2;  // digital pin to sleep/wake radio
 
+/* VARIABLES */
+const unsigned UC_SLEEP_TIME = 10000;  // 10 seconds sleep cycle
+
 /* FSM STATES */
 enum State {
   INIT,
@@ -83,8 +86,8 @@ void kill(void);                           // load the bootloader state
 /* SLEEP FUNCTIONALITY */
 inline void sleepRadio(void);
 inline void wakeRadio(void);
-void sleepIMU(void);
-void wakeIMU(void);
-
+int sleepIMUs(void);
+int wakeIMUs(void);
+int powerNap(void);
 
 #endif

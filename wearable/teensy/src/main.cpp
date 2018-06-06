@@ -9,15 +9,18 @@
   fingers to perform diagnostics of parkinson's disease.
   ----------------------------------------------------------------------------*/
 #include "main.h"
-#include <Arduino.h>              // Arduino Library
+#include "Arduino.h"              // Arduino Library
 #include "stdint.h"               // Integer Library
 #include "TimerOne.h"             // Timer Libaray
+#include "Snooze/Snooze.h"        // uC sleep library
 
 /* VARIABLES */
 static IOBuffer BUFFER(BUFFER_SIZE);
 static Data* temp_data;
 static uint32_t __file_pos, __prev_pos;        // position of the data file
 static bool __new_data;
+SnoozeTimer alarmClock;                        // timer for sleeping
+SnoozeBlock config(alarmClock);                // library to wake up
 
 /* STATE */
 volatile bool __sampling_mode;          // sampling (true), transferring (false)
@@ -119,6 +122,9 @@ void setup(void) {
   /* declare start of device and current mode */
   log("starting device...");
   log("starting in transfer mode");
+
+  /* INITIALIZE TIMER FOR LOW POWER */
+  alarmClock.setTimer(UC_SLEEP_TIME);
 
   /* INITIALIZE BUTTON INTERRUPT */
   attachInterrupt(BTN_MODE, btn_isr, CHANGE);
@@ -308,36 +314,30 @@ void wakeRadio(void){
   if(__radio_sleeping){ digitalWrite(XBEE_SLEEP_PIN, LOW); }
 }
 
-/*
-  Set to sleep:
-  PWR_MGMNT_1
-  PWR_MGMNT_2
-
-  gyro: off
-  acel: off
-  mag: off
-  dmp: off
-*/
-void sleepIMU(void){
+int sleepIMUs(void){
   if(!__imu_sleeping) {
-    // turn imus off
+    for(unsigned i=0; i<4; i++)
+      if(__imus[i].sleep() < 0){ return -1 * i; }
 
     __imu_sleeping = true;
   }
+  return 0;
 }
 
-/*
-  Set to wake:
-  PWR_MGMNT_2
-*/
-void wakeIMU(void){
+int wakeIMUs(void){
   if(__imu_sleeping) {
-    // turn imus on
-    // for(unsigned i=0; i<4; i++){
-    //   __imus[i].writeRegister(PWR_MGMNT_2, );
-    // }
+    for(unsigned i=0; i<4; i++)
+      if(__imus[i].wake() < 0){ return -1 * i; }
+
     __imu_sleeping = false;
   }
+  return 0;
+}
+
+int powerNap(void){
+  /* pass out for a little bit before working more */
+  Snooze.deepSleep(config);
+  return 0;
 }
 
 /*
