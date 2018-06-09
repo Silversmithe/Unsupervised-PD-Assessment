@@ -66,7 +66,7 @@ const unsigned EMG_RECT_PIN = 8;    // A8 analog pin for emg rectified sampling
 const unsigned XBEE_SLEEP_PIN = 2;  // digital pin to sleep/wake radio
 
 /* VARIABLES */
-const unsigned UC_SLEEP_TIME = 10000;  // 10 seconds sleep cycle
+const unsigned UC_SLEEP_TIME = 60000;  // 1 minute sleep cycle
 
 /* FSM STATES */
 enum State {
