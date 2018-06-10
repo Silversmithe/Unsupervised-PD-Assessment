@@ -5,6 +5,7 @@ of
 import scipy as sp
 import numpy as np
 from analysis.MahonyFilter import *
+from MatrixBuilder import extract
 import os
 # np.set_printoptions(threshold='nan')
 
@@ -771,34 +772,38 @@ class Score(object):
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_1)):
-            if(float(dataset1[i][0]) > 0.999):
+            if float(dataset1[i][0]) > 0.999:
                 count = count + 1
-        if(count > max_count):
+
+        if count > max_count:
             frequency_choice = 1
             max_count = count
         count = 0
 
-
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_2)):
-            if(float(dataset2[i][0]) > 0.999):
+            if float(dataset2[i][0]) > 0.999:
                 count = count + 1
-        if(count > max_count):
+
+        if count > max_count:
             frequency_choice = 2
             max_count = count
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_3)):
-            if(float(dataset3[i][0]) > 0.99):
+            if float(dataset3[i][0]) > 0.99:
                 count = count + 1
-        if(count > max_count):
+
+        if count > max_count:
             frequency_choice = 3
             max_count = count
         count = 0
 
         for i in range(0, int(total_instances/self.SAMPLING_PERIOD_4)):
-            if(float(dataset4[i][0]) > 0.75):
+
+            if float(dataset4[i][0]) > 0.75:
                 count = count + 1
-        if(count > max_count):
+
+        if count > max_count:
             frequency_choice = 4
             max_count = count
         count = 0
@@ -1081,33 +1086,35 @@ class Score(object):
         # testing time: (slice)
         # 3*gravity, 1*hampel, 1*roll
 
-        # roll
-        text_file = open("{}/raw.txt".format(self.__filename), "r")
-        lines_raw = text_file.read().split("\n")
-        text_file.close()
-
-        # emg rekt
-        text_file = open("{}/hampel.txt".format(self.__filename), "r")
-        lines_hamp = text_file.read().split("\n")
-        text_file.close()
-
-        # real hand accel xyz
-        text_file = open("{}/gravity.txt".format(self.__filename), "r")
-        lines_grav = text_file.read().split("\n")
-        text_file.close()
-
-        # combo
-        mat = np.zeros((self.__num_instances, 5))
-        for rows in range(0, self.__num_instances):
-            raw = lines_raw[rows].split(sep=' ')
-            hamp = lines_hamp[rows].split(sep=' ')
-            # hand accel
-            mat[rows][0], mat[rows][1], mat[rows][2] = raw[2], raw[3], raw[4]
-            # emg rect
-            mat[rows][3] = hamp[0]
-            # roll
-            q = [float(raw[38]), float(raw[39]), float(raw[40]), float(raw[41])]
-            mat[rows][4] = q_to_roll(q)
+        # # roll
+        # text_file = open("{}/raw.txt".format(self.__filename), "r")
+        # lines_raw = text_file.read().split("\n")
+        # text_file.close()
+        #
+        # # emg rekt
+        # text_file = open("{}/hampel.txt".format(self.__filename), "r")
+        # lines_hamp = text_file.read().split("\n")
+        # text_file.close()
+        #
+        # # real hand accel xyz
+        # text_file = open("{}/gravity.txt".format(self.__filename), "r")
+        # lines_grav = text_file.read().split("\n")
+        # text_file.close()
+        #
+        # # combo
+        # mat = np.zeros((self.__num_instances, 5))
+        # for rows in range(0, self.__num_instances):
+        #     raw = lines_raw[rows].split(sep=' ')
+        #     hamp = lines_hamp[rows].split(sep=' ')
+        #     # hand accel
+        #     mat[rows][0], mat[rows][1], mat[rows][2] = raw[2], raw[3], raw[4]
+        #     # emg rect
+        #     mat[rows][3] = hamp[0]
+        #     # roll
+        #     q = [float(raw[38]), float(raw[39]), float(raw[40]), float(raw[41])]
+        #     mat[rows][4] = q_to_roll(q)
+        mat = extract(self.__filename, "GH", "MEk", "OHr")
+        mat = np.matrix(mat).transpose()
 
         fs = 100
         data_for_Postural_Ax = mat[:, 0] #67 Hand_Ax

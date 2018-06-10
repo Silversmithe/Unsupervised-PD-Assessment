@@ -6,6 +6,7 @@ thread called the pipeline manager, which guides the raw data through
 several filters and ultimately to the scoring stage, where the system
 will produce the UPDRS results
 """
+import time
 import os
 # import matplotlib.pyplot as plt
 from analysis.LowPassFilter import LowPassFilter
@@ -53,40 +54,43 @@ class PipelineManager(Thread):
             return
 
         print("processing: {}".format(self.__patient_path))
+        start = time.time()
 
         # ###################
         # # Low Pass Filter #
         # ###################
-        # print("calling low pass filter...")
-        # self.__low_pass_filter.process()
-        #
+        print("calling low pass filter...")
+        self.__low_pass_filter.process()
+
         # ####################
         # # Band Pass Filter #
         # ####################
-        # print("calling band pass filter...")
-        # self.__band_pass_filter.process()
+        print("calling band pass filter...")
+        self.__band_pass_filter.process()
 
         ####################
         # Hampel Filter    #
         ####################
-        # print("calling hampel filter...")
-        # self.__hampel_filter.process()
+        print("calling hampel filter...")
+        self.__hampel_filter.process()
 
         # ####################
         # # Gravity Filter   #
         # ####################
         print("calling gravity filter...")
         self.__gravity_filter.process()
-        #
-        # ##################
-        # # Scoring Filter #
-        # ##################
+
+        # # ##################
+        # # # Scoring Filter #
+        # # ##################
         #
         # print("calling score...")
         # self.__score.process()
         #
-        # ##################
-        # # Report Output  #
-        # ##################
+        # # ##################
+        # # # Report Output  #
+        # # ##################
         # print("reporting...")
         # self.__reporter.generate_report(self.__score.get_result())
+
+        print("Processing Time: {}".format(time.time() - start))

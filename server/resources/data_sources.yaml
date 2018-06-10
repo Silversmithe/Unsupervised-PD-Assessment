@@ -36,8 +36,8 @@ P:
     file_path: 'raw.txt'
     range:  [20, 29]
     A: { range: [20, 23], x: [20], y: [21], z: [22]}   # ACCELERATION
-    G: { range: [22, 25], x: [22], y: [23], z: [24]}   # GYROSCOPE
-    M: { range: [25, 28], x: [25], y: [26], z: [27]}   # MAGNETOMETER
+    G: { range: [22, 25], x: [23], y: [24], z: [25]}   # GYROSCOPE
+    M: { range: [25, 28], x: [26], y: [27], z: [28]}   # MAGNETOMETER
 
 ########
 # RING #
@@ -78,21 +78,46 @@ O:
 ##################
 L:
     file_path: 'lowpass.txt'
+    range: [0, 12]
+    # raw, rekt
+    E: { range: [0, 2], w: [0], k: [1]}
+    # HAxyz TAxyz PAxyz RAxyz
+    A: { range: [2, 14], a: [2], b:[3], c:[4], d:[5], e:[6], f:[7], g:[8], h:[9], i:[10], j:[11], k:[12], l:[13] }
+    # HRxyz TRxyz PRxyz RRxyz
+    G: { range: [14, 26], a:[14],b:[15], c:[16], d:[17], e:[18], f:[19], g:[20], h:[21], i:[22], j:[23], k:[24], l:[25] }
+    # QHwxyz QTwxyz QPwxyz QRwxyz
+    Q: { range: [26, 42], a:[26], b:[27], c:[28], d:[29], e:[30], f:[31], g:[32], h:[33], i:[34], j:[35], k:[36], l:[37], m:[38], n:[39], o:[40], p:[41] }
 
 ###################
 # BANDPASS FILTER #
 ###################
 B:
     file_path: 'bandpass.txt'
+    range: [0, 28]
+    # HAxyz TAxyz PAxyz RAxyz
+    A: { range: [0, 12], a:[0],b:[1],c:[2],d:[3],e:[4],f:[5],g:[6],h:[7],i:[8],j:[9],k:[10],l:[11]}
+    # HRxyz TRxyz PRxyz RRxyz
+    G: { range: [12, 24], a:[12],b:[13],c:[14],d:[15],e:[16],f:[17],g:[18],h:[19],i:[20],j:[21],k:[22],l:[23]}
+    # Rhtpr
+    R: { range: [24, 28], h: [24], t: [25], p: [26], r: [27]}
+
 
 #################
 # HAMPEL FILTER #
 #################
 M:
     file_path: 'hampel.txt'
+    range: [0, 1]
+    E: { range: [0, 1], k: [0]}
 
 ##################
 # GRAVITY FILTER #
 ##################
 G:
     file_path: 'gravity.txt'
+    range: [0, 12]
+    H: { range: [0, 3], x: [0], y: [1], z: [2]}  # HAND
+    T: { range: [3, 6], x: [3], y: [4], z: [5]}  # THUMB
+    P: { range: [6, 9], x: [6], y: [7], z: [8]}  # POINTER
+    R: { range: [9, 12], x: [9], y: [10], z: [11]}  # RING
+

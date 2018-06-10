@@ -39,19 +39,35 @@ class HampelFilter(object):
         for i in range(1, len(filtered)-1):
             count = 0
             total = 0
+            top_cutoff = False
 
+            # searching for nans
             if np.isnan(filtered[i]):
                 while np.isnan(filtered[i+count]):
                     count += 1
+                    if i + count >= len(filtered) - 1:
+                        top_cutoff = True
+                        break
 
+                # lower bounds of nans
                 for r in range(i-self.AVE_BOUND, i):
                     total += filtered[r]
-               
-                for r in range(i+count, i+count+self.AVE_BOUND):
-                    total += filtered[r]
+
+                if not top_cutoff:
+                    # upper bound of nans
+                    for r in range(i+count, i+count+self.AVE_BOUND):
+                        total += filtered[r]
                
                 for n in range(i, i+count):
-                    filtered[n] = total/(2.0 * self.AVE_BOUND)
+                    if not top_cutoff:
+                        filtered[n] = total/(2.0 * self.AVE_BOUND)
+
+                    else:
+                        filtered[n] = total / self.AVE_BOUND
+
+                if top_cutoff:
+                    filtered[len(filtered)-1] = filtered[n] = total / self.AVE_BOUND
+                    break
 
                 # maximum = max(filtered[i-self.AVE_BOUND: i].extend(filtered[i+count: i+count+self.AVE_BOUND]))
 
