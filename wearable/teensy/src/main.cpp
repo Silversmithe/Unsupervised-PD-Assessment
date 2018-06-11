@@ -80,7 +80,7 @@ void setup(void) {
   __imu_sleeping = false;            // imus on
 
   hardware_success = init_com(false) && hardware_success;
-  hardware_success = imu_setup(true) && hardware_success;
+  hardware_success = imu_setup(false) && hardware_success;
   if(!hardware_success){
     __current_state = KILL;
     __error = IMU_ERROR;
