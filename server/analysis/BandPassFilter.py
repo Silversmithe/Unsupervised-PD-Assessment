@@ -1,5 +1,8 @@
 """
-BAND PASS FILTER
+[CLASS] BAND PASS FILTER
+
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly, Senbao Lu
 
 This signal filter will take the raw data and run it all through
 a special band-pass filter.

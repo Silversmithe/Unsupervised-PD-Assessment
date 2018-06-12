@@ -1,23 +1,18 @@
 """
 MATRIX BUILDER
 
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly
+
 Builds matrices for all the filters that need to extract information from all the
 other different files.
 
 SYSTEM
-
 in function extract, you specify what values to extract.
 there is a code to specify what you want to extract
-
 the order that the values come specifies what order the values are in
-
 """
-import numpy as np
 from yaml import load
-
-
-reference = './resources/data_sources.yaml'
-
 
 """
 CLASS + SUBCLASS + ITEM
@@ -32,8 +27,11 @@ extract('data-1', 'HA', 'TGx', 'TGy', 'M')
 
 def extract(filename, *argv):
     """
-    :param filename:
-    :param argv:
+    :param filename: the name of the patient to extract data from
+    :param argv: strings that have requests for what data to collect.
+                 all different types of data available to collect are viewable in
+                 "server/resources/data_sources.yaml".
+                 Please look at the example above for how to use this function
     :return:
     """
     yamlfile = load(open('./resources/data_sources.yaml', 'r'))
@@ -108,6 +106,4 @@ def extract(filename, *argv):
         finally:
             datafile.close()
 
-    # print(np.matrix(result))
-    # return np.matrix(result)
     return result

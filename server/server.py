@@ -1,13 +1,13 @@
 #! /usr/bin/python
 
 """
-run_server.py
+[SERVER] Unsupervised Parkinson's Disease Assessment
 
-by Alexander Adranly, 2018
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly
 
-NOTE: use the arg parse library for command-line tools
+Server Related Classes
 """
-
 # !/bin/bash
 import os
 import sys
@@ -40,7 +40,7 @@ else:
     SD_DATA_PATH = "/media/iron-fist/UPDA-SD/DATA.txt"
 
 """
-WEARABLE DEVICE
+[CLASS] WEARABLE DEVICE
 
 Keeps track of general statistics and characteristics of the radio
 mounted on the wearable device in communication with this specific
@@ -80,7 +80,7 @@ MessageBuffer = list()
 BufferLock = Lock()
 
 """
-INSTANCE LOADER
+[CLASS] INSTANCE LOADER
 
 takes all the raw data over the radio and passes it through a filter
 Listens to an array that is populated by the XBee server and uses it to 
@@ -308,6 +308,7 @@ console system.
 
 def stats(tokens):
     """
+    Present stats on the previous server session
     :param tokens:
     :return:
     """
@@ -320,11 +321,13 @@ def stats(tokens):
 
 def start(tokens):
     """
+    Initialize a new 'process'
     start run_server
     start process
     start process data-1
-    :param tokens:
-    :return:
+
+    :param tokens: arguments to specify what is being started
+    :return: NA
     """
     if len(tokens) <= 1:
         print("no object specified...")
@@ -374,7 +377,7 @@ def start(tokens):
 
 def load(tokens):
     """
-    :param tokens:
+    :param tokens: arguments in the case of additional data
     :return:
     """
     print("downloading data information from sd...")

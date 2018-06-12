@@ -1,5 +1,8 @@
 """
-MAHONEY FILTER
+[CLASS] MAHONEY FILTER
+
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly
 
 A type of kallman filter that fuses acceleration, radians per second,
 microtesslas, and a time differential to estimate the position of

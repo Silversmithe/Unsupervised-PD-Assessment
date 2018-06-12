@@ -1,7 +1,10 @@
 """
-HAMPEL FILTER
+[CLASS] HAMPEL FILTER
 
-description...
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly, Senbao Lu
+
+
 """
 import pandas as pd
 import numpy as np

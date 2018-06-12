@@ -1,6 +1,9 @@
 """
 PIPELINE MANAGER
 
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly
+
 After the raw data has been produced by the server, the server starts a new
 thread called the pipeline manager, which guides the raw data through
 several filters and ultimately to the scoring stage, where the system
@@ -8,7 +11,6 @@ will produce the UPDRS results
 """
 import time
 import os
-# import matplotlib.pyplot as plt
 from analysis.LowPassFilter import LowPassFilter
 from analysis.BandPassFilter import BandPassFilter
 from analysis.HampelFilter import HampelFilter
@@ -16,6 +18,14 @@ from analysis.GravityFilter import GravityFilter
 from Reporter import Reporter
 from Score import Score
 from threading import Thread, Lock, ThreadError
+
+
+"""
+[CLASS] PipelineManager
+
+This derivation of the thread class is responsible for passing raw data from
+a patient profile through all of the different filters in the pipeline.
+"""
 
 
 class PipelineManager(Thread):
@@ -56,15 +66,15 @@ class PipelineManager(Thread):
         print("processing: {}".format(self.__patient_path))
         start = time.time()
 
-        # ###################
-        # # Low Pass Filter #
-        # ###################
+        ###################
+        # Low Pass Filter #
+        ###################
         print("calling low pass filter...")
         self.__low_pass_filter.process()
 
-        # ####################
-        # # Band Pass Filter #
-        # ####################
+        ####################
+        # Band Pass Filter #
+        ####################
         print("calling band pass filter...")
         self.__band_pass_filter.process()
 
@@ -74,23 +84,22 @@ class PipelineManager(Thread):
         print("calling hampel filter...")
         self.__hampel_filter.process()
 
-        # ####################
-        # # Gravity Filter   #
-        # ####################
+        ####################
+        # Gravity Filter   #
+        ####################
         print("calling gravity filter...")
         self.__gravity_filter.process()
 
-        # # ##################
-        # # # Scoring Filter #
-        # # ##################
-        #
-        # print("calling score...")
-        # self.__score.process()
-        #
-        # # ##################
-        # # # Report Output  #
-        # # ##################
-        # print("reporting...")
-        # self.__reporter.generate_report(self.__score.get_result())
+        ##################
+        # Scoring Filter #
+        ##################
+        print("calling score...")
+        self.__score.process()
+
+        ##################
+        # Report Output  #
+        ##################
+        print("reporting...")
+        self.__reporter.generate_report(self.__score.get_result())
 
         print("Processing Time: {}".format(time.time() - start))

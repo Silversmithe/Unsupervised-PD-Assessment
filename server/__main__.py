@@ -1,14 +1,21 @@
 #! /usr/bin/python
 
 """
-run_server.py
+[SERVER] Unsupervised Parkinson's Disease Assessment
 
-by Alexander Adranly, 2018
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly
 
-
-Building the tools for an effective command line interface
+Console class
 """
 from server import *
+
+
+"""
+[CLASS] Command
+
+Defines a new command a user can install into the console class
+"""
 
 
 class Command(object):
@@ -19,13 +26,32 @@ class Command(object):
         self.__action = action
 
     def name(self):
+        """
+        :return: (str) name of the command
+        """
         return self.__name
 
     def __call__(self, tokens):
+        """
+        :param tokens: (list) : arguments from user input that can be used to run the command
+        :return:
+        """
         self.__action(tokens)
 
     def __str__(self):
+        """
+        :return: (str) : string formatted description of what is shown in the "help" menu
+        """
         return self.__name + ('\t' * 3) + self.__help
+
+
+"""
+[CLASS] Console
+
+Defines a generic class for designing a basic console interface for the application.
+New command objects can be created and added to the console class to enable different
+types of features.
+"""
 
 
 class Console(object):
@@ -42,24 +68,33 @@ class Console(object):
         # control objects
         self.__run = True
 
-    """
-        SETTERS
-    """
-
     def set_prompt(self, prompt):
+        """
+        :param prompt: (str) : prompt to set
+        :return: NA
+        """
         self.__prompt = prompt
 
     def set_separator(self, sep):
+        """
+        :param sep: (str): seperator  to set
+        :return: NA
+        """
         self.__separator = sep
 
     def set_closer(self, close):
+        """
+        :param close: (str): set an exit message
+        :return: NA
+        """
+
         self.__closer = close
 
-    """
-        COMMANDS
-    """
-
     def add_command(self, command):
+        """
+        :param command: (Command) : command to be added to console
+        :return: NA
+        """
         if not type(command) is Command:
             print("invalid command to add")
             return
@@ -68,18 +103,30 @@ class Console(object):
             self.__commands[command.name()] = command
 
     def cmd_help(self, tokens):
+        """
+        Function for the help command
+        :param tokens: (list): arguments to pass to the command
+        :return:  NA
+        """
+
         print("usage: {}\n".format(self.__name))
         for cmd in self.__commands.items():
             print(cmd[1])
 
     def cmd_exit(self, tokens):
+        """
+        Signal the thread to terminate the console
+        Called upon the "exit" command
+        :param tokens: arguments
+        :return:
+        """
         self.__run = False
 
-    """
-        RUNNING SYSTEM
-    """
-
     def run(self):
+        """
+        Main loop that drives the console
+        :return:
+        """
         try:
             while self.__run:
                 tokens = input(self.__prompt).lower().split(sep=self.__separator)
@@ -101,7 +148,11 @@ class Console(object):
 
 
 def main():
-
+    """
+    The function that defines the console and starts the entire
+    software system on the server
+    :return:
+    """
     print('*' * 50)
     print("\n  .----.-----.-----.-----.\n",
           "/      \     \     \     \\\n",

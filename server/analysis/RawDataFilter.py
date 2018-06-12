@@ -1,4 +1,9 @@
 """
+[CLASS] RawDataFilter
+
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly
+
 Filters that process and use the
 packet data to produce and anlaysis
 """
@@ -100,6 +105,7 @@ class RawDataFilter(object):
             return self.PAYLOAD_MSG, _pid, result
 
         else:
+            # fragmentation error
             # some sort of weird error...
             print("error reading packet: {} - {}".format(_command, _pid))
             return self.CLOSE_MSG, None, None

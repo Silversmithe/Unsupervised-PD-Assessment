@@ -1,5 +1,8 @@
 """
-GRAVITY FILTER
+[CLASS] GRAVITY FILTER
+
+Date:       Tuesday June 12th, 2018
+Author:     Alexander Adranly, Senbao Lu
 
 A filter that can find the direction of gravity given the orientation of the hand. This
 direction can be used to discern when a data is resting their hand or they are

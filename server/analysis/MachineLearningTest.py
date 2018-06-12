@@ -1,9 +1,15 @@
 """
+[CLASS] MachineLearningTest
+
+Date:       Tuesday June 12th, 2018
+Author:     Yousef Zoumot
+
 Object responsible for generating test outputs
 by multiplying the new data matrix with our
 calculated column weights in our Machine Learning
 model
 """
+
 
 class MachineLearningTest(object):
 
@@ -17,7 +23,6 @@ class MachineLearningTest(object):
     def sigmoid(temp_in):
         return np.float64(1 / (1 + np.exp( - temp_in)))
 
-
     """
     By multiplying the new inputs with our calculated
     column weights, we generate a column of prediction
@@ -25,5 +30,3 @@ class MachineLearningTest(object):
     """
     def get_predictions(inputs, weights):
         return sigmoid(np.matmul(inputs, weights))
-
-    
