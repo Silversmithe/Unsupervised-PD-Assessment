@@ -44,7 +44,7 @@ extern const int WEAR_ADDR;
 
 /* radio information */
 #define PAYLOAD_SIZE 90  // max 100
-#define TX_STAT_WAIT 100
+#define TX_STAT_WAIT 1000
 
 /* communication protocol variables */
 /* should have a byte for identifying the message type */

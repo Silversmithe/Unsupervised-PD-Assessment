@@ -73,9 +73,8 @@ void setup(void) {
   pinMode(BTN_MODE, INPUT);
   pinMode(LED_MODE_STAT, OUTPUT);
   pinMode(XBEE_SLEEP_PIN, OUTPUT);
-  delay(1000);
 
-  digitalWrite(XBEE_SLEEP_PIN, LOW); // set radio low
+  digitalWrite(XBEE_SLEEP_PIN, LOW);
   __radio_sleeping = false;
   __imu_sleeping = false;            // imus on
 
@@ -94,23 +93,20 @@ void setup(void) {
   if(XBEE_SELECT){
     log("checking network status...");
     wakeRadio();
-    delay(100);
     network_success = isAnyoneThere();
     sleepRadio();
   }
 
+  /* decide if online or offline */
   __current_state = (network_success)? ONLINE : OFFLINE;
   if(__current_state == ONLINE){
     log("state: online");
-    /* FUTURE */
-    // try to send data stored on SD wirelessly before getting a new batch
+    wakeRadio();
   } else {
     log("state: offline");
-    // if a data file exists, send it up
   }
 
-  /* turn the radio off */
-  wakeRadio();
+  /* show device has booted successfully */
   digitalWrite(LED_MODE_STAT, HIGH);
 
   /* delay and signal before running */
@@ -125,7 +121,6 @@ void setup(void) {
 
   /* INITIALIZE TIMER FOR LOW POWER */
   alarmClock.setTimer(UC_SLEEP_TIME);
-
   /* INITIALIZE BUTTON INTERRUPT */
   attachInterrupt(BTN_MODE, btn_isr, CHANGE);
   /* INITIALIZE SENSOR INTERRUPT */
@@ -220,8 +215,10 @@ void loop(void) {
 }
 
 void transfer_mode(void){
-  // turn off the device
+  /* take some time to sleep before doing anything */
+  powerNap();
   delay(TRANSFER_POLL_TIME);
+
   if(__current_state == OFFLINE && !__enable_sampling){
     /* check for connection */
     State temp = __current_state;
@@ -246,6 +243,7 @@ void transfer_mode(void){
       }
     }
   }
+
 }
 
 /*
@@ -302,7 +300,10 @@ bool imu_setup(bool trace){
  * @description:  Turn off the 802.15.4 radio
  */
 void sleepRadio(void){
-  if(!__radio_sleeping){ digitalWrite(XBEE_SLEEP_PIN, HIGH); }
+  if(!__radio_sleeping){
+    digitalWrite(XBEE_SLEEP_PIN, HIGH);
+    __radio_sleeping = true;
+  }
 }
 
 /*
@@ -311,7 +312,10 @@ void sleepRadio(void){
  * @description:  Turn on the 802.15.4 radio
  */
 void wakeRadio(void){
-  if(__radio_sleeping){ digitalWrite(XBEE_SLEEP_PIN, LOW); }
+  if(__radio_sleeping){
+    digitalWrite(XBEE_SLEEP_PIN, LOW);
+    __radio_sleeping = false;
+  }
 }
 
 int sleepIMUs(void){
@@ -377,13 +381,14 @@ void btn_isr(void){
       __enable_sampling = true;
       // tell system there is more data
       digitalWrite(LED_MODE_STAT, LOW);
-      // open_datastream();
-      // Timer1.attachInterrupt(sensor_isr);
+      sleepRadio();
+      wakeIMUs();
 
     } else {
       log("switching to: transfer mode");
       digitalWrite(LED_MODE_STAT, HIGH);
-      // Timer1.detachInterrupt(); // already detached for me
+      wakeRadio();
+      sleepIMUs();
     }
   } else if(__sampling_mode){Timer1.attachInterrupt(sensor_isr); } // remove interrupt
   delay(1000); // just in case
