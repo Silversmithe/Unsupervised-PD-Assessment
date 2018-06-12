@@ -1,0 +1,52 @@
+-----------------------------------------------------------------------------
+DEVICE TEST
+
+Alexander S. Adranly
+
+April 7th, 2018
+
+This is a document stating all the different tests that are run on the device
+-----------------------------------------------------------------------------
+
+1.0 INITIALIZATION PROCEDURE
+
+- successful hw initialization
+  * imus
+  * emg
+  * Radio
+  * sd card
+- successful hw and network initialization !!!
+  * xbee-server communication
+- successful hw failure
+- successful network failure
+- log file created successfully
+- data file created successfully
+
+- transfer stored data at startup if available !!!
+
+2.0 OFFLINE SAMPLING (Currently testing)
+
+- successful sd data storage
+- successful serial output
+
+- correct data
+- does it meet sampling requirements
+
+- triggers correct error handling   !!! ?
+  * correct logging
+  * fatal error
+  * buffer overflow
+  * sd error
+
+  3.0 ONLINE SAMPLING
+
+  - successful radio transfer !!!
+  - successful acknowledgement from server !!!
+  - successful ack recieved !!!
+
+  - successful transition to offline on network error !!!
+
+  - triggers correct error handling !!!
+    * correct logging
+    * fatal error
+    * isolated device
