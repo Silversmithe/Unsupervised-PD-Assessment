@@ -1,5 +1,5 @@
- %% read raw data
-data=load("3_4_ftaps_0.txt");  % read the data
+%% read raw data
+data=load("c0_bottlelift_0.txt");  % read the data
 % INPUT FORMAT: 
 % dt EMG_raw EMG_rect Hand_Ax Hand_Ay Hand_Az Hand_Gx Hand_Gy Hand_Gz 
 % Thumb_Ax Thumb_Ay Thumb_Az Thumb_Gx Thumb_Gy Thumb_Gz
@@ -64,11 +64,11 @@ Ring_Gz=data(:,27);
 % subplot(3,1,3)
 % plot(true_time,Ring_Az)
 %% visualize sample data  
-sample_signal=Thumb_Az;    % Hand_Ax
+sample_signal=EMG_raw;    % EMG
 sample_signal=sample_signal-mean(sample_signal);   
 nsample_signal=sample_signal/max(abs(sample_signal));
 figure(1)
-plot(true_time,nsample_signal,'g')
+plot(true_time,nsample_signal)
 axis tight
 ylabel('sample signal')
 xlabel('Time in seconds')
@@ -81,53 +81,34 @@ plot(freq(1:data_length/2+1),mag(1:data_length/2+1),'-')
 grid
 ylabel('Magnitude')
 xlabel('Frequency in HZ')
-%% cut meaningful period
-meaningful_information=Thumb_Az(true_time>25&true_time<65,:);
-time=true_time(true_time>25&true_time<65,:);
-%% plot with time
-plot(time,meaningful_information,'g')
-xlabel('time');
 %% filter noise parameters
-cut_low=8;   % cut-off freqency for the low pass filter
+cut_low=8;   % lower limit for band pass filter
+cut_high=12;   % upper limit for band pass filter
 df=fs/data_length;
 freq=df/fs:df:fs;
 %% filter noise sample
-raw_signal=data(:,3);
+raw_signal=data(:,2);
 raw_signal_fft=fft(raw_signal);             
-raw_signal_fft(abs(freq)>cut_low)=0;
+raw_signal_fft(abs(freq)<cut_low)=0;
+raw_signal_fft(abs(freq)>cut_high)=0;
 filtered_signal=ifft(raw_signal_fft);
 figure(3)
-plot(true_time,raw_signal,'r',true_time,filtered_signal,'g')
+plot(true_time,filtered_signal,'g')
 % true_time,raw_signal,'r',
 %% filter noise
 data_filtered=zeros(data_length,channel_num-1);
 for i=2:channel_num
     raw_signal=data(:,i);
     raw_signal_fft=fft(raw_signal);             
-    raw_signal_fft(abs(freq)>cut_low)=0;
+    raw_signal_fft(abs(freq)<cut_low)=0;
+    raw_signal_fft(abs(freq)>cut_high)=0;
     filtered_signal=ifft(raw_signal_fft);
     data_filtered(:,i-1)=filtered_signal;
 end
-%% add time
-data_filtered_with_time=horzcat(true_time,data_filtered);
-%% plot filtered data for one senser
-figure
-subplot(3,1,1)
-plot(true_time,data_filtered(:,9),'g') %true_time,data(:,i+1),'r',
-subplot(3,1,2)
-plot(true_time,data_filtered(:,10),'g') %true_time,data(:,i+1),'r',
-subplot(3,1,3)
-plot(true_time,data_filtered(:,11),'g') %true_time,data(:,i+1),'r',
 %% plot filtered data
 for i=1:channel_num-1
     figure(i)
     plot(true_time,data_filtered(:,i),'g') %true_time,data(:,i+1),'r',
 end
-%% cut meaningful period
-data_filtered_real=real(data_filtered);
-meaningful_information=data_filtered_real(true_time>4&true_time<15.5,:);
-%% plot with time
-plot(meaningful_information(:,1),meaningful_information(:,4))
-xlabel('time');
 %% output data
-dlmwrite('3_4_ftaps_8hz.txt',meaningful_information,'delimiter','\t')
+dlmwrite('c0_bottlelift_0_filtered.txt',data_filtered,'delimiter','\t')

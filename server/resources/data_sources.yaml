@@ -1,0 +1,123 @@
+# data data organization
+
+#######
+# EMG #
+#######
+E:
+    file_path: 'raw.txt'
+    range:  [0, 2]
+    W:      { range: [0] }              # RAW
+    C:      { range: [1] }              # RECT
+
+########
+# HAND #
+########
+H:
+    file_path: 'raw.txt'
+    range:  [2, 11]
+    A: { range: [2, 5], x: [2], y: [3], z: [4]}   # ACCELERATION
+    G: { range: [5, 8], x: [5], y: [6], z: [7]}   # GYROSCOPE
+    M: { range: [8, 11], x: [8], y: [9], z: [10]}   # MAGNETOMETER
+
+#########
+# THUMB #
+#########
+T:
+    file_path: 'raw.txt'
+    range:  [11, 20]
+    A: { range: [11, 14], x: [11], y: [12], z: [13]}   # ACCELERATION
+    G: { range: [14, 17], x: [14], y: [15], z: [16]}   # GYROSCOPE
+    M: { range: [17, 20], x: [17], y: [18], z: [19]}   # MAGNETOMETER
+
+#########
+# POINT #
+#########
+P:
+    file_path: 'raw.txt'
+    range:  [20, 29]
+    A: { range: [20, 23], x: [20], y: [21], z: [22]}   # ACCELERATION
+    G: { range: [22, 25], x: [23], y: [24], z: [25]}   # GYROSCOPE
+    M: { range: [25, 28], x: [26], y: [27], z: [28]}   # MAGNETOMETER
+
+########
+# RING #
+########
+R:
+    file_path: 'raw.txt'
+    range:  [29, 38]
+    A: { range: [29, 32], x: [29], y: [30], z: [31]}   # ACCELERATION
+    G: { range: [32, 35], x: [32], y: [33], z: [34]}   # GYROSCOPE
+    M: { range: [35, 38], x: [35], y: [36], z: [37]}   # MAGNETOMETER
+
+
+##############
+# QUATERNION #
+##############
+Q:
+    file_path: 'pos.txt'
+    range: [0, 16]
+    H: { range: [0, 4], w: [0], x: [1], y: [2], z: [3]}  # HAND
+    T: { range: [4, 8], w: [4], x: [5], y: [6], z: [7]}  # THUMB
+    P: { range: [8, 12], w: [8], x: [9], y: [10], z: [11]}  # POINTER
+    R: { range: [12, 16], w: [12], x: [13], y: [14], z: [15]}  # RING
+
+################
+# EULER ANGLES #
+################
+O:
+    file_path: 'pos.txt'
+    range: [16, 28]
+    H: { range: [16, 19], p: [16], r: [17], y: [18]}  # HAND
+    T: { range: [19, 22], p: [19], r: [20], y: [21]}  # THUMB
+    P: { range: [22, 25], p: [22], r: [23], y: [24]}  # POINTER
+    R: { range: [25, 28], p: [25], r: [26], y: [27]}  # RING
+
+
+##################
+# LOWPASS FILTER #
+##################
+L:
+    file_path: 'lowpass.txt'
+    range: [0, 12]
+    # raw, rekt
+    E: { range: [0, 2], w: [0], k: [1]}
+    # HAxyz TAxyz PAxyz RAxyz
+    A: { range: [2, 14], a: [2], b:[3], c:[4], d:[5], e:[6], f:[7], g:[8], h:[9], i:[10], j:[11], k:[12], l:[13] }
+    # HRxyz TRxyz PRxyz RRxyz
+    G: { range: [14, 26], a:[14],b:[15], c:[16], d:[17], e:[18], f:[19], g:[20], h:[21], i:[22], j:[23], k:[24], l:[25] }
+    # QHwxyz QTwxyz QPwxyz QRwxyz
+    Q: { range: [26, 42], a:[26], b:[27], c:[28], d:[29], e:[30], f:[31], g:[32], h:[33], i:[34], j:[35], k:[36], l:[37], m:[38], n:[39], o:[40], p:[41] }
+
+###################
+# BANDPASS FILTER #
+###################
+B:
+    file_path: 'bandpass.txt'
+    range: [0, 28]
+    # HAxyz TAxyz PAxyz RAxyz
+    A: { range: [0, 12], a:[0],b:[1],c:[2],d:[3],e:[4],f:[5],g:[6],h:[7],i:[8],j:[9],k:[10],l:[11]}
+    # HRxyz TRxyz PRxyz RRxyz
+    G: { range: [12, 24], a:[12],b:[13],c:[14],d:[15],e:[16],f:[17],g:[18],h:[19],i:[20],j:[21],k:[22],l:[23]}
+    # Rhtpr
+    R: { range: [24, 28], h: [24], t: [25], p: [26], r: [27]}
+
+
+#################
+# HAMPEL FILTER #
+#################
+M:
+    file_path: 'hampel.txt'
+    range: [0, 1]
+    E: { range: [0, 1], k: [0]}
+
+##################
+# GRAVITY FILTER #
+##################
+G:
+    file_path: 'gravity.txt'
+    range: [0, 12]
+    H: { range: [0, 3], x: [0], y: [1], z: [2]}  # HAND
+    T: { range: [3, 6], x: [3], y: [4], z: [5]}  # THUMB
+    P: { range: [6, 9], x: [6], y: [7], z: [8]}  # POINTER
+    R: { range: [9, 12], x: [9], y: [10], z: [11]}  # RING
+
